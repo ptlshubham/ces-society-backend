@@ -12,13 +12,465 @@ var handlebars = require("handlebars");
 const fs = require('fs');
 const schedule = require('node-schedule');
 
+router.get("/GetInstituteDetailById/:id", (req, res, next) => {
+    console.log(req.params,'institute');
+    db.executeSql("SELECT * FROM institute WHERE url='" + req.params.id + "';", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+
+router.post("/SaveInsituteDetails", (req, res, next) => {
+    console.log(req.body, "hello  im here");
+    const body = req.body;
+    var salt = '7fa73b47df808d36c5fe328546ddef8b9011b2c6';
+    var repass = salt + '' + body.pass;
+    var encPassword = crypto.createHash('sha1').update(repass).digest('hex');
+    console.log(encPassword);
+    db.executeSql("INSERT INTO `institute`(`type`, `name`, `phone`, `contact`, `email`, `password`, `url`, `createddate`) VALUES ('" + req.body.type + "','" + req.body.name + "'," + req.body.phone + "," + req.body.contact + ",'" + req.body.email + "','" + encPassword + "','" + req.body.url + "',CURRENT_TIMESTAMP)", function (data, err) {
+        if (err) {
+            res.json("error");
+        } else {
+            return res.json(data);
+        }
+    });
+});
+
+router.get("/GetAllInstituteDetails", (req, res, next) => {
+    db.executeSql("SELECT * FROM `institute`;", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+
+router.post("/UploadGalleryImages", (req, res, next) => {
+    var imgname = generateUUID();
+
+    const storage = multer.diskStorage({
+        destination: function (req, file, cb) {
+            cb(null, 'images/gallery');
+        },
+        // By default, multer removes file extensions so let's add them back
+        filename: function (req, file, cb) {
+
+            cb(null, imgname + path.extname(file.originalname));
+        }
+    });
+    let upload = multer({ storage: storage }).single('file');
+    upload(req, res, function (err) {
+        console.log("path=", config.url + 'images/gallery/' + req.file.filename);
+
+        if (req.fileValidationError) {
+            console.log("err1", req.fileValidationError);
+            return res.json("err1", req.fileValidationError);
+        } else if (!req.file) {
+            console.log('Please select an image to upload');
+            return res.json('Please select an image to upload');
+        } else if (err instanceof multer.MulterError) {
+            console.log("err3");
+            return res.json("err3", err);
+        } else if (err) {
+            console.log("err4");
+            return res.json("err4", err);
+        }
+        return res.json('/images/gallery/' + req.file.filename);
+
+
+    });
+});
+router.post("/SaveGalleryImages", (req, res, next) => {
+    db.executeSql("INSERT INTO `image`(`institute_id`, `purpose`, `image`, `isactive`, `createddate`) VALUES(" + req.body.institute_id + ",'" + req.body.purpose + "','" + req.body.image + "',true,CURRENT_TIMESTAMP)", function (data, err) {
+        if (err) {
+            res.json("error");
+        } else {
+            return res.json(data);
+        }
+    });
+});
+router.post("/GetImagesByIdDetails", (req, res, next) => {
+    db.executeSql("SELECT * FROM `image` WHERE institute_id=" + req.body.institute_id + ";", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+router.post("/UpdateActiveDeactiveBanners", (req, res, next) => {
+    db.executeSql("UPDATE  `image` SET isactive=" + req.body.isactive + " WHERE id=" + req.body.id + ";", function (data, err) {
+        if (err) {
+            console.log("Error in store.js", err);
+        } else {
+            return res.json(data);
+        }
+    });
+});
+router.post("/RemoveImagesByIdDetails", (req, res, next) => {
+    db.executeSql("DELETE FROM `image` WHERE id=" + req.body.id + ";", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+
+router.post("/SaveDepartmentList", (req, res, next) => {
+    db.executeSql("INSERT INTO `department_list`(`institute_id`, `department`, `createddate`) VALUES (" + req.body.institute_id + ",'" + req.body.department + "',CURRENT_TIMESTAMP)", function (data, err) {
+        if (err) {
+            res.json("error");
+        } else {
+            return res.json(data);
+        }
+    });
+});
+
+router.post("/UpdateDepartmentList", (req, res, next) => {
+    db.executeSql("UPDATE `department_list` SET `department`='" + req.body.department + "',`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id + ";", function (data, err) {
+        if (err) {
+            res.json("error");
+        } else {
+            return res.json('success');
+        }
+    });
+});
+
+router.get("/GetDepartmentByIdDetails/:id", (req, res, next) => {
+    db.executeSql("SELECT * FROM `department_list` WHERE institute_id=" + req.params.id, function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+router.get("/RemoveDepartmentByIdDetails/:id", (req, res, next) => {
+    db.executeSql("DELETE FROM `department_list` WHERE id=" + req.params.id, function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+
+router.post("/SaveStaffProfileImages", (req, res, next) => {
+    var imgname = generateUUID();
+
+    const storage = multer.diskStorage({
+        destination: function (req, file, cb) {
+            cb(null, 'images/staff');
+        },
+        // By default, multer removes file extensions so let's add them back
+        filename: function (req, file, cb) {
+
+            cb(null, imgname + path.extname(file.originalname));
+        }
+    });
+    let upload = multer({ storage: storage }).single('file');
+    upload(req, res, function (err) {
+        console.log("path=", config.url + 'images/staff/' + req.file.filename);
+
+        if (req.fileValidationError) {
+            console.log("err1", req.fileValidationError);
+            return res.json("err1", req.fileValidationError);
+        } else if (!req.file) {
+            console.log('Please select an image to upload');
+            return res.json('Please select an image to upload');
+        } else if (err instanceof multer.MulterError) {
+            console.log("err3");
+            return res.json("err3", err);
+        } else if (err) {
+            console.log("err4");
+            return res.json("err4", err);
+        }
+        return res.json('/images/staff/' + req.file.filename);
+
+
+    });
+});
+
+router.post("/SaveStaffDetailsList", (req, res, next) => {
+    console.log(req.body, 'Hii I ma Staff')
+    db.executeSql("INSERT INTO `staff_list` (`institute_id`, `department`, `name`, `contact`, `email`, `designation`, `qualification`, `birthday_date`, `joining_date`, `profile_image`, `createddate`) values ('" + req.body.institute_id + "','" + req.body.department + "','" + req.body.name + "'," + req.body.contact + ",'" + req.body.email + "','" + req.body.designation + "','" + req.body.qualification + "','" + req.body.birthday_date + "','" + req.body.joining_date + "','" + req.body.profile + "',CURRENT_TIMESTAMP)", function (data, err) {
+        if (err) {
+            res.json("error");
+            console.log(err)
+        } else {
+            return res.json(data);
+        }
+    });
+});
+
+router.get("/GetAllStaffDetails/:id", (req, res, next) => {
+    db.executeSql("SELECT * FROM staff_list WHERE institute_id=" + req.params.id, function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+
+router.get("/RemoveStaffDetailsById/:id", (req, res, next) => {
+    db.executeSql("DELETE FROM `staff_list` WHERE id=" + req.params.id, function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+
+router.post("/SaveDonnerListDetails", (req, res, next) => {
+    db.executeSql("INSERT INTO `donners`(`donationDate`, `donnerName`, `donnerCity`, `amount`, `createddate`) VALUES ('" + req.body.donationDate + "','" + req.body.donnerName + "','" + req.body.donnerCity + "'," + req.body.amount + ",CURRENT_TIMESTAMP)", function (data, err) {
+        if (err) {
+            res.json("error");
+            console.log(err)
+        } else {
+            return res.json(data);
+        }
+    });
+});
+
+router.get("/GetAllDonnerList", (req, res, next) => {
+    db.executeSql("SELECT * FROM donners;", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+router.post("/SaveBulkDonnersDetails", (req, res, next) => {
+    for (let i = 0; i < req.body.length; i++) {
+        db.executeSql("INSERT INTO `donners`(`donationDate`, `donnerName`, `donnerCity`, `amount`, `createddate`) VALUES ('" + req.body[i].donationDate + "','" + req.body[i].donnerName + "','" + req.body[i].donnerCity + "'," + req.body[i].amount + ",CURRENT_TIMESTAMP)", function (data, err) {
+            if (err) {
+                res.json("error");
+                console.log(err)
+            } else {
+            }
+        });
+    }
+    return res.json('success');
+});
+
+router.post("/SaveBeneficiaryDetails", (req, res, next) => {
+    console.log(req.body, 'Hii I ma bhb')
+    db.executeSql("INSERT INTO `beneficiary`(`year`,`studentName`, `instituteName`, `course`, `refundAmount`, `createddate`) VALUES ('" + req.body.year + "','" + req.body.studentName + "','" + req.body.instituteName + "','" + req.body.course + "','" + req.body.refundAmount + "',CURRENT_TIMESTAMP)", function (data, err) {
+        if (err) {
+            res.json("error");
+            console.log(err)
+        } else {
+            return res.json(data);
+        }
+    });
+});
+
+router.get("/GetAllBeneficiaryList", (req, res, next) => {
+    db.executeSql("SELECT * FROM beneficiary;", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+router.post("/SaveBulkBeneficiaryDetails", (req, res, next) => {
+    for (let i = 0; i < req.body.length; i++) {
+        db.executeSql("INSERT INTO `beneficiary`(`year`,`studentName`, `instituteName`, `course`, `refundAmount`, `createddate`) VALUES ('" + req.body[i].year + "','" + req.body[i].studentName + "','" + req.body[i].instituteName + "','" + req.body[i].course + "','" + req.body[i].refundAmount + "',CURRENT_TIMESTAMP)", function (data, err) {
+            if (err) {
+                res.json("error");
+                console.log(err)
+            } else {
+            }
+        });
+    }
+    return res.json('success');
+
+});
+
+
+router.get("/RemoveBeneficiaryDetailsById/:id", (req, res, next) => {
+    db.executeSql("DELETE FROM `beneficiary` WHERE id=" + req.params.id, function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+
+router.get("/RemoveDonnerDetailsById/:id", (req, res, next) => {
+    db.executeSql("DELETE FROM `donners` WHERE id=" + req.params.id, function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+router.post("/uploadBlogImages", (req, res, next) => {
+    var imgname = generateUUID();
+
+    const storage = multer.diskStorage({
+        destination: function (req, file, cb) {
+            cb(null, 'images/blogs');
+        },
+        // By default, multer removes file extensions so let's add them back
+        filename: function (req, file, cb) {
+
+            cb(null, imgname + path.extname(file.originalname));
+        }
+    });
+    let upload = multer({ storage: storage }).single('file');
+    upload(req, res, function (err) {
+        console.log("path=", config.url + 'images/blogs/' + req.file.filename);
+
+        if (req.fileValidationError) {
+            console.log("err1", req.fileValidationError);
+            return res.json("err1", req.fileValidationError);
+        } else if (!req.file) {
+            console.log('Please select an image to upload');
+            return res.json('Please select an image to upload');
+        } else if (err instanceof multer.MulterError) {
+            console.log("err3");
+            return res.json("err3", err);
+        } else if (err) {
+            console.log("err4");
+            return res.json("err4", err);
+        }
+        return res.json('/images/blogs/' + req.file.filename);
+
+
+    });
+});
+router.post("/SaveBlogDetails", (req, res, next) => {
+    db.executeSql("INSERT INTO `blogs`(`institute_id`, `blogTitle`, `blogDate`, `blogImage`, `blogDetails`, `createdate`) VALUES ('" + req.body.institute_id + "','" + req.body.blogTitle + "','" + req.body.blogDate + "','" + req.body.blogImage + "','" + req.body.blogDetails + "',CURRENT_TIMESTAMP)", function (data, err) {
+        if (err) {
+            res.json("error");
+            console.log(err)
+        } else {
+            return res.json(data);
+        }
+    });
+});
+
+router.get("/GetBlogsDetailsById/:id", (req, res, next) => {
+    db.executeSql("SELECT * FROM blogs WHERE institute_id=" + req.params.id + ";", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+router.post("/UploadInfraImage", (req, res, next) => {
+    var imgname = generateUUID();
+
+    const storage = multer.diskStorage({
+        destination: function (req, file, cb) {
+            cb(null, 'images/infra');
+        },
+        // By default, multer removes file extensions so let's add them back
+        filename: function (req, file, cb) {
+
+            cb(null, imgname + path.extname(file.originalname));
+        }
+    });
+    let upload = multer({ storage: storage }).single('file');
+    upload(req, res, function (err) {
+        console.log("path=", config.url + 'images/infra/' + req.file.filename);
+
+        if (req.fileValidationError) {
+            console.log("err1", req.fileValidationError);
+            return res.json("err1", req.fileValidationError);
+        } else if (!req.file) {
+            console.log('Please select an image to upload');
+            return res.json('Please select an image to upload');
+        } else if (err instanceof multer.MulterError) {
+            console.log("err3");
+            return res.json("err3", err);
+        } else if (err) {
+            console.log("err4");
+            return res.json("err4", err);
+        }
+        return res.json('/images/infra/' + req.file.filename);
+
+
+    });
+});
+router.post("/SaveInfrastructureDetails", (req, res, next) => {
+    console.log(req.body, 'Hii I am INfra')
+    db.executeSql("INSERT INTO `infrastructure`(`institute_id`, `infraTitle`, `infraDetails`, `infraImage`, `createddate`) VALUES ('" + req.body.institute_id + "','" + req.body.infraTitle + "','" + req.body.infraDetails + "','" + req.body.infraImage + "',CURRENT_TIMESTAMP)", function (data, err) {
+        if (err) {
+            res.json("error");
+            console.log(err)
+        } else {
+            return res.json(data);
+        }
+    });
+});
+router.get("/GetInfraDetailsById/:id", (req, res, next) => {
+    db.executeSql("SELECT * FROM infrastructure WHERE institute_id=" + req.params.id + ";", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+router.get("/getUserDetailById/:id", midway.checkToken, (req, res, next) => {
+    db.executeSql("SELECT * FROM user u JOIN address a ON u.id = a.uid where u.id=" + req.params.id, function (data, err) {
+        if (err) {
+            console.log(err)
+        }
+        else {
+            res.json(data)
+        }
+    })
+})
 
 router.post("/RegisterNewUser", (req, res, next) => {
-    db.executeSql("select * from user where email="+req.body.email,function(data,err){
-        if(data.length >0){
+    db.executeSql("select * from user where email=" + req.body.email, function (data, err) {
+        if (data.length > 0) {
             res.json('duplicate email');
-        }else{
-            db.executeSql("INSERT INTO `user`(`salutation`, `firstName`, `lastName`, `phone`, `email`, `role`, `companyName`, `designation`,`avg_mnth_trade`, `GST_no`, `company_contact`, `material_quality`, `KYC_status`, `created_date`,`profileUpdation`) VALUES ('"+req.body.select+"','"+req.body.fname+"','"+req.body.lname+"','"+req.body.contact+"','"+req.body.email+"','"+req.body.regAs+"','"+req.body.companyname+"','"+req.body.designation+"','"+req.body.avg_mnth_trade+"','"+req.body.gstno+"','"+req.body.workphone+"','"+req.body.selectMaterial+"',false,CURRENT_TIMESTAMP,false)", function (data, err) {
+        } else {
+            db.executeSql("INSERT INTO `user`(`salutation`, `firstName`, `lastName`, `phone`, `email`, `role`, `companyName`, `designation`,`avg_mnth_trade`, `GST_no`, `company_contact`, `material_quality`, `KYC_status`, `created_date`,`profileUpdation`) VALUES ('" + req.body.select + "','" + req.body.fname + "','" + req.body.lname + "','" + req.body.contact + "','" + req.body.email + "','" + req.body.regAs + "','" + req.body.companyname + "','" + req.body.designation + "','" + req.body.avg_mnth_trade + "','" + req.body.gstno + "','" + req.body.workphone + "','" + req.body.selectMaterial + "',false,CURRENT_TIMESTAMP,false)", function (data, err) {
                 if (err) {
                     res.json("error");
                 } else {
@@ -27,52 +479,31 @@ router.post("/RegisterNewUser", (req, res, next) => {
             });
         }
     })
-   
-});
 
-router.post("/RegisterNewUser", (req, res, next) => {
+});
+router.post("/completeProfile", midway.checkToken, (req, res, next) => {
     console.log(req.body)
-    db.executeSql("INSERT INTO `user`(`salutation`, `firstName`, `lastName`, `phone`, `email`, `role`, `companyName`, `designation`,`avg_mnth_trade`, `GST_no`, `company_contact`, `material_quality`, `KYC_status`, `created_date`) VALUES ('"+req.body.select+"','"+req.body.fname+"','"+req.body.lname+"','"+req.body.contact+"','"+req.body.email+"','"+req.body.regAs+"','"+req.body.companyname+"','"+req.body.designation+"','"+req.body.avg_mnth_trade+"','"+req.body.gstno+"','"+req.body.workphone+"','"+req.body.selectMaterial+"',false,CURRENT_TIMESTAMP)", function (data, err) {
+    db.executeSql("UPDATE `user` SET `firstName`='" + req.body.firstName + "',`lastName`='" + req.body.lastName + "',`phone`='" + req.body.phone + "',`email`='" + req.body.email + "',`companyName`='" + req.body.companyName + "',`designation`='" + req.body.designation + "',`avg_mnth_trade`='" + req.body.avg_mnth_trade + "',`GST_no`='" + req.body.GST_no + "',`company_contact`='" + req.body.company_contact + "',`material_quality`='" + req.body.material_quality + "',`bank_name`='" + req.body.bank_name + "',`bank_acc_no`='" + req.body.bank_acc_no + "',`acc_type`='" + req.body.acc_type + "',`acc_holder_name`='" + req.body.acc_holder_name + "',`isfc_code`='" + req.body.isfc_code + "',`branch_name`='" + req.body.branch_name + "',`cancel_cheque`='" + req.body.cancel_cheque + "',`PAN_card`='" + req.body.PAN_card + "',`updated_date`=CURRENT_TIMESTAMP,`profileUpdation`=true WHERE id=" + req.body.id, function (data, err) {
         if (err) {
-            res.json("error");
-        } else {
-            return res.json('sucess');
-        }
-    });
-});
-
-
-router.post("/completeProfile", midway.checkToken,(req,res,next)=>{
-    console.log(req.body)
-    db.executeSql("UPDATE `user` SET `firstName`='"+req.body.firstName+"',`lastName`='"+req.body.lastName+"',`phone`='"+req.body.phone+"',`email`='"+req.body.email+"',`companyName`='"+req.body.companyName+"',`designation`='"+req.body.designation+"',`avg_mnth_trade`='"+req.body.avg_mnth_trade+"',`GST_no`='"+req.body.GST_no+"',`company_contact`='"+req.body.company_contact+"',`material_quality`='"+req.body.material_quality+"',`bank_name`='"+req.body.bank_name+"',`bank_acc_no`='"+req.body.bank_acc_no+"',`acc_type`='"+req.body.acc_type+"',`acc_holder_name`='"+req.body.acc_holder_name+"',`isfc_code`='"+req.body.isfc_code+"',`branch_name`='"+req.body.branch_name+"',`cancel_cheque`='"+req.body.cancel_cheque+"',`PAN_card`='"+req.body.PAN_card+"',`updated_date`=CURRENT_TIMESTAMP,`profileUpdation`=true WHERE id="+req.body.id,function(data,err){
-        if(err){
             console.log(err);
-        }else{
+        } else {
             res.json('success');
         }
     })
 })
 
-router.get("/getUserDetailById/:id", midway.checkToken,(req,res,next)=>{
-    db.executeSql("SELECT * FROM user u JOIN address a ON u.id = a.uid where u.id="+req.params.id,function(data,err){
-        if(err){
+router.get("/getUserDetailById/:id", midway.checkToken, (req, res, next) => {
+    db.executeSql("SELECT * FROM user u JOIN address a ON u.id = a.uid where u.id=" + req.params.id, function (data, err) {
+        if (err) {
             console.log(err)
         }
-        else{
+        else {
             res.json(data)
         }
     })
 })
 
-router.get("/getAllUser", midway.checkToken, (req, res, next) => {
-    db.executeSql("SELECT * FROM user u JOIN address a ON u.id = a.uid;;", function (data, err) {
-        if (err) {
-            console.log(err);
-        } else {
-            return res.json(data);
-        }
-    })
-});
+
 
 router.get("/getAllBuyer", midway.checkToken, (req, res, next) => {
     db.executeSql("SELECT * FROM user u JOIN address a ON u.id = a.uid where u.role='buyer' and u.KYC_status=true;", function (data, err) {
@@ -105,24 +536,24 @@ router.get("/getAllKYCPendingUser", midway.checkToken, (req, res, next) => {
 });
 
 router.post("/updateKYCUser", midway.checkToken, (req, res, next) => {
-    db.executeSql("update user set KYC_status=true, KYC_date=CURRENT_TIMESTAMP where id="+req.body.id, function (data, err) {
+    db.executeSql("update user set KYC_status=true, KYC_date=CURRENT_TIMESTAMP where id=" + req.body.id, function (data, err) {
         if (err) {
             console.log(err);
         } else {
-            db.executeSql("select * from user where id="+req.body.id,function(data1,err){
-                if(err){
+            db.executeSql("select * from user where id=" + req.body.id, function (data1, err) {
+                if (err) {
                     console.log(er);
-                }else{
+                } else {
                     const replacements = {
-                        votp: data1[0].firstName+'@123',
+                        votp: data1[0].firstName + '@123',
                         email: data1[0].firstName,
-                        id:req.body.id
+                        id: req.body.id
                     };
 
-                    
+
                     mail('newpassword.html', replacements, data1[0].email, "Setting Password", "New Password for Nextgen ");
                     var salt = '7fa73b47df808d36c5fe328546ddef8b9011b2c6';
-                    var repass = salt + '' + data1[0].firstName+'@123';
+                    var repass = salt + '' + data1[0].firstName + '@123';
                     var encPassword = crypto.createHash('sha1').update(repass).digest('hex');
                     db.executeSql("UPDATE user SET password='" + encPassword + "' WHERE id=" + req.body.id + ";", function (data, err) {
                         if (err) {
@@ -133,119 +564,17 @@ router.post("/updateKYCUser", midway.checkToken, (req, res, next) => {
                     });
                 }
             })
-          
+
             // return res.json('success');
         }
     })
 });
 
-router.post("/UploadMaterialImage", midway.checkToken, (req, res, next) => {
-    var imgname = generateUUID();
-
-    const storage = multer.diskStorage({
-        destination: function (req, file, cb) {
-            cb(null, 'images/material');
-        },
-        // By default, multer removes file extensions so let's add them back
-        filename: function (req, file, cb) {
-
-            cb(null, imgname + path.extname(file.originalname));
-        }
-    });
-    let upload = multer({ storage: storage }).single('file');
-    upload(req, res, function (err) {
-        console.log("path=", config.url + 'images/material/' + req.file.filename);
-
-        if (req.fileValidationError) {
-            console.log("err1", req.fileValidationError);
-            return res.json("err1", req.fileValidationError);
-        } else if (!req.file) {
-            console.log('Please select an image to upload');
-            return res.json('Please select an image to upload');
-        } else if (err instanceof multer.MulterError) {
-            console.log("err3");
-            return res.json("err3", err);
-        } else if (err) {
-            console.log("err4");
-            return res.json("err4", err);
-        }
-        return res.json('/images/material/' + req.file.filename);
 
 
-    });
-});
-
-router.post("/UploadCancelCheckImage", midway.checkToken, (req, res, next) => {
-    var imgname = generateUUID();
-
-    const storage = multer.diskStorage({
-        destination: function (req, file, cb) {
-            cb(null, 'images/cancelcheck');
-        },
-        // By default, multer removes file extensions so let's add them back
-        filename: function (req, file, cb) {
-
-            cb(null, imgname + path.extname(file.originalname));
-        }
-    });
-    let upload = multer({ storage: storage }).single('file');
-    upload(req, res, function (err) {
-        console.log("path=", config.url + 'images/cancelcheck/' + req.file.filename);
-
-        if (req.fileValidationError) {
-            console.log("err1", req.fileValidationError);
-            return res.json("err1", req.fileValidationError);
-        } else if (!req.file) {
-            console.log('Please select an image to upload');
-            return res.json('Please select an image to upload');
-        } else if (err instanceof multer.MulterError) {
-            console.log("err3");
-            return res.json("err3", err);
-        } else if (err) {
-            console.log("err4");
-            return res.json("err4", err);
-        }
-        return res.json('/images/cancelcheck/' + req.file.filename);
 
 
-    });
-});
 
-router.post("/UploadMaterialMultiImage", midway.checkToken, (req, res, next) => {
-    var imgname = generateUUID();
-
-    const storage = multer.diskStorage({
-        destination: function (req, file, cb) {
-            cb(null, 'images/material-multi');
-        },
-        // By default, multer removes file extensions so let's add them back
-        filename: function (req, file, cb) {
-
-            cb(null, imgname + path.extname(file.originalname));
-        }
-    });
-    let upload = multer({ storage: storage }).single('file');
-    upload(req, res, function (err) {
-        console.log("path=", config.url + 'images/material-multi/' + req.file.filename);
-
-        if (req.fileValidationError) {
-            console.log("err1", req.fileValidationError);
-            return res.json("err1", req.fileValidationError);
-        } else if (!req.file) {
-            console.log('Please select an image to upload');
-            return res.json('Please select an image to upload');
-        } else if (err instanceof multer.MulterError) {
-            console.log("err3");
-            return res.json("err3", err);
-        } else if (err) {
-            console.log("err4");
-            return res.json("err4", err);
-        }
-        return res.json('/images/material-multi/' + req.file.filename);
-
-
-    });
-});
 
 
 
@@ -277,7 +606,7 @@ router.get("/GetMonthlyTotal", (req, res, next) => {
     })
 });
 
- 
+
 
 
 
@@ -302,7 +631,7 @@ function mail(filename, data, toemail, subj, mailname) {
         to: toemail,
         Name: mailname,
         html: htmlToSend,
-       
+
 
     };
     transporter.sendMail(mailOptions, function (error, info) {

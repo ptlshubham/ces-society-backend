@@ -5,7 +5,7 @@ var con = mysql.createConnection({
     host: "localhost",
     user: "root",
     password: "",
-    database: "nextgen_metals"
+    database: "ces_society"
 });
 exports.executeSql = function (sql, callback) {
     con.query(sql, function (err, result) {
