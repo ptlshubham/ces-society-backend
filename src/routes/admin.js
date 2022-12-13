@@ -13,7 +13,7 @@ const fs = require('fs');
 const schedule = require('node-schedule');
 
 router.get("/GetInstituteDetailById/:id", (req, res, next) => {
-    console.log(req.params,'institute');
+    console.log(req.params, 'institute');
     db.executeSql("SELECT * FROM institute WHERE url='" + req.params.id + "';", function (data, err) {
         if (err) {
             console.log(err);
@@ -126,7 +126,7 @@ router.post("/SaveDepartmentList", (req, res, next) => {
         if (err) {
             res.json("error");
         } else {
-            return res.json(data);
+            return res.json('success');
         }
     });
 });
@@ -282,6 +282,15 @@ router.get("/GetAllBeneficiaryList", (req, res, next) => {
         }
     })
 });
+router.get("/GetBeneficiaryYear", (req, res, next) => {
+    db.executeSql("SELECT id, year FROM beneficiary GROUP BY year;", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
 router.post("/SaveBulkBeneficiaryDetails", (req, res, next) => {
     for (let i = 0; i < req.body.length; i++) {
         db.executeSql("INSERT INTO `beneficiary`(`year`,`studentName`, `instituteName`, `course`, `refundAmount`, `createddate`) VALUES ('" + req.body[i].year + "','" + req.body[i].studentName + "','" + req.body[i].instituteName + "','" + req.body[i].course + "','" + req.body[i].refundAmount + "',CURRENT_TIMESTAMP)", function (data, err) {
@@ -371,6 +380,7 @@ router.get("/GetBlogsDetailsById/:id", (req, res, next) => {
         }
     })
 });
+
 router.post("/UploadInfraImage", (req, res, next) => {
     var imgname = generateUUID();
 
@@ -407,7 +417,6 @@ router.post("/UploadInfraImage", (req, res, next) => {
     });
 });
 router.post("/SaveInfrastructureDetails", (req, res, next) => {
-    console.log(req.body, 'Hii I am INfra')
     db.executeSql("INSERT INTO `infrastructure`(`institute_id`, `infraTitle`, `infraDetails`, `infraImage`, `createddate`) VALUES ('" + req.body.institute_id + "','" + req.body.infraTitle + "','" + req.body.infraDetails + "','" + req.body.infraImage + "',CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
             res.json("error");
@@ -427,19 +436,86 @@ router.get("/GetInfraDetailsById/:id", (req, res, next) => {
     })
 });
 
+router.post("/SaveAlumniDetails", (req, res, next) => {
+    db.executeSql("INSERT INTO `alumni`(`instituteName`, `alumniName`, `alumniCourse`, `alumniYear`, `contactNumber`, `email`, `createddate`) VALUES  ('" + req.body.instituteName + "','" + req.body.alumniName + "','" + req.body.alumniCourse + "','" + req.body.alumniYear + "','" + req.body.contactNumber + "','" + req.body.email + "',CURRENT_TIMESTAMP)", function (data, err) {
+        if (err) {
+            res.json("error");
+            console.log(err)
+        } else {
+            return res.json('success');
+        }
+    });
+});
 
+router.get("/GetAlumniDetails", (req, res, next) => {
+    db.executeSql("SELECT * FROM alumni;", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
 
+router.post("/SaveContactUsDetails", (req, res, next) => {
+    db.executeSql("INSERT INTO `contact`(`institute_id`, `name`, `email`, `contact`, `subject`, `message`, `createddate`) VALUES  ('" + req.body.institute_id + "','" + req.body.name + "','" + req.body.email + "','" + req.body.contact + "','" + req.body.subject + "','" + req.body.message + "',CURRENT_TIMESTAMP)", function (data, err) {
+        if (err) {
+            res.json("error");
+            console.log(err)
+        } else {
+            return res.json('success');
+        }
+    });
+});
 
+router.get("/GetContactUsDetailsById/:id", (req, res, next) => {
+    db.executeSql("SELECT * FROM contact WHERE institute_id=" + req.params.id + ";", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
 
+router.post("/SaveResultDetails", (req, res, next) => {
+    db.executeSql("INSERT INTO `result`(`institute_id`, `title`, `image`, `createddate`) VALUES ('" + req.body.institute_id + "','" + req.body.title + "','" + req.body.image + "',CURRENT_TIMESTAMP)", function (data, err) {
+        if (err) {
+            res.json("error");
+            console.log(err)
+        } else {
+            return res.json(data);
+        }
+    });
+});
+router.get("/GetResultDetailsById/:id", (req, res, next) => {
+    db.executeSql("SELECT * FROM result WHERE institute_id=" + req.params.id + ";", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
 
+router.post("/UploadPDF", (req, res, next) => {
 
+    const storage = multer.diskStorage({
+        destination: (req, file, cb) => {
+            cb(null, "pdf/")
+        },
+        filename: (req, file, cb) => {
+            cb(null, Date.now() + "-" + file.originalname)
+        },
+    })
+    let upload = multer({ storage: storage }).single('file');
+    upload(req, res, function (err) {
+        console.log(req.file.filename)
+        return res.send('/pdf/' + req.file.filename)
+        // return res.json('/images/infra/' + req.file.filename);
+    });
 
-
-
-
-
-
-
+});
 
 
 
