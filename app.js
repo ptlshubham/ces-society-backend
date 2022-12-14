@@ -27,6 +27,8 @@ app.use(express.static('public'));
 
 //Serves all the request which includes /images in the url from Images folder
 app.use('/images', express.static(__dirname + '/images'));
+app.use('/pdf', express.static(__dirname + '/pdf'));
+
 
 
 //const DbConnectionString = 'mssql://'+ process.env.SQL_USER +':'+ process.env.SQL_PASSWORD +'@192.168.1.112:54161/'+process.env.SQL_DATABASE;

@@ -361,7 +361,7 @@ router.post("/uploadBlogImages", (req, res, next) => {
     });
 });
 router.post("/SaveBlogDetails", (req, res, next) => {
-    db.executeSql("INSERT INTO `blogs`(`institute_id`, `blogTitle`, `blogDate`, `blogImage`, `blogDetails`, `createdate`) VALUES ('" + req.body.institute_id + "','" + req.body.blogTitle + "','" + req.body.blogDate + "','" + req.body.blogImage + "','" + req.body.blogDetails + "',CURRENT_TIMESTAMP)", function (data, err) {
+    db.executeSql("INSERT INTO `blogs`(`institute_id`, `blogTitle`,`authorName`, `blogDate`, `blogImage`, `blogDetails`, `createdate`) VALUES ('" + req.body.institute_id + "','" + req.body.blogTitle + "','" + req.body.authorName + "','" + req.body.blogDate + "','" + req.body.blogImage + "','" + req.body.blogDetails + "',CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
             res.json("error");
             console.log(err)
@@ -505,17 +505,79 @@ router.post("/UploadPDF", (req, res, next) => {
             cb(null, "pdf/")
         },
         filename: (req, file, cb) => {
-            cb(null, Date.now() + "-" + file.originalname)
+            cb(null, Date.now() + ".pdf")
         },
     })
     let upload = multer({ storage: storage }).single('file');
     upload(req, res, function (err) {
-        console.log(req.file.filename)
-        return res.send('/pdf/' + req.file.filename)
+        console.log('/pdf/' + req.file.filename)
+        return res.json('/pdf/' + req.file.filename)
         // return res.json('/images/infra/' + req.file.filename);
     });
 
 });
+
+router.post("/SaveNewsDataList", (req, res, next) => {
+    db.executeSql("INSERT INTO `news`(`institute_id`, `date`, `message`, `files`, `createddate`) VALUES ('" + req.body.institute_id + "','" + req.body.date + "','" + req.body.message + "','" + req.body.files + "',CURRENT_TIMESTAMP)", function (data, err) {
+        if (err) {
+            res.json("error");
+            console.log(err)
+        } else {
+            return res.json('success');
+        }
+    });
+});
+
+router.get("/GetNewsByIdDetails/:id", (req, res, next) => {
+    db.executeSql("SELECT * FROM news WHERE institute_id=" + req.params.id + ";", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+
+router.get("/removeNewsByIdDetailsURL/:id", (req, res, next) => {
+    db.executeSql("DELETE FROM news WHERE id=" + req.params.id, function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+
+router.post("/SaveOthersDataList", (req, res, next) => {
+    db.executeSql("INSERT INTO `others`(`institute_id`, `purpose`, `title`, `files`, `createddate`) VALUES  ('" + req.body.institute_id + "','" + req.body.purpose + "','" + req.body.title + "','" + req.body.files + "',CURRENT_TIMESTAMP)", function (data, err) {
+        if (err) {
+            res.json("error");
+            console.log(err)
+        } else {
+            return res.json('success');
+        }
+    });
+});
+
+router.get("/GetOthersByIdDetails/:id", (req, res, next) => {
+    db.executeSql("SELECT * FROM others WHERE institute_id=" + req.params.id + ";", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+
+
+
+
+
+
+
+
+
+
 
 
 
