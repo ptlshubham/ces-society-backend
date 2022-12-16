@@ -24,7 +24,7 @@ router.post('/UserLogin', (req, res, next) => {
     db.executeSql("select * from institute where email='" + req.body.email + "' and id='" + req.body.instituteId + "';", function (data, err) {
         if (data.length > 0) {
             db.executeSql("select * from institute where email='" + req.body.email + "' and password='" + encPassword + "' and id='" + req.body.instituteId + "' ;", function (data, err) {
-                console.log(data,'Output');
+                console.log(data, 'Output');
                 if (data.length > 0) {
                     module.exports.user = {
                         username: data[0].email, password: data[0].password
@@ -37,7 +37,13 @@ router.post('/UserLogin', (req, res, next) => {
                     );
                     console.log("token=", token);
                     data[0].token = token;
-
+                    db.executeSql("UPDATE `institute` SET `updatedSite`=CURRENT_TIMESTAMP WHERE id=" + data[0].id + ";", function (data, err) {
+                        if (err) {
+                            console.log("Error in store.js", err);
+                        } else {
+                            console.log('Site Updated Status..')
+                        }
+                    });
                     res.cookie('auth', token);
                     res.json(data);
                 }

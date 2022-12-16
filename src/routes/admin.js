@@ -12,9 +12,26 @@ var handlebars = require("handlebars");
 const fs = require('fs');
 const schedule = require('node-schedule');
 
-router.get("/GetInstituteDetailById/:id", (req, res, next) => {
+router.get("/GetInstituteDetailByURL/:id", (req, res, next) => {
     console.log(req.params, 'institute');
     db.executeSql("SELECT * FROM institute WHERE url='" + req.params.id + "';", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            // db.executeSql("INSERT INTO `visitor`(`localArea`, `wifi`, `createddate`) VALUES ('" + MacAddress.Local Area Connection * 10 + "','" + MacAddress.Wi - Fi + "',CURRENT_TIMESTAMP)", function (data1, err) {
+            //     if (err) {
+            //         res.json("error");
+            //     } else {
+            //         console.log('success')
+            //     }
+            // });
+            return res.json(data);
+        }
+    })
+});
+
+router.get("/GetLastUpdateSiteById/:id", (req, res, next) => {
+    db.executeSql("SELECT * FROM institute WHERE id='" + req.params.id + "';", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -22,7 +39,6 @@ router.get("/GetInstituteDetailById/:id", (req, res, next) => {
         }
     })
 });
-
 router.post("/SaveInsituteDetails", (req, res, next) => {
     console.log(req.body, "hello  im here");
     const body = req.body;
@@ -463,6 +479,14 @@ router.post("/SaveContactUsDetails", (req, res, next) => {
             res.json("error");
             console.log(err)
         } else {
+            const replacements = {
+                name: req.body.name,
+                email: req.body.email,
+                subject: req.body.subject,
+                message: req.body.message
+            };
+            mail('feedback.html', replacements, req.body.email, "Feedback Submitted", " ")
+            // res.json(data);
             return res.json('success');
         }
     });
@@ -568,6 +592,71 @@ router.get("/GetOthersByIdDetails/:id", (req, res, next) => {
         }
     })
 });
+function mail(filename, data, toemail, subj, mailname) {
+    const transporter = nodemailer.createTransport({
+        service: "gmail",
+        host: 'smtp.gmail.com',
+        auth: {
+            user: 'ptlshubham@gmail.com',
+            pass: 'hvcukfxtadulqrnb'
+        },
+    });
+    const filePath = 'src/assets/emailtemplets/' + filename;
+    const source = fs.readFileSync(filePath, 'utf-8').toString();
+    const template = handlebars.compile(source);
+    const replacements = data;
+    const htmlToSend = template(replacements);
+
+    const mailOptions = {
+        from: `"ptlshubham@gmail.com"`,
+        subject: subj,
+        to: toemail,
+        Name: mailname,
+        html: htmlToSend,
+
+
+    };
+    transporter.sendMail(mailOptions, function (error, info) {
+        console.log('fgfjfj')
+        if (error) {
+            console.log(error);
+            res.json("Errror");
+        } else {
+            console.log('Email sent: ' + info.response);
+            res.json(data);
+        }
+    });
+}
+
+router.get("/GetAllBirthdayDetails", (req, res, next) => {
+    db.executeSql("SELECT s.id as staffId,s.institute_id,s.department,s.name,s.contact,s.email,s.designation,s.qualification,s.joining_date,s.profile_image, s.birthday_date, CURDATE(),d.id as departmentId,d.department as departmentName,i.id as instiId,i.name as instituteName FROM staff_list s left join department_list d on s.department= d.id left join institute i on s.institute_id=i.id WHERE DAYOFMONTH(s.birthday_date) = DAYOFMONTH(CURDATE()) AND MONTH(s.birthday_date) = MONTH(CURDATE());", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+
+router.get("/GetAllNewsDetails/:id", (req, res, next) => {
+    db.executeSql("SELECT * FROM institute WHERE url='www.cesociety.in';", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            db.executeSql("SELECT * FROM news WHERE institute_id=" + req.params.id + " OR institute_id=" + data[0].id + ";", function (data1, err) {
+                if (err) {
+                    console.log(err);
+                } else {
+                    return res.json(data1);
+                }
+            })
+
+        }
+    })
+
+
+});
+
 
 
 
@@ -707,20 +796,6 @@ router.post("/updateKYCUser", midway.checkToken, (req, res, next) => {
         }
     })
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 var nowDate = new Date();
 date = nowDate.getFullYear() + '-' + (nowDate.getMonth() + 1) + '-' + nowDate.getDate();
 router.get("/GetDailyTotal", (req, res, next) => {
@@ -743,48 +818,6 @@ router.get("/GetMonthlyTotal", (req, res, next) => {
         }
     })
 });
-
-
-
-
-
-function mail(filename, data, toemail, subj, mailname) {
-    const transporter = nodemailer.createTransport({
-        service: "gmail",
-        host: 'smtp.gmail.com',
-        auth: {
-            user: 'ptlshubham@gmail.com',
-            pass: 'hvcukfxtadulqrnb'
-        },
-    });
-    const filePath = 'src/assets/emailtemplets/' + filename;
-    const source = fs.readFileSync(filePath, 'utf-8').toString();
-    const template = handlebars.compile(source);
-    const replacements = data;
-    const htmlToSend = template(replacements);
-
-    const mailOptions = {
-        from: `"ptlshubham@gmail.com"`,
-        subject: subj,
-        to: toemail,
-        Name: mailname,
-        html: htmlToSend,
-
-
-    };
-    transporter.sendMail(mailOptions, function (error, info) {
-        console.log('fgfjfj')
-        if (error) {
-            console.log(error);
-            res.json("Errror");
-        } else {
-            console.log('Email sent: ' + info.response);
-            res.json(data);
-        }
-    });
-}
-
-
 router.post("/ForgotPassword", (req, res, next) => {
     let otp = Math.floor(100000 + Math.random() * 900000);
     console.log(req.body);
