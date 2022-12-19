@@ -54,7 +54,30 @@ router.post("/SaveInsituteDetails", (req, res, next) => {
         }
     });
 });
-
+router.post("/UpdateInstituteDetails", (req, res, next) => {
+    console.log(req.body, "hello  im here");
+    const body = req.body;
+    var salt = '7fa73b47df808d36c5fe328546ddef8b9011b2c6';
+    var repass = salt + '' + body.pass;
+    var encPassword = crypto.createHash('sha1').update(repass).digest('hex');
+    console.log(encPassword);
+    db.executeSql("UPDATE `institute` SET `type`='" + req.body.type + "',`name`='" + req.body.name + "',`phone`=" + req.body.phone + ",`contact`=" + req.body.contact + ",`email`='" + req.body.email + "',`password`='" + encPassword + "',`url`='" + req.body.url + "',`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id + ";", function (data, err) {
+        if (err) {
+            res.json("error");
+        } else {
+            return res.json('success');
+        }
+    });
+});
+router.get("/RemoveInstituteDetailsById/:id", (req, res, next) => {
+    db.executeSql("DELETE FROM institute WHERE id='" + req.params.id + "';", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
 router.get("/GetAllInstituteDetails", (req, res, next) => {
     db.executeSql("SELECT * FROM `institute`;", function (data, err) {
         if (err) {
@@ -215,6 +238,18 @@ router.post("/SaveStaffProfileImages", (req, res, next) => {
 router.post("/SaveStaffDetailsList", (req, res, next) => {
     console.log(req.body, 'Hii I ma Staff')
     db.executeSql("INSERT INTO `staff_list` (`institute_id`, `department`, `name`, `contact`, `email`, `designation`, `qualification`, `birthday_date`, `joining_date`, `profile_image`, `createddate`) values ('" + req.body.institute_id + "','" + req.body.department + "','" + req.body.name + "'," + req.body.contact + ",'" + req.body.email + "','" + req.body.designation + "','" + req.body.qualification + "','" + req.body.birthday_date + "','" + req.body.joining_date + "','" + req.body.profile + "',CURRENT_TIMESTAMP)", function (data, err) {
+        if (err) {
+            res.json("error");
+            console.log(err)
+        } else {
+            return res.json(data);
+        }
+    });
+});
+
+router.post("/UpdateStaffDetailsById", (req, res, next) => {
+    console.log(req.body, 'Update Staff')
+    db.executeSql("UPDATE `staff_list` SET `department`='" + req.body.department + "',`name`='" + req.body.name + "',`contact`='" + req.body.contact + "',`email`='" + req.body.email + "',`designation`='" + req.body.designation + "',`qualification`='" + req.body.qualification + "',`birthday_date`='" + req.body.birthday_date + "',`joining_date`='" + req.body.joining_date + "',`profile_image`='" + req.body.profile + "',`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id, function (data, err) {
         if (err) {
             res.json("error");
             console.log(err)
@@ -512,6 +547,40 @@ router.post("/SaveResultDetails", (req, res, next) => {
         }
     });
 });
+
+router.post("/UpdateResultDetails", (req, res, next) => {
+    console, log(req.body, 'resukt')
+    db.executeSql("UPDATE `result` SET `title`='" + req.body.title + "',`image`='" + req.body.image + "',`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id, function (data, err) {
+        if (err) {
+            res.json("error");
+            console.log(err)
+        } else {
+            return res.json(data);
+        }
+    });
+});
+
+router.post("/UpdateBeneficiaryDetails", (req, res, next) => {
+    console, log('Benificiary')
+    db.executeSql("UPDATE `beneficiary` SET `year`='" + req.body.year + "',`studentName`='" + req.body.studentName + "',`instituteName`='" + req.body.instituteName + "',`course`='" + req.body.course + "',`refundAmount`='" + req.body.refundAmount + "',`updateddate`=CURRENT_TIMESTAMP WHERE id" + req.body.id, function (data, err) {
+        if (err) {
+            res.json("error");
+            console.log(err)
+        } else {
+            return res.json(data);
+        }
+    });
+});
+router.get("/RemoveResultDetailsById/:id", (req, res, next) => {
+    console.log(req.params, 'gjvuvyihgk')
+    db.executeSql("DELETE FROM `result` WHERE id=" + req.params.id, function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
 router.get("/GetResultDetailsById/:id", (req, res, next) => {
     db.executeSql("SELECT * FROM result WHERE institute_id=" + req.params.id + ";", function (data, err) {
         if (err) {
@@ -562,8 +631,17 @@ router.get("/GetNewsByIdDetails/:id", (req, res, next) => {
     })
 });
 
-router.get("/removeNewsByIdDetailsURL/:id", (req, res, next) => {
+router.get("/RemoveNewsByIdDetails/:id", (req, res, next) => {
     db.executeSql("DELETE FROM news WHERE id=" + req.params.id, function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+router.get("/RemoveOtherDetailsById/:id", (req, res, next) => {
+    db.executeSql("DELETE FROM others WHERE id=" + req.params.id, function (data, err) {
         if (err) {
             console.log(err);
         } else {

@@ -65,10 +65,10 @@ router.post('/adminLogin', (req, res, next) => {
     var repass = salt + '' + body.pass;
     var encPassword = crypto.createHash('sha1').update(repass).digest('hex');
     console.log(body);
-    db.executeSql("select * from adminuser where email='" + body.email + "';", function (data, err) {
+    db.executeSql("select * from admin where email='" + body.email + "';", function (data, err) {
         console.log(data);
         if (data.length > 0) {
-            db.executeSql("select * from adminuser where email='" + body.email + "' and password='" + encPassword + "';", function (data, err) {
+            db.executeSql("select * from admin where email='" + body.email + "' and password='" + encPassword + "';", function (data, err) {
                 console.log(data);
                 if (data.length > 0) {
                     module.exports.user = {
