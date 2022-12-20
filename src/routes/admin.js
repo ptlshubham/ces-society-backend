@@ -11,6 +11,8 @@ const nodemailer = require('nodemailer');
 var handlebars = require("handlebars");
 const fs = require('fs');
 const schedule = require('node-schedule');
+const { sql } = require("../../config");
+const mysql = require('mysql');
 
 router.get("/GetInstituteDetailByURL/:id", (req, res, next) => {
     console.log(req.params, 'institute');
@@ -412,12 +414,21 @@ router.post("/uploadBlogImages", (req, res, next) => {
     });
 });
 router.post("/SaveBlogDetails", (req, res, next) => {
-    db.executeSql("INSERT INTO `blogs`(`institute_id`, `blogTitle`,`authorName`, `blogDate`, `blogImage`, `blogDetails`, `createdate`) VALUES ('" + req.body.institute_id + "','" + req.body.blogTitle + "','" + req.body.authorName + "','" + req.body.blogDate + "','" + req.body.blogImage + "','" + req.body.blogDetails + "',CURRENT_TIMESTAMP)", function (data, err) {
+    db.executeSql("INSERT INTO `blogs`(`institute_id`, `blogTitle`,`authorName`, `blogDate`, `blogImage`, `createdate`) VALUES ('" + req.body.institute_id + "','" + req.body.blogTitle + "','" + req.body.authorName + "','" + req.body.blogDate + "','" + req.body.blogImage + "',CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
             res.json("error");
             console.log(err)
         } else {
-            return res.json(data);
+            const values = [req.body.blogDetails]
+            const escapedValues = values.map(mysql.escape);
+            db.executeSql1("UPDATE blogs SET blogDetails=" + escapedValues + " WHERE id= " + data.insertId, escapedValues, function (data1, err) {
+                if (err) {
+                    res.json("error");
+                    console.log(err)
+                } else {
+                }
+            });
+            return res.json('success');
         }
     });
 });
@@ -467,15 +478,28 @@ router.post("/UploadInfraImage", (req, res, next) => {
 
     });
 });
+
 router.post("/SaveInfrastructureDetails", (req, res, next) => {
-    db.executeSql("INSERT INTO `infrastructure`(`institute_id`, `infraTitle`, `infraDetails`, `infraImage`, `createddate`) VALUES ('" + req.body.institute_id + "','" + req.body.infraTitle + "','" + req.body.infraDetails + "','" + req.body.infraImage + "',CURRENT_TIMESTAMP)", function (data, err) {
+    db.executeSql("INSERT INTO `infrastructure`(`institute_id`, `infraTitle`,`infraImage`, `createddate`) VALUES ('" + req.body.institute_id + "','" + req.body.infraTitle + "','" + req.body.infraImage + "',CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
             res.json("error");
             console.log(err)
         } else {
-            return res.json(data);
+            const values = [req.body.infraDetails]
+            const escapedValues = values.map(mysql.escape);
+            db.executeSql1("UPDATE infrastructure SET infraDetails=" + escapedValues + " WHERE id= " + data.insertId, escapedValues, function (data1, err) {
+                if (err) {
+                    res.json("error");
+                    console.log(err)
+                } else {
+                }
+            });
+            return res.json('success');
         }
+
     });
+    // return res.json('success');
+
 });
 router.get("/GetInfraDetailsById/:id", (req, res, next) => {
     db.executeSql("SELECT * FROM infrastructure WHERE institute_id=" + req.params.id + ";", function (data, err) {

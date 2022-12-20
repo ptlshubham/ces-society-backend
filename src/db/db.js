@@ -20,3 +20,16 @@ exports.executeSql = function (sql, callback) {
     });
 
 }
+exports.executeSql1 = function (sql, values,callback) {
+    con.query(sql, function (err, result) {
+        if (err) {
+            // throw err;
+            callback(null, err);
+        }
+        else {
+            callback(result);
+        }
+
+    });
+
+}
