@@ -125,6 +125,39 @@ router.post("/UploadGalleryImages", (req, res, next) => {
 
     });
 });
+
+router.post("/UploadGalleryVideo", (req, res, next) => {
+    const videoStorage = multer.diskStorage({
+        destination: (req, file, cb) => {
+            cb(null, "video/")
+        },
+        filename: (req, file, cb) => {
+            cb(null, file.fieldname + '_' + Date.now()
+                + path.extname(file.originalname))
+        }
+    });
+    const videoUpload = multer({
+        storage: videoStorage,
+        limits: {
+            fileSize: 10000000 // 10000000 Bytes = 10 MB
+        },
+        fileFilter(req, file, cb) {
+            // upload only mp4 and mkv format
+            if (!file.originalname.match(/\.(mp4|MPEG-4|mkv)$/)) {
+                return cb(new Error('Please upload a video'))
+            }
+            cb(undefined, true)
+        }
+    })
+    let upload = multer({ videoUpload: videoUpload }).single('video');
+    upload(error, req, res, function (err) {
+        console.log('/video/' + req.file.filename);
+        res.status(400).send({ error: error.message })
+        return res.json('/video/' + req.file.filename)
+        // return res.json('/images/infra/' + req.file.filename);
+    });
+});
+
 router.post("/SaveGalleryImages", (req, res, next) => {
     db.executeSql("INSERT INTO `image`(`institute_id`, `purpose`, `image`, `isactive`, `createddate`) VALUES(" + req.body.institute_id + ",'" + req.body.purpose + "','" + req.body.image + "',true,CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
@@ -432,9 +465,36 @@ router.post("/SaveBlogDetails", (req, res, next) => {
         }
     });
 });
+router.post("/UpdateBlogDetails", (req, res, next) => {
+    db.executeSql("UPDATE `blogs` SET `blogTitle`='" + req.body.blogTitle + "',`authorName`='" + req.body.authorName + "',`blogDate`='" + req.body.blogDate + "',`blogImage`='" + req.body.blogImage + "',`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id + ";", function (data, err) {
+        if (err) {
+            res.json("error");
+        } else {
+            const values = [req.body.blogDetails]
+            const escapedValues = values.map(mysql.escape);
+            db.executeSql1("UPDATE blogs SET blogDetails=" + escapedValues + " WHERE id= " + req.body.id, escapedValues, function (data1, err) {
+                if (err) {
+                    res.json("error");
+                    console.log(err)
+                } else {
+                }
+            });
+            return res.json('success');
+        }
+    });
+});
 
 router.get("/GetBlogsDetailsById/:id", (req, res, next) => {
     db.executeSql("SELECT * FROM blogs WHERE institute_id=" + req.params.id + ";", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+router.get("/RemoveBlogDetails/:id", (req, res, next) => {
+    db.executeSql("DELETE FROM `blogs` WHERE id=" + req.params.id + ";", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -500,6 +560,33 @@ router.post("/SaveInfrastructureDetails", (req, res, next) => {
     });
     // return res.json('success');
 
+});
+router.post("/UpdateInfraDetails", (req, res, next) => {
+    db.executeSql("UPDATE `infrastructure` SET `infraTitle`='" + req.body.infraTitle + "',`infraImage`='" + req.body.infraImage + "',`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id + ";", function (data, err) {
+        if (err) {
+            res.json("error");
+        } else {
+            const values = [req.body.infraDetails]
+            const escapedValues = values.map(mysql.escape);
+            db.executeSql1("UPDATE infrastructure SET infraDetails=" + escapedValues + " WHERE id= " + req.body.id, escapedValues, function (data1, err) {
+                if (err) {
+                    res.json("error");
+                    console.log(err)
+                } else {
+                }
+            });
+            return res.json('success');
+        }
+    });
+});
+router.get("/RemoveInfraDetails/:id", (req, res, next) => {
+    db.executeSql("DELETE FROM `infrastructure` WHERE id=" + req.params.id + ";", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
 });
 router.get("/GetInfraDetailsById/:id", (req, res, next) => {
     db.executeSql("SELECT * FROM infrastructure WHERE institute_id=" + req.params.id + ";", function (data, err) {
@@ -643,6 +730,84 @@ router.post("/SaveNewsDataList", (req, res, next) => {
             return res.json('success');
         }
     });
+});
+router.post("/SaveNewsDataList", (req, res, next) => {
+    db.executeSql("INSERT INTO `news`(`institute_id`, `date`, `files`, `createddate`) VALUES ('" + req.body.institute_id + "','" + req.body.date + "','" + req.body.files + "',CURRENT_TIMESTAMP)", function (data, err) {
+        if (err) {
+            res.json("error");
+            console.log(err)
+        } else {
+            const values = [req.body.message]
+            const escapedValues = values.map(mysql.escape);
+            db.executeSql1("UPDATE news SET message=" + escapedValues + " WHERE id= " + data.insertId, escapedValues, function (data1, err) {
+                if (err) {
+                    res.json("error");
+                    console.log(err)
+                } else {
+                }
+            });
+            return res.json('success');
+        }
+    });
+});
+router.post("/SaveStudentListData", (req, res, next) => {
+    db.executeSql("INSERT INTO `student`(`institute_id`, `title`, `createddate`) VALUES ('" + req.body.institute_id + "','" + req.body.title + "',CURRENT_TIMESTAMP)", function (data, err) {
+        if (err) {
+            res.json("error");
+            console.log(err)
+        } else {
+            const values = [req.body.details]
+            const escapedValues = values.map(mysql.escape);
+            db.executeSql1("UPDATE student SET details=" + escapedValues + " WHERE id= " + data.insertId, escapedValues, function (data1, err) {
+                if (err) {
+                    res.json("error");
+                    console.log(err)
+                } else {
+                }
+            });
+            return res.json('success');
+        }
+    });
+});
+
+router.post("/UpdateStudentListData", (req, res, next) => {
+    db.executeSql("UPDATE `student` SET `title`='" + req.body.title + "',`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id, function (data, err) {
+        if (err) {
+            res.json("error");
+            console.log(err)
+        } else {
+            const values = [req.body.details]
+            const escapedValues = values.map(mysql.escape);
+            db.executeSql1("UPDATE student SET details=" + escapedValues + " WHERE id= " + req.body.id, escapedValues, function (data1, err) {
+                if (err) {
+                    res.json("error");
+                    console.log(err)
+                } else {
+                }
+            });
+            return res.json('success');
+        }
+    });
+});
+
+router.get("/GetStudentListData/:id", (req, res, next) => {
+    db.executeSql("SELECT * FROM student WHERE institute_id=" + req.params.id + ";", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+
+router.get("/RemoveStudentListData/:id", (req, res, next) => {
+    db.executeSql("DELETE FROM student WHERE id=" + req.params.id + ";", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
 });
 
 router.get("/GetNewsByIdDetails/:id", (req, res, next) => {
