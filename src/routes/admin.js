@@ -295,7 +295,7 @@ router.post("/UpdateStaffDetailsById", (req, res, next) => {
 });
 
 router.get("/GetAllStaffDetails/:id", (req, res, next) => {
-    db.executeSql("SELECT * FROM staff_list WHERE institute_id=" + req.params.id, function (data, err) {
+    db.executeSql("SELECT s.id as staffId,s.institute_id,s.department,s.name,s.contact,s.email,s.designation,s.qualification,s.joining_date,s.profile_image, s.birthday_date,d.id as departmentId,d.department as departmentName FROM staff_list s left join department_list d on s.department= d.id WHERE s.institute_id=" + req.params.id, function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -604,6 +604,14 @@ router.post("/SaveAlumniDetails", (req, res, next) => {
             res.json("error");
             console.log(err)
         } else {
+            const replacements = {
+                name: req.body.alumniName,
+                // email: req.body.email,
+                // subject: req.body.subject,
+                // message: req.body.message
+            };
+            mail('alumni.html', replacements, req.body.email, "Alumni Registered Successfully", " ")
+            // res.json(data);
             return res.json('success');
         }
     });
@@ -631,7 +639,7 @@ router.post("/SaveContactUsDetails", (req, res, next) => {
                 subject: req.body.subject,
                 message: req.body.message
             };
-            mail('feedback.html', replacements, req.body.email, "Feedback Submitted", " ")
+            mail('feedback-ces.html', replacements, req.body.email, "Feedback Submitted", " ")
             // res.json(data);
             return res.json('success');
         }
@@ -721,18 +729,18 @@ router.post("/UploadPDF", (req, res, next) => {
 
 });
 
+// router.post("/SaveNewsDataList", (req, res, next) => {
+//     db.executeSql("INSERT INTO `news`(`institute_id`, `date`, `message`, `files`, `createddate`) VALUES ('" + req.body.institute_id + "','" + req.body.date + "','" + req.body.message + "','" + req.body.files + "',CURRENT_TIMESTAMP)", function (data, err) {
+//         if (err) {
+//             res.json("error");
+//             console.log(err)
+//         } else {
+//             return res.json('success');
+//         }
+//     });
+// });
 router.post("/SaveNewsDataList", (req, res, next) => {
-    db.executeSql("INSERT INTO `news`(`institute_id`, `date`, `message`, `files`, `createddate`) VALUES ('" + req.body.institute_id + "','" + req.body.date + "','" + req.body.message + "','" + req.body.files + "',CURRENT_TIMESTAMP)", function (data, err) {
-        if (err) {
-            res.json("error");
-            console.log(err)
-        } else {
-            return res.json('success');
-        }
-    });
-});
-router.post("/SaveNewsDataList", (req, res, next) => {
-    db.executeSql("INSERT INTO `news`(`institute_id`, `date`, `files`, `createddate`) VALUES ('" + req.body.institute_id + "','" + req.body.date + "','" + req.body.files + "',CURRENT_TIMESTAMP)", function (data, err) {
+    db.executeSql("INSERT INTO `news`(`institute_id`, `date`, `files`,`isactive`,`createddate`) VALUES ('" + req.body.institute_id + "','" + req.body.date + "','" + req.body.files + "',true,CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
             res.json("error");
             console.log(err)
@@ -747,6 +755,16 @@ router.post("/SaveNewsDataList", (req, res, next) => {
                 }
             });
             return res.json('success');
+        }
+    });
+});
+router.post("/UpdateActiveDeactiveNews", (req, res, next) => {
+    console.log(req.body, 'news')
+    db.executeSql("UPDATE `news` SET isactive=" + req.body.isactive + " WHERE id=" + req.body.id + ";", function (data, err) {
+        if (err) {
+            console.log("Error in store.js", err);
+        } else {
+            return res.json(data);
         }
     });
 });
@@ -820,6 +838,15 @@ router.get("/GetNewsByIdDetails/:id", (req, res, next) => {
     })
 });
 
+router.get("/GetNewsOnlyForCES/:id", (req, res, next) => {
+    db.executeSql("SELECT * FROM news WHERE institute_id=" + req.params.id + " AND isactive=true;", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
 router.get("/RemoveNewsByIdDetails/:id", (req, res, next) => {
     db.executeSql("DELETE FROM news WHERE id=" + req.params.id, function (data, err) {
         if (err) {
@@ -850,6 +877,34 @@ router.post("/SaveOthersDataList", (req, res, next) => {
     });
 });
 
+router.post("/SaveMagazineList", (req, res, next) => {
+    db.executeSql("INSERT INTO `magazine`(`title`, `files`, `createddate`) VALUES ('" + req.body.title + "','" + req.body.files + "',CURRENT_TIMESTAMP)", function (data, err) {
+        if (err) {
+            res.json("error");
+            console.log(err)
+        } else {
+            return res.json('success');
+        }
+    });
+});
+router.get("/GetMagazineList", (req, res, next) => {
+    db.executeSql("SELECT * FROM magazine;", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+router.get("/RemoveMagazineList/:id", (req, res, next) => {
+    db.executeSql("DELETE FROM magazine WHERE id=" + req.params.id + ";", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
 router.get("/GetOthersByIdDetails/:id", (req, res, next) => {
     db.executeSql("SELECT * FROM others WHERE institute_id=" + req.params.id + ";", function (data, err) {
         if (err) {
@@ -910,7 +965,7 @@ router.get("/GetAllNewsDetails/:id", (req, res, next) => {
         if (err) {
             console.log(err);
         } else {
-            db.executeSql("SELECT * FROM news WHERE institute_id=" + req.params.id + " OR institute_id=" + data[0].id + ";", function (data1, err) {
+            db.executeSql("SELECT * FROM news WHERE (institute_id=" + req.params.id + " OR institute_id=" + data[0].id + ") AND isactive=true;", function (data1, err) {
                 if (err) {
                     console.log(err);
                 } else {
