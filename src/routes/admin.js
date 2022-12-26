@@ -606,9 +606,6 @@ router.post("/SaveAlumniDetails", (req, res, next) => {
         } else {
             const replacements = {
                 name: req.body.alumniName,
-                // email: req.body.email,
-                // subject: req.body.subject,
-                // message: req.body.message
             };
             mail('alumni.html', replacements, req.body.email, "Alumni Registered Successfully", " ")
             // res.json(data);
@@ -635,15 +632,40 @@ router.post("/SaveContactUsDetails", (req, res, next) => {
         } else {
             const replacements = {
                 name: req.body.name,
-                email: req.body.email,
-                subject: req.body.subject,
-                message: req.body.message
             };
             mail('feedback-ces.html', replacements, req.body.email, "Feedback Submitted", " ")
             // res.json(data);
             return res.json('success');
         }
     });
+});
+
+router.post("/SaveCounselingDetails", (req, res, next) => {
+    db.executeSql("INSERT INTO `counseling`(`name`, `division`, `email`, `phone`, `instituteName`, `message`, `createddate`) VALUES ('" + req.body.name + "','" + req.body.division + "','" + req.body.email + "'," + req.body.phone + ",'" + req.body.instituteName + "','" + req.body.message + "',CURRENT_TIMESTAMP)", function (data, err) {
+        if (err) {
+            res.json("error");
+            console.log(err)
+        } else {
+            const replacements = {
+                name: req.body.name,
+                // email: req.body.email,
+                // subject: req.body.subject,
+                // message: req.body.message
+            };
+            mail('appointement-ces.html', replacements, req.body.email, "Appointement Submitted", " ")
+            // res.json(data);
+            return res.json('success');
+        }
+    });
+});
+router.get("/GetCounselingData", (req, res, next) => {
+    db.executeSql("SELECT * FROM counseling;", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
 });
 
 router.get("/GetContactUsDetailsById/:id", (req, res, next) => {
@@ -939,7 +961,7 @@ function mail(filename, data, toemail, subj, mailname) {
 
     };
     transporter.sendMail(mailOptions, function (error, info) {
-        console.log('fgfjfj')
+        // console.log('Mail Sent')
         if (error) {
             console.log(error);
             res.json("Errror");
