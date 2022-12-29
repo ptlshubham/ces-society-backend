@@ -224,6 +224,16 @@ router.get("/GetDepartmentByIdDetails/:id", (req, res, next) => {
         }
     })
 });
+
+router.get("/GetYearbyGroupDetails/:id", (req, res, next) => {
+    db.executeSql("SELECT * FROM `papers` WHERE institute_id='" + req.params.id + "' GROUP BY year;", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
 router.get("/RemoveDepartmentByIdDetails/:id", (req, res, next) => {
     db.executeSql("DELETE FROM `department_list` WHERE id=" + req.params.id, function (data, err) {
         if (err) {
@@ -538,7 +548,78 @@ router.post("/UploadInfraImage", (req, res, next) => {
 
     });
 });
+router.post("/UploadMoreImage", (req, res, next) => {
+    var imgname = generateUUID();
+    const storage = multer.diskStorage({
+        destination: function (req, file, cb) {
+            cb(null, 'images/more');
+        },
+        // By default, multer removes file extensions so let's add them back
+        filename: function (req, file, cb) {
 
+            cb(null, imgname + path.extname(file.originalname));
+        }
+    });
+    let upload = multer({ storage: storage }).single('file');
+    upload(req, res, function (err) {
+        console.log("path=", config.url + 'images/more/' + req.file.filename);
+
+        if (req.fileValidationError) {
+            console.log("err1", req.fileValidationError);
+            return res.json("err1", req.fileValidationError);
+        } else if (!req.file) {
+            console.log('Please select an image to upload');
+            return res.json('Please select an image to upload');
+        } else if (err instanceof multer.MulterError) {
+            console.log("err3");
+            return res.json("err3", err);
+        } else if (err) {
+            console.log("err4");
+            return res.json("err4", err);
+        }
+        return res.json('/images/more/' + req.file.filename);
+
+
+    });
+});
+router.post("/SaveScholarshipDetails", (req, res, next) => {
+    db.executeSql("INSERT INTO `scholarship`(`institute_id`, `purpose`, `title`, `image`,`createdate`) VALUES  ('" + req.body.institute_id + "','" + req.body.purpose + "','" + req.body.title + "','" + req.body.image + "',CURRENT_TIMESTAMP)", function (data, err) {
+        if (err) {
+            res.json("error");
+            console.log(err)
+        } else {
+            const values = [req.body.details]
+            const escapedValues = values.map(mysql.escape);
+            db.executeSql1("UPDATE scholarship SET details=" + escapedValues + " WHERE id= " + data.insertId, escapedValues, function (data1, err) {
+                if (err) {
+                    res.json("error");
+                    console.log(err)
+                } else {
+                }
+            });
+            return res.json('success');
+        }
+    });
+});
+router.get("/GetScholarshipDetails/:id", (req, res, next) => {
+    console.log(req.params.id, 'jghgjvhj')
+    db.executeSql("SELECT * FROM scholarship WHERE institute_id=" + req.params.id + ";", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+router.get("/RemoveScholarshipDetails/:id", (req, res, next) => {
+    db.executeSql("DELETE FROM `scholarship` WHERE id=" + req.params.id + ";", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
 router.post("/SaveInfrastructureDetails", (req, res, next) => {
     db.executeSql("INSERT INTO `infrastructure`(`institute_id`, `infraTitle`,`infraImage`, `createddate`) VALUES ('" + req.body.institute_id + "','" + req.body.infraTitle + "','" + req.body.infraImage + "',CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
@@ -687,6 +768,37 @@ router.post("/SaveResultDetails", (req, res, next) => {
             return res.json(data);
         }
     });
+});
+
+router.post("/SaveQuestionPapersDetails", (req, res, next) => {
+    db.executeSql("INSERT INTO `papers`(`institute_id`, `department`, `subject`, `year`, `semester`, `title`, `files`, `createdate`) VALUES('" + req.body.institute_id + "','" + req.body.department + "','" + req.body.subject + "','" + req.body.year + "','" + req.body.semester + "','" + req.body.title + "','" + req.body.files + "',CURRENT_TIMESTAMP)", function (data, err) {
+        if (err) {
+            res.json("error");
+            console.log(err)
+        } else {
+            return res.json(data);
+        }
+    });
+});
+
+router.get("/GetQuestionPapersDetails/:id", (req, res, next) => {
+    db.executeSql("SELECT * FROM papers WHERE institute_id=" + req.params.id + ";", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+
+router.get("/RemoveQuestionPapersDetails/:id", (req, res, next) => {
+    db.executeSql("DELETE FROM papers WHERE id=" + req.params.id + ";", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
 });
 
 router.post("/UpdateResultDetails", (req, res, next) => {
