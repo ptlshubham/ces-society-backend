@@ -167,7 +167,7 @@ router.post("/SaveGalleryImages", (req, res, next) => {
         }
     });
 });
-router.post("/GetImagesByIdDetails", (req, res, next) => {
+router.post("/GetALLImagesByIdDetails", (req, res, next) => {
     db.executeSql("SELECT * FROM `image` WHERE institute_id=" + req.body.institute_id + ";", function (data, err) {
         if (err) {
             console.log(err);
@@ -176,7 +176,17 @@ router.post("/GetImagesByIdDetails", (req, res, next) => {
         }
     })
 });
+router.post("/GetImagesByIdDetails", (req, res, next) => {
+    db.executeSql("SELECT * FROM `image` WHERE isactive=true AND institute_id=" + req.body.institute_id + ";", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
 router.post("/UpdateActiveDeactiveBanners", (req, res, next) => {
+    console.log(req.body, 'Deactive')
     db.executeSql("UPDATE  `image` SET isactive=" + req.body.isactive + " WHERE id=" + req.body.id + ";", function (data, err) {
         if (err) {
             console.log("Error in store.js", err);
@@ -1109,11 +1119,29 @@ router.get("/GetAllNewsDetails/:id", (req, res, next) => {
 
         }
     })
-
-
 });
 
+router.post("/SaveGatePassUserList", (req, res, next) => {
+    db.executeSql("INSERT INTO `gatepass`(`role`, `institute`, `meetingWith`, `purpose`, `name`, `dateTime`, `contact`, `createddate`) VALUES ('" + req.body.role + "','" + req.body.institute + "','" + req.body.meetingWith + "','" + req.body.purpose + "','" + req.body.name + "','" + req.body.dateTime + "'," + req.body.contact + ",CURRENT_TIMESTAMP)", function (data, err) {
+        if (err) {
+            res.json("error");
+            console.log(err)
+        } else {
+            console.log(data.insertId);
 
+            return res.json(data.insertId);
+        }
+    });
+});
+router.get("/GetGatePassUserList", (req, res, next) => {
+    db.executeSql("SELECT * FROM gatepass;", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
 
 
 
@@ -1971,10 +1999,6 @@ router.post("/GetCustomerDataById", (req, res, next) => {
 //         }
 //     });
 // })
-
-
-
-
 router.post("/SaveWebBanners", (req, res, next) => {
     console.log(req.body);
     db.executeSql("INSERT INTO `webbanners`(`name`,`bannersimage`,`status`)VALUES('" + req.body.name + "','" + req.body.bannersimage + "'," + req.body.status + ");", function (data, err) {
