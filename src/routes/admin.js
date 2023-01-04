@@ -1127,8 +1127,6 @@ router.post("/SaveGatePassUserList", (req, res, next) => {
             res.json("error");
             console.log(err)
         } else {
-            console.log(data.insertId);
-
             return res.json(data.insertId);
         }
     });
