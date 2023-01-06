@@ -356,7 +356,7 @@ router.get("/GetAllDonnerList", (req, res, next) => {
 });
 router.post("/SaveBulkDonnersDetails", (req, res, next) => {
     for (let i = 0; i < req.body.length; i++) {
-        db.executeSql("INSERT INTO `donners`(`donationDate`, `donnerName`, `donnerCity`, `amount`, `createddate`) VALUES ('" + req.body[i].donationDate + "','" + req.body[i].donnerName + "','" + req.body[i].donnerCity + "'," + req.body[i].amount + ",CURRENT_TIMESTAMP)", function (data, err) {
+        db.executeSql("INSERT INTO `donners`(`donationDate`, `donnerName`, `donnerCity`, `amount`, `createddate`) VALUES ('" + req.body[i].donationDate + "','" + req.body[i].donnerName + "','" + req.body[i].donnerCity + "','" + req.body[i].amount + "',CURRENT_TIMESTAMP)", function (data, err) {
             if (err) {
                 res.json("error");
                 console.log(err)
@@ -364,11 +364,10 @@ router.post("/SaveBulkDonnersDetails", (req, res, next) => {
             }
         });
     }
-    return res.json('success');
+    // return res.json('success');
 });
 
 router.post("/SaveBeneficiaryDetails", (req, res, next) => {
-    console.log(req.body, 'Hii I ma bhb')
     db.executeSql("INSERT INTO `beneficiary`(`year`,`studentName`, `instituteName`, `course`, `refundAmount`, `createddate`) VALUES ('" + req.body.year + "','" + req.body.studentName + "','" + req.body.instituteName + "','" + req.body.course + "','" + req.body.refundAmount + "',CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
             res.json("error");
@@ -612,7 +611,6 @@ router.post("/SaveScholarshipDetails", (req, res, next) => {
     });
 });
 router.get("/GetScholarshipDetails/:id", (req, res, next) => {
-    console.log(req.params.id, 'jghgjvhj')
     db.executeSql("SELECT * FROM scholarship WHERE institute_id=" + req.params.id + ";", function (data, err) {
         if (err) {
             console.log(err);
