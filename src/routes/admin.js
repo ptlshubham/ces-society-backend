@@ -971,7 +971,7 @@ router.get("/RemoveStudentListData/:id", (req, res, next) => {
 });
 
 router.get("/GetNewsByIdDetails/:id", (req, res, next) => {
-    db.executeSql("SELECT * FROM news WHERE institute_id=" + req.params.id + ";", function (data, err) {
+    db.executeSql("SELECT * FROM news WHERE institute_id=" + req.params.id + " ORDER BY date DESC ;", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -981,7 +981,7 @@ router.get("/GetNewsByIdDetails/:id", (req, res, next) => {
 });
 
 router.get("/GetNewsOnlyForCES/:id", (req, res, next) => {
-    db.executeSql("SELECT * FROM news WHERE institute_id=" + req.params.id + " AND isactive=true;", function (data, err) {
+    db.executeSql("SELECT * FROM news WHERE institute_id=" + req.params.id + " AND isactive=true ORDER BY date DESC; ", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -1107,7 +1107,7 @@ router.get("/GetAllNewsDetails/:id", (req, res, next) => {
         if (err) {
             console.log(err);
         } else {
-            db.executeSql("SELECT * FROM news WHERE (institute_id=" + req.params.id + " OR institute_id=" + data[0].id + ") AND isactive=true;", function (data1, err) {
+            db.executeSql("SELECT * FROM news WHERE (institute_id=" + req.params.id + " OR institute_id=" + data[0].id + ") AND isactive=true ORDER BY date DESC ;", function (data1, err) {
                 if (err) {
                     console.log(err);
                 } else {
