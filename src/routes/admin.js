@@ -703,6 +703,30 @@ router.post("/SaveAlumniDetails", (req, res, next) => {
     });
 });
 
+router.post("/SaveRahatokarshDonation", (req, res, next) => {
+    db.executeSql("INSERT INTO `rahatokarsh`(`name`, `number`, `email`, `amount`, `address`, `createddate`) VALUES  ('" + req.body.donnerName + "','" + req.body.contactNumber + "','" + req.body.email + "','" + req.body.donationAmount + "','" + req.body.address + "',CURRENT_TIMESTAMP)", function (data, err) {
+        if (err) {
+            res.json("error");
+            console.log(err)
+        } else {
+            const replacements = {
+                name: req.body.donnerName,
+            };
+            mail('donation.html', replacements, req.body.email, "Thank You For Contributing.", " ")
+            // res.json(data);
+            return res.json('success');
+        }
+    });
+});
+router.get("/GetRahatokarshDonationList", (req, res, next) => {
+    db.executeSql("SELECT * FROM rahatokarsh ORDER BY createddate DESC; ;", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
 router.get("/GetAlumniDetails", (req, res, next) => {
     db.executeSql("SELECT * FROM alumni;", function (data, err) {
         if (err) {
@@ -1062,7 +1086,7 @@ function mail(filename, data, toemail, subj, mailname) {
         host: 'smtp.gmail.com',
         auth: {
             user: 'ptlshubham@gmail.com',
-            pass: 'hvcukfxtadulqrnb'
+            pass: 'viygdzpfihpwgrlv'
         },
     });
     const filePath = 'src/assets/emailtemplets/' + filename;
