@@ -924,6 +924,27 @@ router.post("/SaveNewsDataList", (req, res, next) => {
         }
     });
 });
+
+router.post("/SaveAnswerkeyDataList", (req, res, next) => {
+    db.executeSql("INSERT INTO `answerkey`(`date`,`files`, `isactive`, `createddate`) VALUES ('" + req.body.date + "','" + req.body.files + "',true,CURRENT_TIMESTAMP)", function (data, err) {
+        if (err) {
+            res.json("error");
+            console.log(err)
+        } else {
+            const values = [req.body.message]
+            const escapedValues = values.map(mysql.escape);
+            db.executeSql1("UPDATE answerkey SET message=" + escapedValues + " WHERE id= " + data.insertId, escapedValues, function (data1, err) {
+                if (err) {
+                    res.json("error");
+                    console.log(err)
+                } else {
+                }
+            });
+            return res.json('success');
+        }
+    });
+});
+
 router.post("/UpdateActiveDeactiveNews", (req, res, next) => {
     console.log(req.body, 'news')
     db.executeSql("UPDATE `news` SET isactive=" + req.body.isactive + " WHERE id=" + req.body.id + ";", function (data, err) {
@@ -934,6 +955,18 @@ router.post("/UpdateActiveDeactiveNews", (req, res, next) => {
         }
     });
 });
+
+router.post("/UpdateActiveDeactiveAnswerkey", (req, res, next) => {
+    console.log(req.body, 'answerkey')
+    db.executeSql("UPDATE `answerkey` SET isactive=" + req.body.isactive + " WHERE id=" + req.body.id + ";", function (data, err) {
+        if (err) {
+            console.log("Error in store.js", err);
+        } else {
+            return res.json(data);
+        }
+    });
+});
+
 router.post("/SaveStudentListData", (req, res, next) => {
     db.executeSql("INSERT INTO `student`(`institute_id`, `title`, `createddate`) VALUES ('" + req.body.institute_id + "','" + req.body.title + "',CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
@@ -1004,6 +1037,16 @@ router.get("/GetNewsByIdDetails/:id", (req, res, next) => {
     })
 });
 
+router.get("/GetAllAnswerkey", (req, res, next) => {
+    db.executeSql("SELECT * FROM answerkey ORDER BY date DESC ;", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+
 router.get("/GetNewsOnlyForCES/:id", (req, res, next) => {
     db.executeSql("SELECT * FROM news WHERE institute_id=" + req.params.id + " AND isactive=true ORDER BY date DESC; ", function (data, err) {
         if (err) {
@@ -1022,6 +1065,16 @@ router.get("/RemoveNewsByIdDetails/:id", (req, res, next) => {
         }
     })
 });
+router.get("/RemoveAnswerkeyByIdDetails/:id", (req, res, next) => {
+    db.executeSql("DELETE FROM answerkey WHERE id=" + req.params.id, function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+
 router.get("/RemoveOtherDetailsById/:id", (req, res, next) => {
     db.executeSql("DELETE FROM others WHERE id=" + req.params.id, function (data, err) {
         if (err) {
@@ -1142,6 +1195,22 @@ router.get("/GetAllNewsDetails/:id", (req, res, next) => {
         }
     })
 });
+// router.get("/GetAllAnswerkeyDetails/:id", (req, res, next) => {
+//     db.executeSql("SELECT * FROM institute WHERE url='www.cesociety.in';", function (data, err) {
+//         if (err) {
+//             console.log(err);
+//         } else {
+//             db.executeSql("SELECT * FROM Answerkey WHERE (institute_id=" + req.params.id + " OR institute_id=" + data[0].id + ") AND isactive=true ORDER BY date DESC ;", function (data1, err) {
+//                 if (err) {
+//                     console.log(err);
+//                 } else {
+//                     return res.json(data1);
+//                 }
+//             })
+
+//         }
+//     })
+// });
 
 router.post("/SaveGatePassUserList", (req, res, next) => {
     db.executeSql("INSERT INTO `gatepass`(`role`, `institute`, `meetingWith`, `purpose`, `name`, `dateTime`, `contact`, `createddate`) VALUES ('" + req.body.role + "','" + req.body.institute + "','" + req.body.meetingWith + "','" + req.body.purpose + "','" + req.body.name + "','" + req.body.dateTime + "'," + req.body.contact + ",CURRENT_TIMESTAMP)", function (data, err) {
