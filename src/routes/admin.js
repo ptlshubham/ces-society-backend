@@ -1138,8 +1138,8 @@ function mail(filename, data, toemail, subj, mailname) {
         service: "gmail",
         host: 'smtp.gmail.com',
         auth: {
-            user: 'ptlshubham@gmail.com',
-            pass: 'viygdzpfihpwgrlv'
+            user: 'cesociety16@gmail.com',
+            pass: 'wtezdbqbwpzryeoy'
         },
     });
     const filePath = 'src/assets/emailtemplets/' + filename;
@@ -1149,7 +1149,7 @@ function mail(filename, data, toemail, subj, mailname) {
     const htmlToSend = template(replacements);
 
     const mailOptions = {
-        from: `"ptlshubham@gmail.com"`,
+        from: `"cesociety16@gmail.com"`,
         subject: subj,
         to: toemail,
         Name: mailname,
