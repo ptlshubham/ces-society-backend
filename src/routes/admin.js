@@ -729,7 +729,7 @@ router.get("/GetRahatokarshDonationList", (req, res, next) => {
     })
 });
 router.post("/GenerateRahatokarshCertficate", (req, res, next) => {
-    console, log(req.body, 'Certificate')
+    console.log(req.body, 'Certificate')
     db.executeSql("UPDATE `rahatokarsh` SET `isactive`=true,`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id, function (data, err) {
         if (err) {
             res.json("error");
