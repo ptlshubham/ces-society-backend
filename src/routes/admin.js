@@ -250,6 +250,10 @@ router.get("/GetAllDonnerList", (req, res, next) => {
 });
 router.post("/SaveBulkDonnersDetails", (req, res, next) => {
     for (let i = 0; i < req.body.length; i++) {
+        console.log(req.body.length);
+        console.log(req.body[i].donationDate);
+        const event =new Date(req.body[i].donationDate);
+        console.log(event.getFullYear()+'-'+event.getMonth()+'-'+event.getDay());
         db.executeSql("INSERT INTO `donners`(`donationDate`, `donnerName`, `donnerCity`, `amount`, `createddate`) VALUES ('" + req.body[i].donationDate + "','" + req.body[i].donnerName + "','" + req.body[i].donnerCity + "'," + req.body[i].amount + ",CURRENT_TIMESTAMP)", function (data, err) {
             if (err) {
                 res.json("error");
@@ -258,7 +262,7 @@ router.post("/SaveBulkDonnersDetails", (req, res, next) => {
             }
         });
     }
-    return res.json('success');
+    // return res.json('success');
 });
 
 router.post("/SaveBeneficiaryDetails", (req, res, next) => {
