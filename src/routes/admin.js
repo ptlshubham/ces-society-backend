@@ -27,6 +27,7 @@ router.get("/GetInstituteDetailByURL/:id", (req, res, next) => {
             //         console.log('success')
             //     }
             // });
+            // console.log(data);
             return res.json(data);
         }
     })
@@ -704,7 +705,7 @@ router.post("/SaveAlumniDetails", (req, res, next) => {
 });
 
 router.post("/SaveRahatokarshDonation", (req, res, next) => {
-    db.executeSql("INSERT INTO `rahatokarsh`(`name`, `number`, `email`, `amount`, `address`, `createddate`) VALUES  ('" + req.body.donnerName + "','" + req.body.contactNumber + "','" + req.body.email + "','" + req.body.donationAmount + "','" + req.body.address + "',CURRENT_TIMESTAMP)", function (data, err) {
+    db.executeSql("INSERT INTO `rahatokarsh`(`name`, `number`, `email`, `amount`, `isactive`, `createddate`) VALUES  ('" + req.body.donnerName + "','" + req.body.contactNumber + "','" + req.body.email + "','" + req.body.donationAmount + "',false,CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
             res.json("error");
             console.log(err)
@@ -726,6 +727,17 @@ router.get("/GetRahatokarshDonationList", (req, res, next) => {
             return res.json(data);
         }
     })
+});
+router.post("/GenerateRahatokarshCertficate", (req, res, next) => {
+    console, log(req.body, 'Certificate')
+    db.executeSql("UPDATE `rahatokarsh` SET `isactive`=true,`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id, function (data, err) {
+        if (err) {
+            res.json("error");
+            console.log(err)
+        } else {
+            return res.json(data);
+        }
+    });
 });
 router.get("/GetAlumniDetails", (req, res, next) => {
     db.executeSql("SELECT * FROM alumni;", function (data, err) {
