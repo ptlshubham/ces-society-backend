@@ -28,6 +28,7 @@ app.use(express.static('public'));
 //Serves all the request which includes /images in the url from Images folder
 app.use('/images', express.static(__dirname + '/images'));
 app.use('/pdf', express.static(__dirname + '/pdf'));
+app.use('/certificate', express.static(__dirname + '/certificate'));
 
 
 

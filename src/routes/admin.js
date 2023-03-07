@@ -764,7 +764,13 @@ router.post("/GenerateRahatokarshCertficate", (req, res, next) => {
             res.json("error");
             console.log(err)
         } else {
-            doc.pipe(fs.createWriteStream('certificate/' + Date.now() + '.pdf'));
+            let cert_name=Date.now();
+            doc.pipe(fs.createWriteStream('certificate/' + cert_name + '.pdf'));
+            db.executeSql("update rahatokarsh set certificate= '/certificate/" + cert_name + ".pdf'  where id=" + req.body.id, function(data1,err){
+                if(err){
+                    console.log(err);
+                }
+            })
             function jumpLine(doc, lines) {
                 for (let index = 0; index < lines; index++) {
                     doc.moveDown();
