@@ -765,10 +765,10 @@ router.post("/GenerateRahatokarshCertficate", (req, res, next) => {
             res.json("error");
             console.log(err)
         } else {
-            let cert_name=Date.now();
+            let cert_name = Date.now();
             doc.pipe(fs.createWriteStream('certificate/' + cert_name + '.pdf'));
-            db.executeSql("update rahatokarsh set certificate= '/certificate/" + cert_name + ".pdf'  where id=" + req.body.id, function(data1,err){
-                if(err){
+            db.executeSql("update rahatokarsh set certificate= '/certificate/" + cert_name + ".pdf'  where id=" + req.body.id, function (data1, err) {
+                if (err) {
                     console.log(err);
                 }
             })
@@ -796,9 +796,9 @@ router.post("/GenerateRahatokarshCertficate", (req, res, next) => {
             //     )
             //     .stroke();
 
-         
-    
-            doc.image('src/assets/example.jpg',0, 0, {
+
+
+            doc.image('src/assets/example.jpg', 0, 0, {
                 fit: [doc.page.width, doc.page.height],
                 align: 'center',
             });
@@ -807,17 +807,17 @@ router.post("/GenerateRahatokarshCertficate", (req, res, next) => {
 
             jumpLine(doc, 2)
             const start = 85;
-            
-          
+
+
             doc
                 .font('src/assets/fonts/NotoSansJP-Bold.otf')
                 .fontSize(22)
                 .fill('#021c27')
-                .text(req.body.name, 85,335, {
+                .text(req.body.name, 85, 335, {
                     align: 'center',
                 });
 
-             
+
 
 
             jumpLine(doc, 2)
@@ -831,8 +831,8 @@ router.post("/GenerateRahatokarshCertficate", (req, res, next) => {
             // doc.fillAndStroke('#021c27');
             // doc.strokeOpacity(0.2);
 
-             const startLine1 = 85;
-             const endLine1 = 128 + lineSize;
+            const startLine1 = 85;
+            const endLine1 = 128 + lineSize;
             // doc
             //     .moveTo(startLine1, signatureHeight)
             //     .lineTo(endLine1, signatureHeight)
@@ -851,12 +851,13 @@ router.post("/GenerateRahatokarshCertficate", (req, res, next) => {
             //     .moveTo(startLine3, signatureHeight)
             //     .lineTo(endLine3, signatureHeight)
             //     .stroke();
-
+            const datetime = new Date(); // Replace this with your datetime object
+            const date = datetime.toISOString().slice(0, 10);
             doc
                 .font('src/assets/fonts/NotoSansJP-Bold.otf')
                 .fontSize(16)
                 .fill('#021c27')
-                .text('07/03/2023', startLine1, signatureHeight + 90, {
+                .text(date, startLine1, signatureHeight + 90, {
                     columns: 1,
                     columnGap: 0,
                     height: 40,
@@ -876,17 +877,17 @@ router.post("/GenerateRahatokarshCertficate", (req, res, next) => {
             //         align: 'center',
             //     });
 
-            // doc
-            // .font('src/assets/fonts/NotoSansJP-Bold.otf')
-            // .fontSize(10)
-            // .fill('#021c27')
-            // .text('Student Name', startLine2, signatureHeight + 10, {
-            //     columns: 1,
-            //     columnGap: 0,
-            //     height: 40,
-            //     width: lineSize,
-            //     align: 'center',
-            // });
+            doc
+                .font('src/assets/fonts/NotoSansJP-Bold.otf')
+                .fontSize(16)
+                .fill('#021c27')
+                .text('0000' + req.body.id, startLine2, signatureHeight + 90, {
+                    columns: 1,
+                    columnGap: 0,
+                    height: 40,
+                    width: lineSize,
+                    align: 'center',
+                });
 
             // doc
             // .font('src/assets/fonts/NotoSansJP-Light.otf')
@@ -972,7 +973,7 @@ router.post("/GenerateRahatokarshCertficate", (req, res, next) => {
             // return res.json(data);
             const replacements = {
                 name: req.body.name,
-                link:'http://localhost:9000/certificate/'+cert_name+'.pdf'
+                link: 'https://bapsanandmandir.co.in/certificate/' + cert_name + '.pdf'
                 // download: 
             };
             mail('certification.html', replacements, req.body.email, "Thank You For Donating.", " ")
