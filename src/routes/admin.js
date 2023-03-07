@@ -973,7 +973,7 @@ router.post("/GenerateRahatokarshCertficate", (req, res, next) => {
             // return res.json(data);
             const replacements = {
                 name: req.body.name,
-                link: 'https://bapsanandmandir.co.in/certificate/' + cert_name + '.pdf'
+                link: 'http://localhost:9000/certificate/' + cert_name + '.pdf'
                 // download: 
             };
             mail('certification.html', replacements, req.body.email, "Thank You For Donating.", " ")
