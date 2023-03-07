@@ -21,6 +21,7 @@ const doc = new PDFDocument({
 
 
 
+
 router.get("/GetInstituteDetailByURL/:id", (req, res, next) => {
     console.log(req.params, 'institute');
     db.executeSql("SELECT * FROM institute WHERE url='" + req.params.id + "';", function (data, err) {
@@ -776,93 +777,66 @@ router.post("/GenerateRahatokarshCertficate", (req, res, next) => {
                     doc.moveDown();
                 }
             }
-            doc.rect(0, 0, doc.page.width, doc.page.height).fill('#fff');
+            // doc.rect(0, 0, doc.page.width, doc.page.height).fill('#fff');
 
-            doc.fontSize(8);
+            // doc.fontSize(8);
 
             // Margin
-            const distanceMargin = 12;
+            // const distanceMargin = 12;
 
-            doc
-                .fillAndStroke('#203154')
-                .lineWidth(2)
-                .lineJoin('round')
-                .rect(
-                    distanceMargin,
-                    distanceMargin,
-                    doc.page.width - distanceMargin * 2,
-                    doc.page.height - distanceMargin * 2,
-                )
-                .stroke();
+            // doc
+            //     .fillAndStroke('#203154')
+            //     .lineWidth(2)
+            //     .lineJoin('round')
+            //     .rect(
+            //         distanceMargin,
+            //         distanceMargin,
+            //         doc.page.width - distanceMargin * 2,
+            //         doc.page.height - distanceMargin * 2,
+            //     )
+            //     .stroke();
 
-            // Header
-            const maxWidth = 180;
-            const maxHeight = 90;
-
-            doc.image('src/assets/logo.png', doc.page.width / 2 - maxWidth / 2, 60, {
-                fit: [maxWidth, maxHeight],
+         
+    
+            doc.image('src/assets/example.jpg',0, 0, {
+                fit: [doc.page.width, doc.page.height],
                 align: 'center',
             });
 
             jumpLine(doc, 4)
 
             jumpLine(doc, 2)
-
-            // Content
-            doc
-                .font('src/assets/fonts/NotoSansJP-Regular.otf')
-                .fontSize(50)
-                .fill('#0d3c5b')
-                .text('CERTIFICATE', {
-                    align: 'center',
-                });
-
-            jumpLine(doc, 1)
-
-            doc
-                .font('src/assets/fonts/NotoSansJP-Light.otf')
-                .fontSize(25)
-                .fill('#021c27')
-                .text('OF DONATION', {
-                    align: 'center',
-                });
-
-            jumpLine(doc,1)
+            const start = 85;
+            
+          
             doc
                 .font('src/assets/fonts/NotoSansJP-Bold.otf')
-                .fontSize(24)
+                .fontSize(22)
                 .fill('#021c27')
-                .text(req.body.name, {
+                .text(req.body.name, 85,335, {
                     align: 'center',
                 });
 
-            // jumpLine(doc, 1)
+             
 
-            // doc
-            //     .font('src/assets/fonts/NotoSansJP-Light.otf')
-            //     .fontSize(10)
-            //     .fill('#021c27')
-            //     .text('Successfully completed the Super Course for Awesomes.', {
-            //         align: 'center',
-            //     });
 
             jumpLine(doc, 2)
 
-            doc.lineWidth(1);
+            //  doc.lineWidth(1);
 
             // Signatures
-            const lineSize = 174;
+            const lineSize = 300;
             const signatureHeight = 390;
 
-            doc.fillAndStroke('#021c27');
-            doc.strokeOpacity(0.2);
+            // doc.fillAndStroke('#021c27');
+            // doc.strokeOpacity(0.2);
 
-            const startLine1 = 128;
-            const endLine1 = 128 + lineSize;
-            doc
-                .moveTo(startLine1, signatureHeight)
-                .lineTo(endLine1, signatureHeight)
-                .stroke();
+             const startLine1 = 85;
+             const endLine1 = 128 + lineSize;
+            // doc
+            //     .moveTo(startLine1, signatureHeight)
+            //     .lineTo(endLine1, signatureHeight)
+            //     .stroke();
 
             const startLine2 = endLine1 + 32;
             const endLine2 = startLine2 + lineSize;
@@ -873,16 +847,16 @@ router.post("/GenerateRahatokarshCertficate", (req, res, next) => {
 
             const startLine3 = endLine2 + 32;
             const endLine3 = startLine3 + lineSize;
-            doc
-                .moveTo(startLine3, signatureHeight)
-                .lineTo(endLine3, signatureHeight)
-                .stroke();
+            // doc
+            //     .moveTo(startLine3, signatureHeight)
+            //     .lineTo(endLine3, signatureHeight)
+            //     .stroke();
 
             doc
                 .font('src/assets/fonts/NotoSansJP-Bold.otf')
-                .fontSize(10)
+                .fontSize(16)
                 .fill('#021c27')
-                .text('John Doe', startLine1, signatureHeight + 10, {
+                .text('07/03/2023', startLine1, signatureHeight + 90, {
                     columns: 1,
                     columnGap: 0,
                     height: 40,
@@ -890,19 +864,19 @@ router.post("/GenerateRahatokarshCertficate", (req, res, next) => {
                     align: 'center',
                 });
 
-            doc
-                .font('src/assets/fonts/NotoSansJP-Light.otf')
-                .fontSize(10)
-                .fill('#021c27')
-                .text('Associate Professor', startLine1, signatureHeight + 25, {
-                    columns: 1,
-                    columnGap: 0,
-                    height: 40,
-                    width: lineSize,
-                    align: 'center',
-                });
+            // doc
+            //     .font('src/assets/fonts/NotoSansJP-Light.otf')
+            //     .fontSize(10)
+            //     .fill('#021c27')
+            //     .text('Associate Professor', startLine1, signatureHeight + 95, {
+            //         columns: 1,
+            //         columnGap: 0,
+            //         height: 40,
+            //         width: lineSize,
+            //         align: 'center',
+            //     });
 
-            doc
+            // doc
             // .font('src/assets/fonts/NotoSansJP-Bold.otf')
             // .fontSize(10)
             // .fill('#021c27')
@@ -914,7 +888,7 @@ router.post("/GenerateRahatokarshCertficate", (req, res, next) => {
             //     align: 'center',
             // });
 
-            doc
+            // doc
             // .font('src/assets/fonts/NotoSansJP-Light.otf')
             // .fontSize(10)
             // .fill('#021c27')
@@ -926,29 +900,29 @@ router.post("/GenerateRahatokarshCertficate", (req, res, next) => {
             //     align: 'center',
             // });
 
-            doc
-                .font('src/assets/fonts/NotoSansJP-Bold.otf')
-                .fontSize(10)
-                .fill('#021c27')
-                .text('Jane Doe', startLine3, signatureHeight + 10, {
-                    columns: 1,
-                    columnGap: 0,
-                    height: 40,
-                    width: lineSize,
-                    align: 'center',
-                });
+            // doc
+            //     .font('src/assets/fonts/NotoSansJP-Bold.otf')
+            //     .fontSize(10)
+            //     .fill('#021c27')
+            //     .text('Jane Doe', startLine3, signatureHeight + 10, {
+            //         columns: 1,
+            //         columnGap: 0,
+            //         height: 40,
+            //         width: lineSize,
+            //         align: 'center',
+            //     });
 
-            doc
-                .font('src/assets/fonts/NotoSansJP-Light.otf')
-                .fontSize(10)
-                .fill('#021c27')
-                .text('Director', startLine3, signatureHeight + 25, {
-                    columns: 1,
-                    columnGap: 0,
-                    height: 40,
-                    width: lineSize,
-                    align: 'center',
-                });
+            // doc
+            //     .font('src/assets/fonts/NotoSansJP-Light.otf')
+            //     .fontSize(10)
+            //     .fill('#021c27')
+            //     .text('Director', startLine3, signatureHeight + 25, {
+            //         columns: 1,
+            //         columnGap: 0,
+            //         height: 40,
+            //         width: lineSize,
+            //         align: 'center',
+            //     });
 
             // jumpLine(doc, 4);
 
