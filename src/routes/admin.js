@@ -778,14 +778,14 @@ router.post("/GenerateRahatokarshCertficate", (req, res, next) => {
             }
             doc.rect(0, 0, doc.page.width, doc.page.height).fill('#fff');
 
-            doc.fontSize(10);
+            doc.fontSize(8);
 
             // Margin
-            const distanceMargin = 18;
+            const distanceMargin = 12;
 
             doc
-                .fillAndStroke('#0e8cc3')
-                .lineWidth(20)
+                .fillAndStroke('#203154')
+                .lineWidth(2)
                 .lineJoin('round')
                 .rect(
                     distanceMargin,
@@ -796,32 +796,24 @@ router.post("/GenerateRahatokarshCertficate", (req, res, next) => {
                 .stroke();
 
             // Header
-            const maxWidth = 140;
-            const maxHeight = 70;
+            const maxWidth = 180;
+            const maxHeight = 90;
 
-            doc.image('src/assets/winners.png', doc.page.width / 2 - maxWidth / 2, 60, {
+            doc.image('src/assets/logo.png', doc.page.width / 2 - maxWidth / 2, 60, {
                 fit: [maxWidth, maxHeight],
                 align: 'center',
             });
 
-            jumpLine(doc, 5)
-
-            doc
-                .font('src/assets/fonts/NotoSansJP-Light.otf')
-                .fontSize(10)
-                .fill('#021c27')
-                .text('Super Course for Awesomes', {
-                    align: 'center',
-                });
+            jumpLine(doc, 4)
 
             jumpLine(doc, 2)
 
             // Content
             doc
                 .font('src/assets/fonts/NotoSansJP-Regular.otf')
-                .fontSize(16)
-                .fill('#021c27')
-                .text('CERTIFICATE OF COMPLETION', {
+                .fontSize(50)
+                .fill('#0d3c5b')
+                .text('CERTIFICATE', {
                     align: 'center',
                 });
 
@@ -829,13 +821,13 @@ router.post("/GenerateRahatokarshCertficate", (req, res, next) => {
 
             doc
                 .font('src/assets/fonts/NotoSansJP-Light.otf')
-                .fontSize(10)
+                .fontSize(25)
                 .fill('#021c27')
-                .text('Present to', {
+                .text('OF DONATION', {
                     align: 'center',
                 });
 
-            jumpLine(doc, 2)
+            jumpLine(doc,1)
             doc
                 .font('src/assets/fonts/NotoSansJP-Bold.otf')
                 .fontSize(24)
@@ -844,17 +836,17 @@ router.post("/GenerateRahatokarshCertficate", (req, res, next) => {
                     align: 'center',
                 });
 
-            jumpLine(doc, 1)
+            // jumpLine(doc, 1)
 
-            doc
-                .font('src/assets/fonts/NotoSansJP-Light.otf')
-                .fontSize(10)
-                .fill('#021c27')
-                .text('Successfully completed the Super Course for Awesomes.', {
-                    align: 'center',
-                });
+            // doc
+            //     .font('src/assets/fonts/NotoSansJP-Light.otf')
+            //     .fontSize(10)
+            //     .fill('#021c27')
+            //     .text('Successfully completed the Super Course for Awesomes.', {
+            //         align: 'center',
+            //     });
 
-            jumpLine(doc, 7)
+            jumpLine(doc, 2)
 
             doc.lineWidth(1);
 
@@ -874,10 +866,10 @@ router.post("/GenerateRahatokarshCertficate", (req, res, next) => {
 
             const startLine2 = endLine1 + 32;
             const endLine2 = startLine2 + lineSize;
-            doc
-                .moveTo(startLine2, signatureHeight)
-                .lineTo(endLine2, signatureHeight)
-                .stroke();
+            // doc
+            //     .moveTo(startLine2, signatureHeight)
+            //     .lineTo(endLine2, signatureHeight)
+            //     .stroke();
 
             const startLine3 = endLine2 + 32;
             const endLine3 = startLine3 + lineSize;
@@ -958,49 +950,49 @@ router.post("/GenerateRahatokarshCertficate", (req, res, next) => {
                     align: 'center',
                 });
 
-            jumpLine(doc, 4);
+            // jumpLine(doc, 4);
 
-            // Validation link
-            const link =
-                'https://validate-your-certificate.hello/validation-code-here';
+            // // Validation link
+            // const link =
+            //     'https://validate-your-certificate.hello/validation-code-here';
 
-            const linkWidth = doc.widthOfString(link);
-            const linkHeight = doc.currentLineHeight();
+            // const linkWidth = doc.widthOfString(link);
+            // const linkHeight = doc.currentLineHeight();
 
-            doc
-                .underline(
-                    doc.page.width / 2 - linkWidth / 2,
-                    448,
-                    linkWidth,
-                    linkHeight,
-                    { color: '#021c27' },
-                )
-                .link(
-                    doc.page.width / 2 - linkWidth / 2,
-                    448,
-                    linkWidth,
-                    linkHeight,
-                    link,
-                );
+            // doc
+            //     .underline(
+            //         doc.page.width / 2 - linkWidth / 2,
+            //         448,
+            //         linkWidth,
+            //         linkHeight,
+            //         { color: '#021c27' },
+            //     )
+            //     .link(
+            //         doc.page.width / 2 - linkWidth / 2,
+            //         448,
+            //         linkWidth,
+            //         linkHeight,
+            //         link,
+            //     );
 
-            doc
-                .font('src/assets/fonts/NotoSansJP-Light.otf')
-                .fontSize(10)
-                .fill('#021c27')
-                .text(
-                    link,
-                    doc.page.width / 2 - linkWidth / 2,
-                    448,
-                    linkWidth,
-                    linkHeight
-                );
+            // doc
+            //     .font('src/assets/fonts/NotoSansJP-Light.otf')
+            //     .fontSize(10)
+            //     .fill('#021c27')
+            //     .text(
+            //         link,
+            //         doc.page.width / 2 - linkWidth / 2,
+            //         448,
+            //         linkWidth,
+            //         linkHeight
+            //     );
 
             // Footer
-            const bottomHeight = doc.page.height - 100;
+            // const bottomHeight = doc.page.height - 100;
 
-            doc.image('src/assets/qr.png', doc.page.width / 2 - 30, bottomHeight, {
-                fit: [60, 60],
-            });
+            // doc.image('src/assets/qr.png', doc.page.width / 2 - 30, bottomHeight, {
+            //     fit: [60, 60],
+            // });
 
             doc.end();
             // return res.json(data);
