@@ -301,11 +301,12 @@ router.post("/SaveStaffProfileImages", (req, res, next) => {
 
 router.post("/SaveStaffDetailsList", (req, res, next) => {
     console.log(req.body, 'Hii I ma Staff')
-    db.executeSql("INSERT INTO `staff_list` (`institute_id`, `department`, `name`, `contact`, `email`, `designation`, `qualification`, `birthday_date`, `joining_date`, `profile_image`, `createddate`) values ('" + req.body.institute_id + "','" + req.body.department + "','" + req.body.name + "'," + req.body.contact + ",'" + req.body.email + "','" + req.body.designation + "','" + req.body.qualification + "','" + req.body.birthday_date + "','" + req.body.joining_date + "','" + req.body.profile + "',CURRENT_TIMESTAMP)", function (data, err) {
+    db.executeSql("INSERT INTO `staff_list` (`institute_id`, `department`, `name`, `contact`, `email`, `designation`, `qualification`, `birthday_date`, `joining_date`, `profile_image`,`position`,`researchPaper`,`createddate`) values ('" + req.body.institute_id + "','" + req.body.department + "','" + req.body.name + "'," + req.body.contact + ",'" + req.body.email + "','" + req.body.designation + "','" + req.body.qualification + "','" + req.body.birthday_date + "','" + req.body.joining_date + "','" + req.body.profile + "'," + req.body.position + ",'" + req.body.researchPaper + "',CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
             res.json("error");
             console.log(err)
         } else {
+            console.log(data, 'Response')
             return res.json(data);
         }
     });
@@ -313,7 +314,7 @@ router.post("/SaveStaffDetailsList", (req, res, next) => {
 
 router.post("/UpdateStaffDetailsById", (req, res, next) => {
     console.log(req.body, 'Update Staff')
-    db.executeSql("UPDATE `staff_list` SET `department`='" + req.body.department + "',`name`='" + req.body.name + "',`contact`='" + req.body.contact + "',`email`='" + req.body.email + "',`designation`='" + req.body.designation + "',`qualification`='" + req.body.qualification + "',`birthday_date`='" + req.body.birthday_date + "',`joining_date`='" + req.body.joining_date + "',`profile_image`='" + req.body.profile + "',`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id, function (data, err) {
+    db.executeSql("UPDATE `staff_list` SET `department`='" + req.body.department + "',`name`='" + req.body.name + "',`contact`='" + req.body.contact + "',`email`='" + req.body.email + "',`designation`='" + req.body.designation + "',`qualification`='" + req.body.qualification + "',`birthday_date`='" + req.body.birthday_date + "',`joining_date`='" + req.body.joining_date + "',`profile_image`='" + req.body.profile + "',`position`=" + req.body.position + ",`researchPaper`='" + req.body.researchPaper + "',`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.staffId, function (data, err) {
         if (err) {
             res.json("error");
             console.log(err)
@@ -324,7 +325,7 @@ router.post("/UpdateStaffDetailsById", (req, res, next) => {
 });
 
 router.get("/GetAllStaffDetails/:id", (req, res, next) => {
-    db.executeSql("SELECT s.id as staffId,s.institute_id,s.department,s.name,s.contact,s.email,s.designation,s.qualification,s.joining_date,s.profile_image, s.birthday_date,d.id as departmentId,d.department as departmentName FROM staff_list s left join department_list d on s.department= d.id WHERE s.institute_id=" + req.params.id, function (data, err) {
+    db.executeSql("SELECT s.id as staffId,s.institute_id,s.department,s.name,s.contact,s.email,s.designation,s.qualification,s.joining_date,s.profile_image, s.position,s.researchPaper,s.birthday_date,s.createddate,d.id as departmentId,d.department as departmentName FROM staff_list s left join department_list d on s.department= d.id WHERE s.institute_id=" + req.params.id + " ORDER BY s.position", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -1162,17 +1163,20 @@ router.post("/UploadPDF", (req, res, next) => {
 //     });
 // });
 router.post("/SaveNewsDataList", (req, res, next) => {
-    db.executeSql("INSERT INTO `news`(`institute_id`, `date`, `files`,`isactive`,`createddate`) VALUES ('" + req.body.institute_id + "','" + req.body.date + "','" + req.body.files + "',true,CURRENT_TIMESTAMP)", function (data, err) {
+    console.log(req.body, 'jbdjbjfds');
+    db.executeSql("INSERT INTO `news`(`institute_id`, `date`, `files`,`isactive`,`createddate`) VALUES (" + req.body.institute_id + ",'" + req.body.date + "','" + req.body.files + "',true,CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
-            res.json("error");
             console.log(err)
+            res.json("error");
+
         } else {
             const values = [req.body.message]
             const escapedValues = values.map(mysql.escape);
             db.executeSql1("UPDATE news SET message=" + escapedValues + " WHERE id= " + data.insertId, escapedValues, function (data1, err) {
                 if (err) {
-                    res.json("error");
                     console.log(err)
+                    res.json("error");
+
                 } else {
                 }
             });
