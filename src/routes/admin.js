@@ -90,7 +90,7 @@ router.get("/RemoveInstituteDetailsById/:id", (req, res, next) => {
     })
 });
 router.get("/GetAllInstituteDetails", (req, res, next) => {
-    db.executeSql("SELECT * FROM `institute`;", function (data, err) {
+    db.executeSql("SELECT * FROM `institute` ORDER BY name ASC;", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -177,7 +177,7 @@ router.post("/SaveGalleryImages", (req, res, next) => {
     });
 });
 router.post("/GetALLImagesByIdDetails", (req, res, next) => {
-    db.executeSql("SELECT * FROM `image` WHERE institute_id=" + req.body.institute_id + ";", function (data, err) {
+    db.executeSql("SELECT * FROM `image` WHERE institute_id=" + req.body.institute_id + " ORDER BY createddate DESC;", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -186,7 +186,7 @@ router.post("/GetALLImagesByIdDetails", (req, res, next) => {
     })
 });
 router.post("/GetImagesByIdDetails", (req, res, next) => {
-    db.executeSql("SELECT * FROM `image` WHERE isactive=true AND institute_id=" + req.body.institute_id + ";", function (data, err) {
+    db.executeSql("SELECT * FROM `image` WHERE isactive=true AND institute_id=" + req.body.institute_id + " ORDER BY createddate DESC;", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -235,7 +235,7 @@ router.post("/UpdateDepartmentList", (req, res, next) => {
 });
 
 router.get("/GetDepartmentByIdDetails/:id", (req, res, next) => {
-    db.executeSql("SELECT * FROM `department_list` WHERE institute_id=" + req.params.id, function (data, err) {
+    db.executeSql("SELECT * FROM `department_list` WHERE institute_id=" + req.params.id + " ORDER BY createddate DESC;", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -245,7 +245,7 @@ router.get("/GetDepartmentByIdDetails/:id", (req, res, next) => {
 });
 
 router.get("/GetYearbyGroupDetails/:id", (req, res, next) => {
-    db.executeSql("SELECT * FROM `papers` WHERE institute_id='" + req.params.id + "' GROUP BY year;", function (data, err) {
+    db.executeSql("SELECT * FROM `papers` WHERE institute_id='" + req.params.id + "' GROUP BY year ;", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -514,7 +514,7 @@ router.post("/UpdateBlogDetails", (req, res, next) => {
 });
 
 router.get("/GetBlogsDetailsById/:id", (req, res, next) => {
-    db.executeSql("SELECT * FROM blogs WHERE institute_id=" + req.params.id + ";", function (data, err) {
+    db.executeSql("SELECT * FROM blogs WHERE institute_id=" + req.params.id + " ORDER BY createdate DESC ;", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -566,6 +566,48 @@ router.post("/UploadInfraImage", (req, res, next) => {
 
 
     });
+});
+router.post("/UploadInfraMultiImage", midway.checkToken, (req, res, next) => {
+    var imgname = generateUUID();
+
+    const storage = multer.diskStorage({
+        destination: function (req, file, cb) {
+            cb(null, 'images/infraMulti');
+        },
+        // By default, multer removes file extensions so let's add them back
+        filename: function (req, file, cb) {
+            cb(null, imgname + path.extname(file.originalname));
+        }
+    });
+    let upload = multer({ storage: storage }).single('file');
+    upload(req, res, function (err) {
+        console.log("path=", config.url + 'images/infraMulti/' + req.file.filename);
+
+        if (req.fileValidationError) {
+            console.log("err1", req.fileValidationError);
+            return res.json("err1", req.fileValidationError);
+        } else if (!req.file) {
+            console.log('Please select an image to upload');
+            return res.json('Please select an image to upload');
+        } else if (err instanceof multer.MulterError) {
+            console.log("err3");
+            return res.json("err3", err);
+        } else if (err) {
+            console.log("err4");
+            return res.json("err4", err);
+        }
+        return res.json('/images/infraMulti/' + req.file.filename);
+    });
+});
+router.get("/GetInfraMultiImagesById/:id", (req, res, next) => {
+    console.log(req.params)
+    db.executeSql("SELECT * FROM infraimage WHERE infraId=" + req.params.id + ";", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
 });
 router.post("/UploadMoreImage", (req, res, next) => {
     var imgname = generateUUID();
@@ -621,7 +663,7 @@ router.post("/SaveScholarshipDetails", (req, res, next) => {
     });
 });
 router.get("/GetScholarshipDetails/:id", (req, res, next) => {
-    db.executeSql("SELECT * FROM scholarship WHERE institute_id=" + req.params.id + ";", function (data, err) {
+    db.executeSql("SELECT * FROM scholarship WHERE institute_id=" + req.params.id + " ORDER BY createdate DESC ;", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -644,6 +686,16 @@ router.post("/SaveInfrastructureDetails", (req, res, next) => {
             res.json("error");
             console.log(err)
         } else {
+            if (req.body.infraMultiImage.length > 0) {
+                for (let i = 0; i < req.body.infraMultiImage.length; i++) {
+                    db.executeSql("INSERT INTO `infraimage`(`infraId`, `image`) VALUES (" + data.insertId + ",'" + req.body.infraMultiImage[i] + "');", function (data1, err) {
+                        if (err) {
+                            res.json("error");
+                        } else {
+                        }
+                    });
+                }
+            }
             const values = [req.body.infraDetails]
             const escapedValues = values.map(mysql.escape);
             db.executeSql1("UPDATE infrastructure SET infraDetails=" + escapedValues + " WHERE id= " + data.insertId, escapedValues, function (data1, err) {
@@ -651,11 +703,12 @@ router.post("/SaveInfrastructureDetails", (req, res, next) => {
                     res.json("error");
                     console.log(err)
                 } else {
+                    return res.json('success');
+
                 }
             });
-            return res.json('success');
+            // return res.json('success');
         }
-
     });
     // return res.json('success');
 
@@ -688,7 +741,7 @@ router.get("/RemoveInfraDetails/:id", (req, res, next) => {
     })
 });
 router.get("/GetInfraDetailsById/:id", (req, res, next) => {
-    db.executeSql("SELECT * FROM infrastructure WHERE institute_id=" + req.params.id + ";", function (data, err) {
+    db.executeSql("SELECT * FROM infrastructure WHERE institute_id=" + req.params.id + " ORDER BY createddate DESC;", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -985,7 +1038,7 @@ router.post("/GenerateRahatokarshCertficate", (req, res, next) => {
     });
 });
 router.get("/GetAlumniDetails", (req, res, next) => {
-    db.executeSql("SELECT * FROM alumni;", function (data, err) {
+    db.executeSql("SELECT * FROM alumni ORDER BY createddate DESC;", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -1029,7 +1082,7 @@ router.post("/SaveCounselingDetails", (req, res, next) => {
     });
 });
 router.get("/GetCounselingData", (req, res, next) => {
-    db.executeSql("SELECT * FROM counseling;", function (data, err) {
+    db.executeSql("SELECT * FROM counseling ORDER BY createddate DESC;", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -1039,7 +1092,7 @@ router.get("/GetCounselingData", (req, res, next) => {
 });
 
 router.get("/GetContactUsDetailsById/:id", (req, res, next) => {
-    db.executeSql("SELECT * FROM contact WHERE institute_id=" + req.params.id + ";", function (data, err) {
+    db.executeSql("SELECT * FROM contact WHERE institute_id=" + req.params.id + " ORDER BY createddate DESC;", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -1049,7 +1102,7 @@ router.get("/GetContactUsDetailsById/:id", (req, res, next) => {
 });
 
 router.post("/SaveResultDetails", (req, res, next) => {
-    db.executeSql("INSERT INTO `result`(`institute_id`, `title`, `image`, `createddate`) VALUES ('" + req.body.institute_id + "','" + req.body.title + "','" + req.body.image + "',CURRENT_TIMESTAMP)", function (data, err) {
+    db.executeSql("INSERT INTO `result`(`institute_id`, `title`, `image`,`year`, `createddate`) VALUES ('" + req.body.institute_id + "','" + req.body.title + "','" + req.body.image + "','" + req.body.year + "',CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
             res.json("error");
             console.log(err)
@@ -1071,7 +1124,7 @@ router.post("/SaveQuestionPapersDetails", (req, res, next) => {
 });
 
 router.get("/GetQuestionPapersDetails/:id", (req, res, next) => {
-    db.executeSql("SELECT * FROM papers WHERE institute_id=" + req.params.id + ";", function (data, err) {
+    db.executeSql("SELECT * FROM papers WHERE institute_id=" + req.params.id + " ORDER BY createdate DESC;", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -1091,8 +1144,8 @@ router.get("/RemoveQuestionPapersDetails/:id", (req, res, next) => {
 });
 
 router.post("/UpdateResultDetails", (req, res, next) => {
-    console, log(req.body, 'resukt')
-    db.executeSql("UPDATE `result` SET `title`='" + req.body.title + "',`image`='" + req.body.image + "',`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id, function (data, err) {
+    console, log(req.body, 'result')
+    db.executeSql("UPDATE `result` SET `title`='" + req.body.title + "',`image`='" + req.body.image + "',`year`='" + req.body.year + "',`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id, function (data, err) {
         if (err) {
             res.json("error");
             console.log(err)
@@ -1124,7 +1177,7 @@ router.get("/RemoveResultDetailsById/:id", (req, res, next) => {
     })
 });
 router.get("/GetResultDetailsById/:id", (req, res, next) => {
-    db.executeSql("SELECT * FROM result WHERE institute_id=" + req.params.id + ";", function (data, err) {
+    db.executeSql("SELECT * FROM result WHERE institute_id=" + req.params.id + " ORDER BY createddate DESC;", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -1268,7 +1321,7 @@ router.post("/UpdateStudentListData", (req, res, next) => {
 });
 
 router.get("/GetStudentListData/:id", (req, res, next) => {
-    db.executeSql("SELECT * FROM student WHERE institute_id=" + req.params.id + ";", function (data, err) {
+    db.executeSql("SELECT * FROM student WHERE institute_id=" + req.params.id + " ORDER BY createddate DESC;", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -1367,7 +1420,7 @@ router.post("/SaveMagazineList", (req, res, next) => {
     });
 });
 router.get("/GetMagazineList", (req, res, next) => {
-    db.executeSql("SELECT * FROM magazine;", function (data, err) {
+    db.executeSql("SELECT * FROM magazine ORDER BY createddate DESC;", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -1385,7 +1438,7 @@ router.get("/RemoveMagazineList/:id", (req, res, next) => {
     })
 });
 router.get("/GetOthersByIdDetails/:id", (req, res, next) => {
-    db.executeSql("SELECT * FROM others WHERE institute_id=" + req.params.id + ";", function (data, err) {
+    db.executeSql("SELECT * FROM others WHERE institute_id=" + req.params.id + " ORDER BY createddate DESC;", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -1483,7 +1536,7 @@ router.post("/SaveGatePassUserList", (req, res, next) => {
     });
 });
 router.get("/GetGatePassUserList", (req, res, next) => {
-    db.executeSql("SELECT * FROM gatepass;", function (data, err) {
+    db.executeSql("SELECT * FROM gatepass ORDER BY createddate DESC;", function (data, err) {
         if (err) {
             console.log(err);
         } else {
