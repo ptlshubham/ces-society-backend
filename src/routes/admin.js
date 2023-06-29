@@ -5,13 +5,10 @@ const multer = require('multer');
 const path = require('path');
 const config = require("../../config");
 var midway = require('./midway');
-const jwt = require('jsonwebtoken');
 var crypto = require('crypto');
 const nodemailer = require('nodemailer');
 var handlebars = require("handlebars");
 const fs = require('fs');
-const schedule = require('node-schedule');
-const { sql } = require("../../config");
 const mysql = require('mysql');
 const PDFDocument = require('pdfkit');
 const doc = new PDFDocument({
@@ -54,7 +51,7 @@ router.post("/SaveInsituteDetails", (req, res, next) => {
     console.log(req.body, "hello  im here");
     const body = req.body;
     var salt = '7fa73b47df808d36c5fe328546ddef8b9011b2c6';
-    var repass = salt + '' + body.pass;
+    var repass = salt + '' + body.password;
     var encPassword = crypto.createHash('sha1').update(repass).digest('hex');
     console.log(encPassword);
     db.executeSql("INSERT INTO `institute`(`type`, `name`, `phone`, `contact`, `email`, `password`, `url`, `createddate`) VALUES ('" + req.body.type + "','" + req.body.name + "'," + req.body.phone + "," + req.body.contact + ",'" + req.body.email + "','" + encPassword + "','" + req.body.url + "',CURRENT_TIMESTAMP)", function (data, err) {
@@ -69,7 +66,7 @@ router.post("/UpdateInstituteDetails", (req, res, next) => {
     console.log(req.body, "hello  im here");
     const body = req.body;
     var salt = '7fa73b47df808d36c5fe328546ddef8b9011b2c6';
-    var repass = salt + '' + body.pass;
+    var repass = salt + '' + body.password;
     var encPassword = crypto.createHash('sha1').update(repass).digest('hex');
     console.log(encPassword);
     db.executeSql("UPDATE `institute` SET `type`='" + req.body.type + "',`name`='" + req.body.name + "',`phone`=" + req.body.phone + ",`contact`=" + req.body.contact + ",`email`='" + req.body.email + "',`password`='" + encPassword + "',`url`='" + req.body.url + "',`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id + ";", function (data, err) {
@@ -1387,7 +1384,6 @@ router.get("/RemoveAnswerkeyByIdDetails/:id", (req, res, next) => {
         }
     })
 });
-
 router.get("/RemoveOtherDetailsById/:id", (req, res, next) => {
     db.executeSql("DELETE FROM others WHERE id=" + req.params.id, function (data, err) {
         if (err) {
@@ -1408,7 +1404,84 @@ router.post("/SaveOthersDataList", (req, res, next) => {
         }
     });
 });
+router.post("/SaveNaacDetails", (req, res, next) => {
+    console.log(req.body)
+    db.executeSql("INSERT INTO `naac`(`criteria`, `keyno`, `paraname`, `paralink`, `attachname`, `attachlink`, `isactive`, `createddate`) VALUES ('" + req.body.criteria + "','" + req.body.keyNo + "','" + req.body.paraname + "','" + req.body.paralink + "','" + req.body.attachname + "','" + req.body.attachlink + "',true,CURRENT_TIMESTAMP)", function (data, err) {
+        if (err) {
+            res.json("error");
+            console.log(err)
+        } else {
+            return res.json(data);
+        }
+    });
+});
+router.post("/SendCriteriaDetails", (req, res, next) => {
+    console.log(req.body)
+    db.executeSql("SELECT * FROM naac WHERE criteria='" + req.body.criteria + "'", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+router.get("/RemoveCrietriaListURL/:id", (req, res, next) => {
+    db.executeSql("DELETE FROM naac WHERE id=" + req.params.id + ";", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+router.get("getCriteriaGroupBy", (req, res, next) => {
+    db.executeSql("SELECT criteria,COUNT(*) FROM naac GROUP BY criteria;", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+})
 
+router.get("/GetNaacData", (req, res, next) => {
+    db.executeSql("SELECT * FROM naac;", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+router.get("/GetKeyNoDataGroupBy", (req, res, next) => {
+    db.executeSql("SELECT keyno,COUNT(*) FROM naac GROUP BY keyno;", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+router.post("/GetKeyNoDataGroupByWithSearch", (req, res, next) => {
+    console.log(req.body)
+    db.executeSql("SELECT keyno,COUNT(*) FROM naac WHERE criteria='" + req.body.criteria + "' GROUP BY keyno", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+router.post("/UpdateNAACData", (req, res, next) => {
+    console.log(req.body, 'NAAC')
+    db.executeSql("UPDATE `naac` SET `criteria`='" + req.body.criteria + "',`keyno`='" + req.body.keyno + "',`paraname`='" + req.body.paraname + "',`paralink`='" + req.body.paralink + "',`attachname`='" + req.body.attachname + "',`attachlink`='" + req.body.attachlink + "',`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id + ";", function (data, err) {
+        if (err) {
+            console.log("Error in store.js", err);
+        } else {
+            return res.json(data);
+        }
+    });
+});
 router.post("/SaveMagazineList", (req, res, next) => {
     db.executeSql("INSERT INTO `magazine`(`title`, `files`, `createddate`) VALUES ('" + req.body.title + "','" + req.body.files + "',CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
