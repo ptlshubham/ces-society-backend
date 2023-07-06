@@ -321,6 +321,17 @@ router.post("/UpdateStaffDetailsById", (req, res, next) => {
     });
 });
 
+router.get("/RemoveStaffDocument/:id", (req, res, next) => {
+    db.executeSql("UPDATE `staff_list` SET `researchPaper`='undefined',`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.params.id, function (data, err) {
+        if (err) {
+            res.json("error");
+            console.log(err)
+        } else {
+            return res.json('success');
+        }
+    });
+});
+
 router.get("/GetAllStaffDetails/:id", (req, res, next) => {
     db.executeSql("SELECT s.id as staffId,s.institute_id,s.department,s.name,s.contact,s.email,s.designation,s.qualification,s.joining_date,s.profile_image, s.position,s.researchPaper,s.birthday_date,s.createddate,d.id as departmentId,d.department as departmentName FROM staff_list s left join department_list d on s.department= d.id WHERE s.institute_id=" + req.params.id + " ORDER BY s.position", function (data, err) {
         if (err) {
@@ -1068,11 +1079,17 @@ router.post("/SaveCounselingDetails", (req, res, next) => {
         } else {
             const replacements = {
                 name: req.body.name,
-                // email: req.body.email,
-                // subject: req.body.subject,
-                // message: req.body.message
+                division: req.body.division,
+                email: req.body.email,
+                phone: req.body.phone,
+                instituteName: req.body.instituteName,
+                message: req.body.message,
+                createddate: req.body.createddate
             };
-            mail('appointement-ces.html', replacements, req.body.email, "Appointement Submitted", " ")
+            let staticEmail = 'ces.counseling2019@gmail.com';
+            mail('appointement-ces.html', replacements, req.body.email, "Appointement Submitted")
+            mail('appointement-booked.html', replacements, staticEmail, "Appointement Submitted")
+
             // res.json(data);
             return res.json('success');
         }
@@ -1533,15 +1550,12 @@ function mail(filename, data, toemail, subj, mailname) {
     const template = handlebars.compile(source);
     const replacements = data;
     const htmlToSend = template(replacements);
-
     const mailOptions = {
         from: `"cesociety16@gmail.com"`,
         subject: subj,
         to: toemail,
         Name: mailname,
         html: htmlToSend,
-
-
     };
     transporter.sendMail(mailOptions, function (error, info) {
         // console.log('Mail Sent')
