@@ -5,13 +5,10 @@ const multer = require('multer');
 const path = require('path');
 const config = require("../../config");
 var midway = require('./midway');
-const jwt = require('jsonwebtoken');
 var crypto = require('crypto');
 const nodemailer = require('nodemailer');
 var handlebars = require("handlebars");
 const fs = require('fs');
-const schedule = require('node-schedule');
-const { sql } = require("../../config");
 const mysql = require('mysql');
 const PDFDocument = require('pdfkit');
 const doc = new PDFDocument({
@@ -54,7 +51,7 @@ router.post("/SaveInsituteDetails", (req, res, next) => {
     console.log(req.body, "hello  im here");
     const body = req.body;
     var salt = '7fa73b47df808d36c5fe328546ddef8b9011b2c6';
-    var repass = salt + '' + body.pass;
+    var repass = salt + '' + body.password;
     var encPassword = crypto.createHash('sha1').update(repass).digest('hex');
     console.log(encPassword);
     db.executeSql("INSERT INTO `institute`(`type`, `name`, `phone`, `contact`, `email`, `password`, `url`, `createddate`) VALUES ('" + req.body.type + "','" + req.body.name + "'," + req.body.phone + "," + req.body.contact + ",'" + req.body.email + "','" + encPassword + "','" + req.body.url + "',CURRENT_TIMESTAMP)", function (data, err) {
@@ -69,7 +66,7 @@ router.post("/UpdateInstituteDetails", (req, res, next) => {
     console.log(req.body, "hello  im here");
     const body = req.body;
     var salt = '7fa73b47df808d36c5fe328546ddef8b9011b2c6';
-    var repass = salt + '' + body.pass;
+    var repass = salt + '' + body.password;
     var encPassword = crypto.createHash('sha1').update(repass).digest('hex');
     console.log(encPassword);
     db.executeSql("UPDATE `institute` SET `type`='" + req.body.type + "',`name`='" + req.body.name + "',`phone`=" + req.body.phone + ",`contact`=" + req.body.contact + ",`email`='" + req.body.email + "',`password`='" + encPassword + "',`url`='" + req.body.url + "',`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id + ";", function (data, err) {
@@ -90,7 +87,7 @@ router.get("/RemoveInstituteDetailsById/:id", (req, res, next) => {
     })
 });
 router.get("/GetAllInstituteDetails", (req, res, next) => {
-    db.executeSql("SELECT * FROM `institute`;", function (data, err) {
+    db.executeSql("SELECT * FROM `institute` ORDER BY name ASC;", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -177,7 +174,7 @@ router.post("/SaveGalleryImages", (req, res, next) => {
     });
 });
 router.post("/GetALLImagesByIdDetails", (req, res, next) => {
-    db.executeSql("SELECT * FROM `image` WHERE institute_id=" + req.body.institute_id + ";", function (data, err) {
+    db.executeSql("SELECT * FROM `image` WHERE institute_id=" + req.body.institute_id + " ORDER BY createddate DESC;", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -186,7 +183,7 @@ router.post("/GetALLImagesByIdDetails", (req, res, next) => {
     })
 });
 router.post("/GetImagesByIdDetails", (req, res, next) => {
-    db.executeSql("SELECT * FROM `image` WHERE isactive=true AND institute_id=" + req.body.institute_id + ";", function (data, err) {
+    db.executeSql("SELECT * FROM `image` WHERE isactive=true AND institute_id=" + req.body.institute_id + " ORDER BY createddate DESC;", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -205,13 +202,26 @@ router.post("/UpdateActiveDeactiveBanners", (req, res, next) => {
     });
 });
 router.post("/RemoveImagesByIdDetails", (req, res, next) => {
-    db.executeSql("DELETE FROM `image` WHERE id=" + req.body.id + ";", function (data, err) {
+    db.executeSql("SELECT * FROM image WHERE id=" + req.body.id + ";", function (data, err) {
         if (err) {
-            console.log(err);
+            console.log("Error in store.js", err);
         } else {
-            return res.json(data);
+            fs.unlink('/var/www/html/cesbackend'+data[0].files, function (err) {
+                if (err) {
+                    throw err;
+                }else{
+                    db.executeSql("DELETE FROM `image` WHERE id=" + req.body.id + ";", function (data, err) {
+                        if (err) {
+                            console.log(err);
+                        } else {
+                            return res.json(data);
+                        }
+                    })
+                }  
+            });
         }
-    })
+    });
+   
 });
 
 router.post("/SaveDepartmentList", (req, res, next) => {
@@ -235,7 +245,7 @@ router.post("/UpdateDepartmentList", (req, res, next) => {
 });
 
 router.get("/GetDepartmentByIdDetails/:id", (req, res, next) => {
-    db.executeSql("SELECT * FROM `department_list` WHERE institute_id=" + req.params.id, function (data, err) {
+    db.executeSql("SELECT * FROM `department_list` WHERE institute_id=" + req.params.id + " ORDER BY createddate DESC;", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -245,7 +255,7 @@ router.get("/GetDepartmentByIdDetails/:id", (req, res, next) => {
 });
 
 router.get("/GetYearbyGroupDetails/:id", (req, res, next) => {
-    db.executeSql("SELECT * FROM `papers` WHERE institute_id='" + req.params.id + "' GROUP BY year;", function (data, err) {
+    db.executeSql("SELECT * FROM `papers` WHERE institute_id='" + req.params.id + "' GROUP BY year ;", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -301,11 +311,12 @@ router.post("/SaveStaffProfileImages", (req, res, next) => {
 
 router.post("/SaveStaffDetailsList", (req, res, next) => {
     console.log(req.body, 'Hii I ma Staff')
-    db.executeSql("INSERT INTO `staff_list` (`institute_id`, `department`, `name`, `contact`, `email`, `designation`, `qualification`, `birthday_date`, `joining_date`, `profile_image`, `createddate`) values ('" + req.body.institute_id + "','" + req.body.department + "','" + req.body.name + "'," + req.body.contact + ",'" + req.body.email + "','" + req.body.designation + "','" + req.body.qualification + "','" + req.body.birthday_date + "','" + req.body.joining_date + "','" + req.body.profile + "',CURRENT_TIMESTAMP)", function (data, err) {
+    db.executeSql("INSERT INTO `staff_list` (`institute_id`, `department`, `name`, `contact`, `email`, `designation`, `qualification`, `birthday_date`, `joining_date`, `profile_image`,`position`,`researchPaper`,`createddate`) values ('" + req.body.institute_id + "','" + req.body.department + "','" + req.body.name + "'," + req.body.contact + ",'" + req.body.email + "','" + req.body.designation + "','" + req.body.qualification + "','" + req.body.birthday_date + "','" + req.body.joining_date + "','" + req.body.profile + "'," + req.body.position + ",'" + req.body.researchPaper + "',CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
             res.json("error");
             console.log(err)
         } else {
+            console.log(data, 'Response')
             return res.json(data);
         }
     });
@@ -313,7 +324,7 @@ router.post("/SaveStaffDetailsList", (req, res, next) => {
 
 router.post("/UpdateStaffDetailsById", (req, res, next) => {
     console.log(req.body, 'Update Staff')
-    db.executeSql("UPDATE `staff_list` SET `department`='" + req.body.department + "',`name`='" + req.body.name + "',`contact`='" + req.body.contact + "',`email`='" + req.body.email + "',`designation`='" + req.body.designation + "',`qualification`='" + req.body.qualification + "',`birthday_date`='" + req.body.birthday_date + "',`joining_date`='" + req.body.joining_date + "',`profile_image`='" + req.body.profile + "',`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id, function (data, err) {
+    db.executeSql("UPDATE `staff_list` SET `department`='" + req.body.department + "',`name`='" + req.body.name + "',`contact`='" + req.body.contact + "',`email`='" + req.body.email + "',`designation`='" + req.body.designation + "',`qualification`='" + req.body.qualification + "',`birthday_date`='" + req.body.birthday_date + "',`joining_date`='" + req.body.joining_date + "',`profile_image`='" + req.body.profile + "',`position`=" + req.body.position + ",`researchPaper`='" + req.body.researchPaper + "',`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.staffId, function (data, err) {
         if (err) {
             res.json("error");
             console.log(err)
@@ -323,8 +334,19 @@ router.post("/UpdateStaffDetailsById", (req, res, next) => {
     });
 });
 
+router.get("/RemoveStaffDocument/:id", (req, res, next) => {
+    db.executeSql("UPDATE `staff_list` SET `researchPaper`='undefined',`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.params.id, function (data, err) {
+        if (err) {
+            res.json("error");
+            console.log(err)
+        } else {
+            return res.json('success');
+        }
+    });
+});
+
 router.get("/GetAllStaffDetails/:id", (req, res, next) => {
-    db.executeSql("SELECT s.id as staffId,s.institute_id,s.department,s.name,s.contact,s.email,s.designation,s.qualification,s.joining_date,s.profile_image, s.birthday_date,d.id as departmentId,d.department as departmentName FROM staff_list s left join department_list d on s.department= d.id WHERE s.institute_id=" + req.params.id, function (data, err) {
+    db.executeSql("SELECT s.id as staffId,s.institute_id,s.department,s.name,s.contact,s.email,s.designation,s.qualification,s.joining_date,s.profile_image, s.position,s.researchPaper,s.birthday_date,s.createddate,d.id as departmentId,d.department as departmentName FROM staff_list s left join department_list d on s.department= d.id WHERE s.institute_id=" + req.params.id + " ORDER BY s.position,s.joining_date", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -513,7 +535,7 @@ router.post("/UpdateBlogDetails", (req, res, next) => {
 });
 
 router.get("/GetBlogsDetailsById/:id", (req, res, next) => {
-    db.executeSql("SELECT * FROM blogs WHERE institute_id=" + req.params.id + ";", function (data, err) {
+    db.executeSql("SELECT * FROM blogs WHERE institute_id=" + req.params.id + " ORDER BY createdate DESC ;", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -522,13 +544,25 @@ router.get("/GetBlogsDetailsById/:id", (req, res, next) => {
     })
 });
 router.get("/RemoveBlogDetails/:id", (req, res, next) => {
-    db.executeSql("DELETE FROM `blogs` WHERE id=" + req.params.id + ";", function (data, err) {
+    db.executeSql("SELECT * FROM blogs WHERE id=" + req.params.id + ";", function (data, err) {
         if (err) {
-            console.log(err);
+            console.log("Error in store.js", err);
         } else {
-            return res.json(data);
+            fs.unlink('/var/www/html/cesbackend'+data[0].blogImage, function (err) {
+                if (err) {
+                    throw err;
+                }else{
+                    db.executeSql("DELETE FROM blog WHERE id=" + req.params.id + ";", function (data, err) {
+                        if (err) {
+                            console.log(err);
+                        } else {
+                            return res.json(data);
+                        }
+                    })
+                }  
+            });
         }
-    })
+    });
 });
 
 router.post("/UploadInfraImage", (req, res, next) => {
@@ -565,6 +599,48 @@ router.post("/UploadInfraImage", (req, res, next) => {
 
 
     });
+});
+router.post("/UploadInfraMultiImage", midway.checkToken, (req, res, next) => {
+    var imgname = generateUUID();
+
+    const storage = multer.diskStorage({
+        destination: function (req, file, cb) {
+            cb(null, 'images/infraMulti');
+        },
+        // By default, multer removes file extensions so let's add them back
+        filename: function (req, file, cb) {
+            cb(null, imgname + path.extname(file.originalname));
+        }
+    });
+    let upload = multer({ storage: storage }).single('file');
+    upload(req, res, function (err) {
+        console.log("path=", config.url + 'images/infraMulti/' + req.file.filename);
+
+        if (req.fileValidationError) {
+            console.log("err1", req.fileValidationError);
+            return res.json("err1", req.fileValidationError);
+        } else if (!req.file) {
+            console.log('Please select an image to upload');
+            return res.json('Please select an image to upload');
+        } else if (err instanceof multer.MulterError) {
+            console.log("err3");
+            return res.json("err3", err);
+        } else if (err) {
+            console.log("err4");
+            return res.json("err4", err);
+        }
+        return res.json('/images/infraMulti/' + req.file.filename);
+    });
+});
+router.get("/GetInfraMultiImagesById/:id", (req, res, next) => {
+    console.log(req.params)
+    db.executeSql("SELECT * FROM infraimage WHERE infraId=" + req.params.id + ";", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
 });
 router.post("/UploadMoreImage", (req, res, next) => {
     var imgname = generateUUID();
@@ -620,7 +696,7 @@ router.post("/SaveScholarshipDetails", (req, res, next) => {
     });
 });
 router.get("/GetScholarshipDetails/:id", (req, res, next) => {
-    db.executeSql("SELECT * FROM scholarship WHERE institute_id=" + req.params.id + ";", function (data, err) {
+    db.executeSql("SELECT * FROM scholarship WHERE institute_id=" + req.params.id + " ORDER BY createdate DESC ;", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -643,6 +719,16 @@ router.post("/SaveInfrastructureDetails", (req, res, next) => {
             res.json("error");
             console.log(err)
         } else {
+            if (req.body.infraMultiImage.length > 0) {
+                for (let i = 0; i < req.body.infraMultiImage.length; i++) {
+                    db.executeSql("INSERT INTO `infraimage`(`infraId`, `image`) VALUES (" + data.insertId + ",'" + req.body.infraMultiImage[i] + "');", function (data1, err) {
+                        if (err) {
+                            res.json("error");
+                        } else {
+                        }
+                    });
+                }
+            }
             const values = [req.body.infraDetails]
             const escapedValues = values.map(mysql.escape);
             db.executeSql1("UPDATE infrastructure SET infraDetails=" + escapedValues + " WHERE id= " + data.insertId, escapedValues, function (data1, err) {
@@ -650,11 +736,12 @@ router.post("/SaveInfrastructureDetails", (req, res, next) => {
                     res.json("error");
                     console.log(err)
                 } else {
+                    return res.json('success');
+
                 }
             });
-            return res.json('success');
+            // return res.json('success');
         }
-
     });
     // return res.json('success');
 
@@ -687,7 +774,7 @@ router.get("/RemoveInfraDetails/:id", (req, res, next) => {
     })
 });
 router.get("/GetInfraDetailsById/:id", (req, res, next) => {
-    db.executeSql("SELECT * FROM infrastructure WHERE institute_id=" + req.params.id + ";", function (data, err) {
+    db.executeSql("SELECT * FROM infrastructure WHERE institute_id=" + req.params.id + " ORDER BY createddate DESC;", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -765,10 +852,10 @@ router.post("/GenerateRahatokarshCertficate", (req, res, next) => {
             res.json("error");
             console.log(err)
         } else {
-            let cert_name=Date.now();
+            let cert_name = Date.now();
             doc.pipe(fs.createWriteStream('certificate/' + cert_name + '.pdf'));
-            db.executeSql("update rahatokarsh set certificate= '/certificate/" + cert_name + ".pdf'  where id=" + req.body.id, function(data1,err){
-                if(err){
+            db.executeSql("update rahatokarsh set certificate= '/certificate/" + cert_name + ".pdf'  where id=" + req.body.id, function (data1, err) {
+                if (err) {
                     console.log(err);
                 }
             })
@@ -796,9 +883,9 @@ router.post("/GenerateRahatokarshCertficate", (req, res, next) => {
             //     )
             //     .stroke();
 
-         
-    
-            doc.image('src/assets/example.jpg',0, 0, {
+
+
+            doc.image('src/assets/example.jpg', 0, 0, {
                 fit: [doc.page.width, doc.page.height],
                 align: 'center',
             });
@@ -807,17 +894,17 @@ router.post("/GenerateRahatokarshCertficate", (req, res, next) => {
 
             jumpLine(doc, 2)
             const start = 85;
-            
-          
+
+
             doc
                 .font('src/assets/fonts/NotoSansJP-Bold.otf')
                 .fontSize(22)
                 .fill('#021c27')
-                .text(req.body.name, 85,335, {
+                .text(req.body.name, 85, 335, {
                     align: 'center',
                 });
 
-             
+
 
 
             jumpLine(doc, 2)
@@ -831,8 +918,8 @@ router.post("/GenerateRahatokarshCertficate", (req, res, next) => {
             // doc.fillAndStroke('#021c27');
             // doc.strokeOpacity(0.2);
 
-             const startLine1 = 85;
-             const endLine1 = 128 + lineSize;
+            const startLine1 = 85;
+            const endLine1 = 128 + lineSize;
             // doc
             //     .moveTo(startLine1, signatureHeight)
             //     .lineTo(endLine1, signatureHeight)
@@ -851,12 +938,13 @@ router.post("/GenerateRahatokarshCertficate", (req, res, next) => {
             //     .moveTo(startLine3, signatureHeight)
             //     .lineTo(endLine3, signatureHeight)
             //     .stroke();
-
+            const datetime = new Date(); // Replace this with your datetime object
+            const date = datetime.toISOString().slice(0, 10);
             doc
                 .font('src/assets/fonts/NotoSansJP-Bold.otf')
                 .fontSize(16)
                 .fill('#021c27')
-                .text('07/03/2023', startLine1, signatureHeight + 90, {
+                .text(date, startLine1, signatureHeight + 90, {
                     columns: 1,
                     columnGap: 0,
                     height: 40,
@@ -876,17 +964,17 @@ router.post("/GenerateRahatokarshCertficate", (req, res, next) => {
             //         align: 'center',
             //     });
 
-            // doc
-            // .font('src/assets/fonts/NotoSansJP-Bold.otf')
-            // .fontSize(10)
-            // .fill('#021c27')
-            // .text('Student Name', startLine2, signatureHeight + 10, {
-            //     columns: 1,
-            //     columnGap: 0,
-            //     height: 40,
-            //     width: lineSize,
-            //     align: 'center',
-            // });
+            doc
+                .font('src/assets/fonts/NotoSansJP-Bold.otf')
+                .fontSize(16)
+                .fill('#021c27')
+                .text('0000' + req.body.id, startLine2, signatureHeight + 90, {
+                    columns: 1,
+                    columnGap: 0,
+                    height: 40,
+                    width: lineSize,
+                    align: 'center',
+                });
 
             // doc
             // .font('src/assets/fonts/NotoSansJP-Light.otf')
@@ -972,7 +1060,7 @@ router.post("/GenerateRahatokarshCertficate", (req, res, next) => {
             // return res.json(data);
             const replacements = {
                 name: req.body.name,
-                link:'http://localhost:9000/certificate/'+cert_name+'.pdf'
+                link: 'http://localhost:9000/certificate/' + cert_name + '.pdf'
                 // download: 
             };
             mail('certification.html', replacements, req.body.email, "Thank You For Donating.", " ")
@@ -983,7 +1071,7 @@ router.post("/GenerateRahatokarshCertficate", (req, res, next) => {
     });
 });
 router.get("/GetAlumniDetails", (req, res, next) => {
-    db.executeSql("SELECT * FROM alumni;", function (data, err) {
+    db.executeSql("SELECT * FROM alumni ORDER BY createddate DESC;", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -1016,18 +1104,24 @@ router.post("/SaveCounselingDetails", (req, res, next) => {
         } else {
             const replacements = {
                 name: req.body.name,
-                // email: req.body.email,
-                // subject: req.body.subject,
-                // message: req.body.message
+                division: req.body.division,
+                email: req.body.email,
+                phone: req.body.phone,
+                instituteName: req.body.instituteName,
+                message: req.body.message,
+                createddate: req.body.createddate
             };
-            mail('appointement-ces.html', replacements, req.body.email, "Appointement Submitted", " ")
+            let staticEmail = 'ces.counseling2019@gmail.com';
+            mail('appointement-ces.html', replacements, req.body.email, "Appointement Submitted")
+            mail('appointement-booked.html', replacements, staticEmail, "Appointement Submitted")
+
             // res.json(data);
             return res.json('success');
         }
     });
 });
 router.get("/GetCounselingData", (req, res, next) => {
-    db.executeSql("SELECT * FROM counseling;", function (data, err) {
+    db.executeSql("SELECT * FROM counseling ORDER BY createddate DESC;", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -1037,7 +1131,7 @@ router.get("/GetCounselingData", (req, res, next) => {
 });
 
 router.get("/GetContactUsDetailsById/:id", (req, res, next) => {
-    db.executeSql("SELECT * FROM contact WHERE institute_id=" + req.params.id + ";", function (data, err) {
+    db.executeSql("SELECT * FROM contact WHERE institute_id=" + req.params.id + " ORDER BY createddate DESC;", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -1047,7 +1141,7 @@ router.get("/GetContactUsDetailsById/:id", (req, res, next) => {
 });
 
 router.post("/SaveResultDetails", (req, res, next) => {
-    db.executeSql("INSERT INTO `result`(`institute_id`, `title`, `image`, `createddate`) VALUES ('" + req.body.institute_id + "','" + req.body.title + "','" + req.body.image + "',CURRENT_TIMESTAMP)", function (data, err) {
+    db.executeSql("INSERT INTO `result`(`institute_id`, `title`, `image`,`year`, `createddate`) VALUES ('" + req.body.institute_id + "','" + req.body.title + "','" + req.body.image + "','" + req.body.year + "',CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
             res.json("error");
             console.log(err)
@@ -1069,7 +1163,7 @@ router.post("/SaveQuestionPapersDetails", (req, res, next) => {
 });
 
 router.get("/GetQuestionPapersDetails/:id", (req, res, next) => {
-    db.executeSql("SELECT * FROM papers WHERE institute_id=" + req.params.id + ";", function (data, err) {
+    db.executeSql("SELECT * FROM papers WHERE institute_id=" + req.params.id + " ORDER BY createdate DESC;", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -1089,8 +1183,8 @@ router.get("/RemoveQuestionPapersDetails/:id", (req, res, next) => {
 });
 
 router.post("/UpdateResultDetails", (req, res, next) => {
-    console, log(req.body, 'resukt')
-    db.executeSql("UPDATE `result` SET `title`='" + req.body.title + "',`image`='" + req.body.image + "',`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id, function (data, err) {
+    console, log(req.body, 'result')
+    db.executeSql("UPDATE `result` SET `title`='" + req.body.title + "',`image`='" + req.body.image + "',`year`='" + req.body.year + "',`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id, function (data, err) {
         if (err) {
             res.json("error");
             console.log(err)
@@ -1112,17 +1206,29 @@ router.post("/UpdateBeneficiaryDetails", (req, res, next) => {
     });
 });
 router.get("/RemoveResultDetailsById/:id", (req, res, next) => {
-    console.log(req.params, 'gjvuvyihgk')
-    db.executeSql("DELETE FROM `result` WHERE id=" + req.params.id, function (data, err) {
+    db.executeSql("SELECT * FROM results WHERE id=" + req.params.id + ";", function (data, err) {
         if (err) {
-            console.log(err);
+            console.log("Error in store.js", err);
         } else {
-            return res.json(data);
+            fs.unlink('/var/www/html/cesbackend'+data[0].image, function (err) {
+                if (err) {
+                    throw err;
+                }else{
+                    db.executeSql("DELETE FROM `result` WHERE id=" + req.params.id, function (data, err) {
+                        if (err) {
+                            console.log(err);
+                        } else {
+                            return res.json(data);
+                        }
+                    })
+                }  
+            });
         }
-    })
+    });
+  
 });
 router.get("/GetResultDetailsById/:id", (req, res, next) => {
-    db.executeSql("SELECT * FROM result WHERE institute_id=" + req.params.id + ";", function (data, err) {
+    db.executeSql("SELECT * FROM result WHERE institute_id=" + req.params.id + " ORDER BY createddate DESC;", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -1138,7 +1244,7 @@ router.post("/UploadPDF", (req, res, next) => {
             cb(null, "pdf/")
         },
         filename: (req, file, cb) => {
-            cb(null, Date.now() + ".pdf")
+            cb(null, Date.now() + path.extname(file.originalname))
         },
     })
     let upload = multer({ storage: storage }).single('file');
@@ -1161,17 +1267,20 @@ router.post("/UploadPDF", (req, res, next) => {
 //     });
 // });
 router.post("/SaveNewsDataList", (req, res, next) => {
-    db.executeSql("INSERT INTO `news`(`institute_id`, `date`, `files`,`isactive`,`createddate`) VALUES ('" + req.body.institute_id + "','" + req.body.date + "','" + req.body.files + "',true,CURRENT_TIMESTAMP)", function (data, err) {
+    console.log(req.body, 'jbdjbjfds');
+    db.executeSql("INSERT INTO `news`(`institute_id`, `date`, `files`,`isactive`,`createddate`) VALUES (" + req.body.institute_id + ",'" + req.body.date + "','" + req.body.files + "',true,CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
-            res.json("error");
             console.log(err)
+            res.json("error");
+
         } else {
             const values = [req.body.message]
             const escapedValues = values.map(mysql.escape);
             db.executeSql1("UPDATE news SET message=" + escapedValues + " WHERE id= " + data.insertId, escapedValues, function (data1, err) {
                 if (err) {
-                    res.json("error");
                     console.log(err)
+                    res.json("error");
+
                 } else {
                 }
             });
@@ -1263,7 +1372,7 @@ router.post("/UpdateStudentListData", (req, res, next) => {
 });
 
 router.get("/GetStudentListData/:id", (req, res, next) => {
-    db.executeSql("SELECT * FROM student WHERE institute_id=" + req.params.id + ";", function (data, err) {
+    db.executeSql("SELECT * FROM student WHERE institute_id=" + req.params.id + " ORDER BY createddate DESC;", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -1312,32 +1421,77 @@ router.get("/GetNewsOnlyForCES/:id", (req, res, next) => {
     })
 });
 router.get("/RemoveNewsByIdDetails/:id", (req, res, next) => {
-    db.executeSql("DELETE FROM news WHERE id=" + req.params.id, function (data, err) {
+    db.executeSql("SELECT * FROM news WHERE id=" + req.params.id + ";", function (data, err) {
         if (err) {
-            console.log(err);
+            console.log("Error in store.js", err);
         } else {
-            return res.json(data);
+            if(data[0].files != null){
+                fs.unlink('/var/www/html/cesbackend'+data[0].files, function (err) {
+                    if (err) {
+                        throw err;
+                    }else{
+                        db.executeSql("DELETE FROM `news` WHERE id=" + req.params.id, function (data, err) {
+                            if (err) {
+                                console.log(err);
+                            } else {
+                                return res.json(data);
+                            }
+                        })
+                    }  
+                });
+            }else{
+                db.executeSql("DELETE FROM news WHERE id=" + req.params.id, function (data, err) {
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        return res.json(data);
+                    }
+                })
+            } 
         }
-    })
+    }); 
 });
 router.get("/RemoveAnswerkeyByIdDetails/:id", (req, res, next) => {
-    db.executeSql("DELETE FROM answerkey WHERE id=" + req.params.id, function (data, err) {
+    db.executeSql("SELECT * FROM answerkey WHERE id=" + req.params.id + ";", function (data, err) {
         if (err) {
-            console.log(err);
+            console.log("Error in store.js", err);
         } else {
-            return res.json(data);
+                fs.unlink('/var/www/html/cesbackend'+data[0].files, function (err) {
+                    if (err) {
+                        throw err;
+                    }else{
+                        db.executeSql("DELETE FROM `answerkey` WHERE id=" + req.params.id, function (data, err) {
+                            if (err) {
+                                console.log(err);
+                            } else {
+                                return res.json(data);
+                            }
+                        })
+                    }  
+                }); 
         }
-    })
+    }); 
 });
-
 router.get("/RemoveOtherDetailsById/:id", (req, res, next) => {
-    db.executeSql("DELETE FROM others WHERE id=" + req.params.id, function (data, err) {
+    db.executeSql("SELECT * FROM others WHERE id=" + req.params.id + ";", function (data, err) {
         if (err) {
-            console.log(err);
+            console.log("Error in store.js", err);
         } else {
-            return res.json(data);
+                fs.unlink('/var/www/html/cesbackend'+data[0].files, function (err) {
+                    if (err) {
+                        throw err;
+                    }else{
+                        db.executeSql("DELETE FROM others WHERE id=" + req.params.id, function (data, err) {
+                            if (err) {
+                                console.log(err);
+                            } else {
+                                return res.json(data);
+                            }
+                        })
+                    }  
+                }); 
         }
-    })
+    });   
 });
 
 router.post("/SaveOthersDataList", (req, res, next) => {
@@ -1350,7 +1504,100 @@ router.post("/SaveOthersDataList", (req, res, next) => {
         }
     });
 });
+router.post("/SaveNaacDetails", (req, res, next) => {
+    console.log(req.body)
+    db.executeSql("INSERT INTO `naac`(`criteria`, `keyno`, `paraname`, `paralink`, `attachname`, `attachlink`, `isactive`, `createddate`) VALUES ('" + req.body.criteria + "','" + req.body.keyNo + "','" + req.body.paraname + "','" + req.body.paralink + "','" + req.body.attachname + "','" + req.body.attachlink + "',true,CURRENT_TIMESTAMP)", function (data, err) {
+        if (err) {
+            res.json("error");
+            console.log(err)
+        } else {
+            return res.json(data);
+        }
+    });
+});
+router.post("/SendCriteriaDetails", (req, res, next) => {
+    console.log(req.body)
+    db.executeSql("SELECT * FROM naac WHERE criteria='" + req.body.criteria + "'", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+router.get("/RemoveCrietriaListURL/:id", (req, res, next) => {
+    db.executeSql("select * from naac where id="+req.params.id,function(data,err){
+        if (err) {
+            console.log(err);
+        } else {
+            fs.unlink('/var/www/html/cesbackend'+data[0].paralink, function (err) {
+                if (err) throw err;
+                // if no error, file has been deleted successfully
+                console.log('File deleted!12');
+            });
+            fs.unlink('/var/www/html/cesbackend'+data[0].attachlink, function (err) {
+                if (err) throw err;
+                // if no error, file has been deleted successfully
+                console.log('File deleted!');
+            });
+            db.executeSql("DELETE FROM naac WHERE id=" + req.params.id + ";", function (data, err) {
+                if (err) {
+                    console.log(err);
+                } else {
+                    return res.json(data);
+                }
+            })
+        }
+    })
+});
+router.get("getCriteriaGroupBy", (req, res, next) => {
+    db.executeSql("SELECT criteria,COUNT(*) FROM naac GROUP BY criteria;", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+})
 
+router.get("/GetNaacData", (req, res, next) => {
+    db.executeSql("SELECT * FROM naac;", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+router.get("/GetKeyNoDataGroupBy", (req, res, next) => {
+    db.executeSql("SELECT keyno,COUNT(*) FROM naac GROUP BY keyno;", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+router.post("/GetKeyNoDataGroupByWithSearch", (req, res, next) => {
+    console.log(req.body)
+    db.executeSql("SELECT keyno,COUNT(*) FROM naac WHERE criteria='" + req.body.criteria + "' GROUP BY keyno", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+router.post("/UpdateNAACData", (req, res, next) => {
+    console.log(req.body, 'NAAC')
+    db.executeSql("UPDATE `naac` SET `criteria`='" + req.body.criteria + "',`keyno`='" + req.body.keyno + "',`paraname`='" + req.body.paraname + "',`paralink`='" + req.body.paralink + "',`attachname`='" + req.body.attachname + "',`attachlink`='" + req.body.attachlink + "',`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id + ";", function (data, err) {
+        if (err) {
+            console.log("Error in store.js", err);
+        } else {
+            return res.json(data);
+        }
+    });
+});
 router.post("/SaveMagazineList", (req, res, next) => {
     db.executeSql("INSERT INTO `magazine`(`title`, `files`, `createddate`) VALUES ('" + req.body.title + "','" + req.body.files + "',CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
@@ -1362,7 +1609,7 @@ router.post("/SaveMagazineList", (req, res, next) => {
     });
 });
 router.get("/GetMagazineList", (req, res, next) => {
-    db.executeSql("SELECT * FROM magazine;", function (data, err) {
+    db.executeSql("SELECT * FROM magazine ORDER BY createddate DESC;", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -1371,16 +1618,28 @@ router.get("/GetMagazineList", (req, res, next) => {
     })
 });
 router.get("/RemoveMagazineList/:id", (req, res, next) => {
-    db.executeSql("DELETE FROM magazine WHERE id=" + req.params.id + ";", function (data, err) {
+    db.executeSql("select * from magazine WHERE id=" + req.params.id + ";",function(data,err){
         if (err) {
             console.log(err);
         } else {
-            return res.json(data);
+            fs.unlink('/var/www/html/cesbackend'+data[0].files, function (err) {
+                if (err) {
+                    throw err;
+                }else{
+                    db.executeSql("DELETE FROM magazine WHERE id=" + req.params.id + ";", function (data, err) {
+                        if (err) {
+                            console.log(err);
+                        } else {
+                            return res.json(data);
+                        }
+                    })
+                }  
+            });
         }
-    })
+    })  
 });
 router.get("/GetOthersByIdDetails/:id", (req, res, next) => {
-    db.executeSql("SELECT * FROM others WHERE institute_id=" + req.params.id + ";", function (data, err) {
+    db.executeSql("SELECT * FROM others WHERE institute_id=" + req.params.id + " ORDER BY createddate DESC;", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -1402,15 +1661,12 @@ function mail(filename, data, toemail, subj, mailname) {
     const template = handlebars.compile(source);
     const replacements = data;
     const htmlToSend = template(replacements);
-
     const mailOptions = {
         from: `"cesociety16@gmail.com"`,
         subject: subj,
         to: toemail,
         Name: mailname,
         html: htmlToSend,
-
-
     };
     transporter.sendMail(mailOptions, function (error, info) {
         // console.log('Mail Sent')
@@ -1478,7 +1734,7 @@ router.post("/SaveGatePassUserList", (req, res, next) => {
     });
 });
 router.get("/GetGatePassUserList", (req, res, next) => {
-    db.executeSql("SELECT * FROM gatepass;", function (data, err) {
+    db.executeSql("SELECT * FROM gatepass ORDER BY createddate DESC;", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -1613,12 +1869,17 @@ router.post("/UpdatePassword", (req, res, next) => {
 
 
 router.get("/RemoveRecentUoloadImage", midway.checkToken, (req, res, next) => {
-    console.log(req.body);
-    db.executeSql("SELECT * FROM images ORDER BY createddate DESC LIMIT 1", function (data, err) {
+    db.executeSql("SELECT * FROM image ORDER BY createddate DESC LIMIT 1", function (data, err) {
         if (err) {
             console.log("Error in store.js", err);
         } else {
-            return res.json(data);
+            fs.unlink('/var/www/html/cesbackend'+data[0].files, function (err) {
+                if (err) {
+                    throw err;
+                }else{
+                    return res.json(data);
+                }  
+            });
         }
     });
 })
