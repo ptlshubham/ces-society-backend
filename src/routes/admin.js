@@ -1402,7 +1402,7 @@ router.get("/GetNewsByIdDetails/:id", (req, res, next) => {
 });
 
 router.get("/GetAllAnswerkey", (req, res, next) => {
-    db.executeSql("SELECT * FROM answerkey ORDER BY date DESC ;", function (data, err) {
+    db.executeSql("SELECT * FROM answerkey where isactive=true ORDER BY date DESC ;", function (data, err) {
         if (err) {
             console.log(err);
         } else {
