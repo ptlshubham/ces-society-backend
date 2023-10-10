@@ -25,14 +25,6 @@ router.get("/GetInstituteDetailByURL/:id", (req, res, next) => {
         if (err) {
             console.log(err);
         } else {
-            // db.executeSql("INSERT INTO `visitor`(`localArea`, `wifi`, `createddate`) VALUES ('" + MacAddress.Local Area Connection * 10 + "','" + MacAddress.Wi - Fi + "',CURRENT_TIMESTAMP)", function (data1, err) {
-            //     if (err) {
-            //         res.json("error");
-            //     } else {
-            //         console.log('success')
-            //     }
-            // });
-            // console.log(data);
             return res.json(data);
         }
     })
@@ -127,8 +119,6 @@ router.post("/UploadGalleryImages", (req, res, next) => {
             return res.json("err4", err);
         }
         return res.json('/images/gallery/' + req.file.filename);
-
-
     });
 });
 
@@ -221,7 +211,6 @@ router.post("/RemoveImagesByIdDetails", (req, res, next) => {
             });
         }
     });
-   
 });
 
 router.post("/SaveDepartmentList", (req, res, next) => {
@@ -255,6 +244,7 @@ router.get("/GetDepartmentByIdDetails/:id", (req, res, next) => {
 });
 
 router.get("/GetYearbyGroupDetails/:id", (req, res, next) => {
+    console.log(req.params);
     db.executeSql("SELECT * FROM `papers` WHERE institute_id='" + req.params.id + "' GROUP BY year ;", function (data, err) {
         if (err) {
             console.log(err);
@@ -275,7 +265,6 @@ router.get("/RemoveDepartmentByIdDetails/:id", (req, res, next) => {
 
 router.post("/SaveStaffProfileImages", (req, res, next) => {
     var imgname = generateUUID();
-
     const storage = multer.diskStorage({
         destination: function (req, file, cb) {
             cb(null, 'images/staff');
@@ -289,7 +278,6 @@ router.post("/SaveStaffProfileImages", (req, res, next) => {
     let upload = multer({ storage: storage }).single('file');
     upload(req, res, function (err) {
         console.log("path=", config.url + 'images/staff/' + req.file.filename);
-
         if (req.fileValidationError) {
             console.log("err1", req.fileValidationError);
             return res.json("err1", req.fileValidationError);
@@ -304,8 +292,6 @@ router.post("/SaveStaffProfileImages", (req, res, next) => {
             return res.json("err4", err);
         }
         return res.json('/images/staff/' + req.file.filename);
-
-
     });
 });
 
@@ -438,7 +424,6 @@ router.post("/SaveBulkBeneficiaryDetails", (req, res, next) => {
         });
     }
     return res.json('success');
-
 });
 
 
@@ -463,7 +448,6 @@ router.get("/RemoveDonnerDetailsById/:id", (req, res, next) => {
 });
 router.post("/uploadBlogImages", (req, res, next) => {
     var imgname = generateUUID();
-
     const storage = multer.diskStorage({
         destination: function (req, file, cb) {
             cb(null, 'images/blogs');
@@ -492,8 +476,6 @@ router.post("/uploadBlogImages", (req, res, next) => {
             return res.json("err4", err);
         }
         return res.json('/images/blogs/' + req.file.filename);
-
-
     });
 });
 router.post("/SaveBlogDetails", (req, res, next) => {
@@ -567,7 +549,6 @@ router.get("/RemoveBlogDetails/:id", (req, res, next) => {
 
 router.post("/UploadInfraImage", (req, res, next) => {
     var imgname = generateUUID();
-
     const storage = multer.diskStorage({
         destination: function (req, file, cb) {
             cb(null, 'images/infra');
@@ -596,13 +577,10 @@ router.post("/UploadInfraImage", (req, res, next) => {
             return res.json("err4", err);
         }
         return res.json('/images/infra/' + req.file.filename);
-
-
     });
 });
 router.post("/UploadInfraMultiImage", midway.checkToken, (req, res, next) => {
     var imgname = generateUUID();
-
     const storage = multer.diskStorage({
         destination: function (req, file, cb) {
             cb(null, 'images/infraMulti');
@@ -657,7 +635,6 @@ router.post("/UploadMoreImage", (req, res, next) => {
     let upload = multer({ storage: storage }).single('file');
     upload(req, res, function (err) {
         console.log("path=", config.url + 'images/more/' + req.file.filename);
-
         if (req.fileValidationError) {
             console.log("err1", req.fileValidationError);
             return res.json("err1", req.fileValidationError);
@@ -672,8 +649,6 @@ router.post("/UploadMoreImage", (req, res, next) => {
             return res.json("err4", err);
         }
         return res.json('/images/more/' + req.file.filename);
-
-
     });
 });
 router.post("/SaveScholarshipDetails", (req, res, next) => {
@@ -1268,7 +1243,7 @@ router.post("/UploadPDF", (req, res, next) => {
 // });
 router.post("/SaveNewsDataList", (req, res, next) => {
     console.log(req.body, 'jbdjbjfds');
-    db.executeSql("INSERT INTO `news`(`institute_id`, `date`, `files`,`isactive`,`createddate`) VALUES (" + req.body.institute_id + ",'" + req.body.date + "','" + req.body.files + "',true,CURRENT_TIMESTAMP)", function (data, err) {
+    db.executeSql("INSERT INTO `news`(`institute_id`, `date`, `files`,`isactive`,`startDate`, `endDate`,`createddate`) VALUES (" + req.body.institute_id + ",'" + req.body.date + "','" + req.body.files + "',true,'" + req.body.startDate + "','" + req.body.endDate + "',CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
             console.log(err)
             res.json("error");
@@ -1392,7 +1367,17 @@ router.get("/RemoveStudentListData/:id", (req, res, next) => {
 });
 
 router.get("/GetNewsByIdDetails/:id", (req, res, next) => {
-    db.executeSql("SELECT * FROM news WHERE institute_id=" + req.params.id + " ORDER BY date DESC ;", function (data, err) {
+    let date = new Date();
+    const day = new String(date.getDate());
+    let mnth = date.getUTCMonth()+1;
+    if(mnth <=9){
+        mnth = '0'+mnth;
+        console.log(mnth);
+    }
+    const year = date.getFullYear();
+    const concat = '' + year+'-'+ mnth+'-'+day;
+    console.log(concat);
+    db.executeSql("SELECT * FROM news WHERE institute_id="+req.params.id+" and (startDate IS NULL OR startDate<='"+concat+"') and (endDate IS NULL OR endDate>='"+concat+"')  ORDER BY date DESC ;", function (data, err) {
         if (err) {
             console.log(err);
         } else {
