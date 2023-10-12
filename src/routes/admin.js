@@ -739,14 +739,43 @@ router.post("/UpdateInfraDetails", (req, res, next) => {
         }
     });
 });
-router.get("/RemoveInfraDetails/:id", (req, res, next) => {
-    db.executeSql("DELETE FROM `infrastructure` WHERE id=" + req.params.id + ";", function (data, err) {
+router.post("/deleteInfraImage",(req,res,next)=>{
+
+    fs.unlink('/var/www/html/cesbackend'+req.body.img, function (err) {
         if (err) {
-            console.log(err);
+            throw err;
+        }else{
+            return res.json('sucess');
+        }  
+    });
+})
+router.get("/RemoveInfraDetails/:id", (req, res, next) => {
+    // db.executeSql("DELETE FROM `infrastructure` WHERE id=" + req.params.id + ";", function (data, err) {
+    //     if (err) {
+    //         console.log(err);
+    //     } else {
+    //         return res.json(data);
+    //     }
+    // });
+    db.executeSql("SELECT * FROM infrastructure WHERE id=" + req.params.id + ";", function (data, err) {
+        if (err) {
+            console.log("Error in store.js", err);
         } else {
-            return res.json(data);
+            fs.unlink('/var/www/html/cesbackend'+data[0].infraImage, function (err) {
+                if (err) {
+                    throw err;
+                }else{
+                    db.executeSql("DELETE FROM `infrastructure` WHERE id=" + req.params.id, function (data, err) {
+                        if (err) {
+                            console.log(err);
+                        } else {
+                            return res.json(data);
+                        }
+                    })
+                }  
+            });
         }
-    })
+    });
 });
 router.get("/GetInfraDetailsById/:id", (req, res, next) => {
     db.executeSql("SELECT * FROM infrastructure WHERE institute_id=" + req.params.id + " ORDER BY createddate DESC;", function (data, err) {
@@ -857,20 +886,13 @@ router.post("/GenerateRahatokarshCertficate", (req, res, next) => {
             //         doc.page.height - distanceMargin * 2,
             //     )
             //     .stroke();
-
-
-
             doc.image('src/assets/example.jpg', 0, 0, {
                 fit: [doc.page.width, doc.page.height],
                 align: 'center',
             });
-
             jumpLine(doc, 4)
-
             jumpLine(doc, 2)
             const start = 85;
-
-
             doc
                 .font('src/assets/fonts/NotoSansJP-Bold.otf')
                 .fontSize(22)
@@ -878,28 +900,19 @@ router.post("/GenerateRahatokarshCertficate", (req, res, next) => {
                 .text(req.body.name, 85, 335, {
                     align: 'center',
                 });
-
-
-
-
             jumpLine(doc, 2)
-
             //  doc.lineWidth(1);
-
             // Signatures
             const lineSize = 300;
             const signatureHeight = 390;
-
             // doc.fillAndStroke('#021c27');
             // doc.strokeOpacity(0.2);
-
             const startLine1 = 85;
             const endLine1 = 128 + lineSize;
             // doc
             //     .moveTo(startLine1, signatureHeight)
             //     .lineTo(endLine1, signatureHeight)
             //     .stroke();
-
             const startLine2 = endLine1 + 32;
             const endLine2 = startLine2 + lineSize;
             // doc
