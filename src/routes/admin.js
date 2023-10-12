@@ -1489,6 +1489,71 @@ router.post("/SaveOthersDataList", (req, res, next) => {
         }
     });
 });
+router.get("/GetNaacLinkData", (req, res, next) => {
+    db.executeSql("SELECT * FROM naaclink;", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+
+router.post("/SaveNaacLinkDetails", (req, res, next) => {
+    console.log(req.body)
+    db.executeSql("INSERT INTO `naaclink`(`criteria`, `subMenu`, `subToSub`, `linkName`, `link`, `isactive`, `createddate`) VALUES ('" + req.body.criteria + "','" + req.body.subMenu + "','" + req.body.subToSub + "','" + req.body.paraname + "','" + req.body.paralink + "',true,CURRENT_TIMESTAMP)", function (data, err) {
+        if (err) {
+            res.json("error");
+            console.log(err)
+        } else {
+            return res.json(data);
+        }
+    });
+});
+router.get("/GetSubMenuGroupBy", (req, res, next) => {
+    db.executeSql("SELECT subMenu,COUNT(*) FROM naaclink GROUP BY subMenu;", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+})
+router.get("/GetSubToSubMenuGroupBy", (req, res, next) => {
+    db.executeSql("SELECT subToSub,COUNT(*) FROM naaclink GROUP BY subToSub;", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+})
+
+router.get("/RemoveLinkByID/:id", (req, res, next) => {
+    db.executeSql("select * from naaclink where id="+req.params.id,function(data,err){
+        if (err) {
+            console.log(err);
+        } else {
+            // fs.unlink('/var/www/html/cesbackend'+data[0].paralink, function (err) {
+            //     if (err) throw err;
+            //     // if no error, file has been deleted successfully
+            //     console.log('File deleted!12');
+            // });
+            // fs.unlink('/var/www/html/cesbackend'+data[0].attachlink, function (err) {
+            //     if (err) throw err;
+            //     // if no error, file has been deleted successfully
+            //     console.log('File deleted!');
+            // });
+            db.executeSql("DELETE FROM naaclink WHERE id=" + req.params.id + ";", function (data, err) {
+                if (err) {
+                    console.log(err);
+                } else {
+                    return res.json(data);
+                }
+            })
+        }
+    })
+});
 router.post("/SaveNaacDetails", (req, res, next) => {
     console.log(req.body)
     db.executeSql("INSERT INTO `naac`(`criteria`, `keyno`, `paraname`, `paralink`, `attachname`, `attachlink`, `isactive`, `createddate`) VALUES ('" + req.body.criteria + "','" + req.body.keyNo + "','" + req.body.paraname + "','" + req.body.paralink + "','" + req.body.attachname + "','" + req.body.attachlink + "',true,CURRENT_TIMESTAMP)", function (data, err) {
