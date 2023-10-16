@@ -547,110 +547,7 @@ router.get("/RemoveBlogDetails/:id", (req, res, next) => {
     });
 });
 
-router.post("/UploadInfraImage", (req, res, next) => {
-    var imgname = generateUUID();
-    const storage = multer.diskStorage({
-        destination: function (req, file, cb) {
-            cb(null, 'images/infra');
-        },
-        // By default, multer removes file extensions so let's add them back
-        filename: function (req, file, cb) {
 
-            cb(null, imgname + path.extname(file.originalname));
-        }
-    });
-    let upload = multer({ storage: storage }).single('file');
-    upload(req, res, function (err) {
-        console.log("path=", config.url + 'images/infra/' + req.file.filename);
-
-        if (req.fileValidationError) {
-            console.log("err1", req.fileValidationError);
-            return res.json("err1", req.fileValidationError);
-        } else if (!req.file) {
-            console.log('Please select an image to upload');
-            return res.json('Please select an image to upload');
-        } else if (err instanceof multer.MulterError) {
-            console.log("err3");
-            return res.json("err3", err);
-        } else if (err) {
-            console.log("err4");
-            return res.json("err4", err);
-        }
-        return res.json('/images/infra/' + req.file.filename);
-    });
-});
-router.post("/UploadInfraMultiImage", midway.checkToken, (req, res, next) => {
-    var imgname = generateUUID();
-    const storage = multer.diskStorage({
-        destination: function (req, file, cb) {
-            cb(null, 'images/infraMulti');
-        },
-        // By default, multer removes file extensions so let's add them back
-        filename: function (req, file, cb) {
-            cb(null, imgname + path.extname(file.originalname));
-        }
-    });
-    let upload = multer({ storage: storage }).single('file');
-    upload(req, res, function (err) {
-        console.log("path=", config.url + 'images/infraMulti/' + req.file.filename);
-
-        if (req.fileValidationError) {
-            console.log("err1", req.fileValidationError);
-            return res.json("err1", req.fileValidationError);
-        } else if (!req.file) {
-            console.log('Please select an image to upload');
-            return res.json('Please select an image to upload');
-        } else if (err instanceof multer.MulterError) {
-            console.log("err3");
-            return res.json("err3", err);
-        } else if (err) {
-            console.log("err4");
-            return res.json("err4", err);
-        }
-        return res.json('/images/infraMulti/' + req.file.filename);
-    });
-});
-router.get("/GetInfraMultiImagesById/:id", (req, res, next) => {
-    console.log(req.params)
-    db.executeSql("SELECT * FROM infraimage WHERE infraId=" + req.params.id + ";", function (data, err) {
-        if (err) {
-            console.log(err);
-        } else {
-            return res.json(data);
-        }
-    })
-});
-router.post("/UploadMoreImage", (req, res, next) => {
-    var imgname = generateUUID();
-    const storage = multer.diskStorage({
-        destination: function (req, file, cb) {
-            cb(null, 'images/more');
-        },
-        // By default, multer removes file extensions so let's add them back
-        filename: function (req, file, cb) {
-
-            cb(null, imgname + path.extname(file.originalname));
-        }
-    });
-    let upload = multer({ storage: storage }).single('file');
-    upload(req, res, function (err) {
-        console.log("path=", config.url + 'images/more/' + req.file.filename);
-        if (req.fileValidationError) {
-            console.log("err1", req.fileValidationError);
-            return res.json("err1", req.fileValidationError);
-        } else if (!req.file) {
-            console.log('Please select an image to upload');
-            return res.json('Please select an image to upload');
-        } else if (err instanceof multer.MulterError) {
-            console.log("err3");
-            return res.json("err3", err);
-        } else if (err) {
-            console.log("err4");
-            return res.json("err4", err);
-        }
-        return res.json('/images/more/' + req.file.filename);
-    });
-});
 router.post("/SaveScholarshipDetails", (req, res, next) => {
     db.executeSql("INSERT INTO `scholarship`(`institute_id`, `purpose`, `title`, `image`,`createdate`) VALUES  ('" + req.body.institute_id + "','" + req.body.purpose + "','" + req.body.title + "','" + req.body.image + "',CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
@@ -786,6 +683,287 @@ router.get("/GetInfraDetailsById/:id", (req, res, next) => {
         }
     })
 });
+router.post("/UploadInfraImage", (req, res, next) => {
+    var imgname = generateUUID();
+    const storage = multer.diskStorage({
+        destination: function (req, file, cb) {
+            cb(null, 'images/infra');
+        },
+        // By default, multer removes file extensions so let's add them back
+        filename: function (req, file, cb) {
+
+            cb(null, imgname + path.extname(file.originalname));
+        }
+    });
+    let upload = multer({ storage: storage }).single('file');
+    upload(req, res, function (err) {
+        console.log("path=", config.url + 'images/infra/' + req.file.filename);
+
+        if (req.fileValidationError) {
+            console.log("err1", req.fileValidationError);
+            return res.json("err1", req.fileValidationError);
+        } else if (!req.file) {
+            console.log('Please select an image to upload');
+            return res.json('Please select an image to upload');
+        } else if (err instanceof multer.MulterError) {
+            console.log("err3");
+            return res.json("err3", err);
+        } else if (err) {
+            console.log("err4");
+            return res.json("err4", err);
+        }
+        return res.json('/images/infra/' + req.file.filename);
+    });
+});
+router.post("/UploadInfraMultiImage", midway.checkToken, (req, res, next) => {
+    var imgname = generateUUID();
+    const storage = multer.diskStorage({
+        destination: function (req, file, cb) {
+            cb(null, 'images/infraMulti');
+        },
+        // By default, multer removes file extensions so let's add them back
+        filename: function (req, file, cb) {
+            cb(null, imgname + path.extname(file.originalname));
+        }
+    });
+    let upload = multer({ storage: storage }).single('file');
+    upload(req, res, function (err) {
+        console.log("path=", config.url + 'images/infraMulti/' + req.file.filename);
+
+        if (req.fileValidationError) {
+            console.log("err1", req.fileValidationError);
+            return res.json("err1", req.fileValidationError);
+        } else if (!req.file) {
+            console.log('Please select an image to upload');
+            return res.json('Please select an image to upload');
+        } else if (err instanceof multer.MulterError) {
+            console.log("err3");
+            return res.json("err3", err);
+        } else if (err) {
+            console.log("err4");
+            return res.json("err4", err);
+        }
+        return res.json('/images/infraMulti/' + req.file.filename);
+    });
+});
+router.get("/GetInfraMultiImagesById/:id", (req, res, next) => {
+    console.log(req.params)
+    db.executeSql("SELECT * FROM infraimage WHERE infraId=" + req.params.id + ";", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+router.post("/UploadMoreImage", (req, res, next) => {
+    var imgname = generateUUID();
+    const storage = multer.diskStorage({
+        destination: function (req, file, cb) {
+            cb(null, 'images/more');
+        },
+        // By default, multer removes file extensions so let's add them back
+        filename: function (req, file, cb) {
+
+            cb(null, imgname + path.extname(file.originalname));
+        }
+    });
+    let upload = multer({ storage: storage }).single('file');
+    upload(req, res, function (err) {
+        console.log("path=", config.url + 'images/more/' + req.file.filename);
+        if (req.fileValidationError) {
+            console.log("err1", req.fileValidationError);
+            return res.json("err1", req.fileValidationError);
+        } else if (!req.file) {
+            console.log('Please select an image to upload');
+            return res.json('Please select an image to upload');
+        } else if (err instanceof multer.MulterError) {
+            console.log("err3");
+            return res.json("err3", err);
+        } else if (err) {
+            console.log("err4");
+            return res.json("err4", err);
+        }
+        return res.json('/images/more/' + req.file.filename);
+    });
+});
+
+
+
+router.post("/UploadCommMultiImage", midway.checkToken, (req, res, next) => {
+    var imgname = generateUUID();
+    const storage = multer.diskStorage({
+        destination: function (req, file, cb) {
+            cb(null, 'images/commmulti');
+        },
+        // By default, multer removes file extensions so let's add them back
+        filename: function (req, file, cb) {
+            cb(null, imgname + path.extname(file.originalname));
+        }
+    });
+    let upload = multer({ storage: storage }).single('file');
+    upload(req, res, function (err) {
+        console.log("path=", config.url + 'images/commmulti/' + req.file.filename);
+
+        if (req.fileValidationError) {
+            console.log("err1", req.fileValidationError);
+            return res.json("err1", req.fileValidationError);
+        } else if (!req.file) {
+            console.log('Please select an image to upload');
+            return res.json('Please select an image to upload');
+        } else if (err instanceof multer.MulterError) {
+            console.log("err3");
+            return res.json("err3", err);
+        } else if (err) {
+            console.log("err4");
+            return res.json("err4", err);
+        }
+        return res.json('/images/commmulti/' + req.file.filename);
+    });
+});
+router.post("/UploadCommitteeImage", (req, res, next) => {
+    var imgname = generateUUID();
+    const storage = multer.diskStorage({
+        destination: function (req, file, cb) {
+            cb(null, 'images/committee');
+        },
+        // By default, multer removes file extensions so let's add them back
+        filename: function (req, file, cb) {
+
+            cb(null, imgname + path.extname(file.originalname));
+        }
+    });
+    let upload = multer({ storage: storage }).single('file');
+    upload(req, res, function (err) {
+        console.log("path=", config.url + 'images/committee/' + req.file.filename);
+
+        if (req.fileValidationError) {
+            console.log("err1", req.fileValidationError);
+            return res.json("err1", req.fileValidationError);
+        } else if (!req.file) {
+            console.log('Please select an image to upload');
+            return res.json('Please select an image to upload');
+        } else if (err instanceof multer.MulterError) {
+            console.log("err3");
+            return res.json("err3", err);
+        } else if (err) {
+            console.log("err4");
+            return res.json("err4", err);
+        }
+        return res.json('/images/committee/' + req.file.filename);
+    });
+});
+router.post("/SaveCommitteeDetails", (req, res, next) => {
+    db.executeSql("INSERT INTO `committee`(`institute_id`, `commTitle`,`commImage`, `createddate`) VALUES ('" + req.body.institute_id + "','" + req.body.infraTitle + "','" + req.body.infraImage + "',CURRENT_TIMESTAMP)", function (data, err) {
+        if (err) {
+            res.json("error");
+            console.log(err)
+        } else {
+            if (req.body.infraMultiImage.length > 0) {
+                for (let i = 0; i < req.body.infraMultiImage.length; i++) {
+                    db.executeSql("INSERT INTO `commimage`(`commId`, `image`) VALUES (" + data.insertId + ",'" + req.body.infraMultiImage[i] + "');", function (data1, err) {
+                        if (err) {
+                            res.json("error");
+                        } else {
+                        }
+                    });
+                }
+            }
+            const values = [req.body.infraDetails]
+            const escapedValues = values.map(mysql.escape);
+            db.executeSql1("UPDATE committee SET commDetails=" + escapedValues + " WHERE id= " + data.insertId, escapedValues, function (data1, err) {
+                if (err) {
+                    res.json("error");
+                    console.log(err)
+                } else {
+                    return res.json('success');
+
+                }
+            });
+            // return res.json('success');
+        }
+    });
+    // return res.json('success');
+
+});
+router.post("/UpdateCommitteeDetails", (req, res, next) => {
+    db.executeSql("UPDATE `committee` SET `commTitle`='" + req.body.infraTitle + "',`commImage`='" + req.body.infraImage + "',`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id + ";", function (data, err) {
+        if (err) {
+            res.json("error");
+        } else {
+            const values = [req.body.infraDetails]
+            const escapedValues = values.map(mysql.escape);
+            db.executeSql1("UPDATE committee SET commDetails=" + escapedValues + " WHERE id= " + req.body.id, escapedValues, function (data1, err) {
+                if (err) {
+                    res.json("error");
+                    console.log(err)
+                } else {
+                }
+            });
+            return res.json('success');
+        }
+    });
+});
+router.post("/deleteCommitteeImage",(req,res,next)=>{
+
+    fs.unlink('/var/www/html/cesbackend'+req.body.img, function (err) {
+        if (err) {
+            throw err;
+        }else{
+            return res.json('sucess');
+        }  
+    });
+})
+router.get("/RemoveCommitteeDetails/:id", (req, res, next) => {
+    // db.executeSql("DELETE FROM `infrastructure` WHERE id=" + req.params.id + ";", function (data, err) {
+    //     if (err) {
+    //         console.log(err);
+    //     } else {
+    //         return res.json(data);
+    //     }
+    // });
+    db.executeSql("SELECT * FROM committee WHERE id=" + req.params.id + ";", function (data, err) {
+        if (err) {
+            console.log("Error in store.js", err);
+        } else {
+            fs.unlink('/var/www/html/cesbackend'+data[0].infraImage, function (err) {
+                if (err) {
+                    throw err;
+                }else{
+                    db.executeSql("DELETE FROM `committee` WHERE id=" + req.params.id, function (data, err) {
+                        if (err) {
+                            console.log(err);
+                        } else {
+                            return res.json(data);
+                        }
+                    })
+                }  
+            });
+        }
+    });
+});
+router.get("/GetCommitteeDetailsById/:id", (req, res, next) => {
+    db.executeSql("SELECT * FROM committee WHERE institute_id=" + req.params.id + " ORDER BY createddate DESC;", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+router.get("/GetCommitteeMultiImagesById/:id", (req, res, next) => {
+    console.log(req.params)
+    db.executeSql("SELECT * FROM commimage WHERE commId=" + req.params.id + ";", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+
+
+
 
 router.post("/SaveAlumniDetails", (req, res, next) => {
     db.executeSql("INSERT INTO `alumni`(`instituteName`, `alumniName`, `alumniCourse`, `alumniYear`, `contactNumber`, `email`, `createddate`) VALUES  ('" + req.body.instituteName + "','" + req.body.alumniName + "','" + req.body.alumniCourse + "','" + req.body.alumniYear + "','" + req.body.contactNumber + "','" + req.body.email + "',CURRENT_TIMESTAMP)", function (data, err) {
