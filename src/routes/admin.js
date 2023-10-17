@@ -854,14 +854,14 @@ router.post("/UploadCommitteeImage", (req, res, next) => {
     });
 });
 router.post("/SaveCommitteeDetails", (req, res, next) => {
-    db.executeSql("INSERT INTO `committee`(`institute_id`, `commTitle`,`commImage`, `createddate`) VALUES ('" + req.body.institute_id + "','" + req.body.infraTitle + "','" + req.body.infraImage + "',CURRENT_TIMESTAMP)", function (data, err) {
+    db.executeSql("INSERT INTO `committee`(`institute_id`, `commTitle`,`commImage`, `createddate`) VALUES ('" + req.body.institute_id + "','" + req.body.commTitle + "','" + req.body.commImage + "',CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
             res.json("error");
             console.log(err)
         } else {
-            if (req.body.infraMultiImage.length > 0) {
-                for (let i = 0; i < req.body.infraMultiImage.length; i++) {
-                    db.executeSql("INSERT INTO `commimage`(`commId`, `image`) VALUES (" + data.insertId + ",'" + req.body.infraMultiImage[i] + "');", function (data1, err) {
+            if (req.body.commMultiImage.length > 0) {
+                for (let i = 0; i < req.body.commMultiImage.length; i++) {
+                    db.executeSql("INSERT INTO `commimage`(`commId`, `image`) VALUES (" + data.insertId + ",'" + req.body.commMultiImage[i] + "');", function (data1, err) {
                         if (err) {
                             res.json("error");
                         } else {
@@ -869,7 +869,7 @@ router.post("/SaveCommitteeDetails", (req, res, next) => {
                     });
                 }
             }
-            const values = [req.body.infraDetails]
+            const values = [req.body.commDetails]
             const escapedValues = values.map(mysql.escape);
             db.executeSql1("UPDATE committee SET commDetails=" + escapedValues + " WHERE id= " + data.insertId, escapedValues, function (data1, err) {
                 if (err) {
