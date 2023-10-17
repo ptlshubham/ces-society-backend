@@ -647,30 +647,35 @@ router.post("/deleteInfraImage",(req,res,next)=>{
     });
 })
 router.get("/RemoveInfraDetails/:id", (req, res, next) => {
-    // db.executeSql("DELETE FROM `infrastructure` WHERE id=" + req.params.id + ";", function (data, err) {
-    //     if (err) {
-    //         console.log(err);
-    //     } else {
-    //         return res.json(data);
-    //     }
-    // });
     db.executeSql("SELECT * FROM infrastructure WHERE id=" + req.params.id + ";", function (data, err) {
         if (err) {
             console.log("Error in store.js", err);
         } else {
-            fs.unlink('/var/www/html/cesbackend'+data[0].infraImage, function (err) {
-                if (err) {
-                    throw err;
-                }else{
-                    db.executeSql("DELETE FROM `infrastructure` WHERE id=" + req.params.id, function (data, err) {
-                        if (err) {
-                            console.log(err);
-                        } else {
-                            return res.json(data);
-                        }
-                    })
-                }  
-            });
+            if(data[0].infraImage != 'null'){
+                fs.unlink('/var/www/html/cesbackend'+data[0].infraImage, function (err) {
+                    if (err) {
+                        throw err;
+                    }else{
+                        db.executeSql("DELETE FROM `infrastructure` WHERE id=" + req.params.id, function (data, err) {
+                            if (err) {
+                                console.log(err);
+                            } else {
+                                return res.json(data);
+                            }
+                        })
+                    }  
+                });
+            }
+            else{
+                db.executeSql("DELETE FROM `infrastructure` WHERE id=" + req.params.id, function (data, err) {
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        return res.json(data);
+                    }
+                })
+
+            }
         }
     });
 });
@@ -926,19 +931,30 @@ router.get("/RemoveCommitteeDetails/:id", (req, res, next) => {
         if (err) {
             console.log("Error in store.js", err);
         } else {
-            fs.unlink('/var/www/html/cesbackend'+data[0].infraImage, function (err) {
-                if (err) {
-                    throw err;
-                }else{
-                    db.executeSql("DELETE FROM `committee` WHERE id=" + req.params.id, function (data, err) {
-                        if (err) {
-                            console.log(err);
-                        } else {
-                            return res.json(data);
-                        }
-                    })
-                }  
-            });
+            if(data[0].commImage != 'null'){
+                fs.unlink('/var/www/html/cesbackend'+data[0].commImage, function (err) {
+                    if (err) {
+                        throw err;
+                    }else{
+                        db.executeSql("DELETE FROM `committee` WHERE id=" + req.params.id, function (data, err) {
+                            if (err) {
+                                console.log(err);
+                            } else {
+                                return res.json(data);
+                            }
+                        })
+                    }  
+                });
+            }else{
+                db.executeSql("DELETE FROM `committee` WHERE id=" + req.params.id, function (data, err) {
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        return res.json(data);
+                    }
+                })
+            }
+           
         }
     });
 });
