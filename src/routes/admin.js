@@ -834,12 +834,12 @@ router.post("/UploadCommitteeImage", (req, res, next) => {
         },
         // By default, multer removes file extensions so let's add them back
         filename: function (req, file, cb) {
-
             cb(null, imgname + path.extname(file.originalname));
         }
     });
     let upload = multer({ storage: storage }).single('file');
     upload(req, res, function (err) {
+        // console.log(req);
         console.log("path=", config.url + 'images/committee/' + req.file.filename);
 
         if (req.fileValidationError) {
@@ -859,14 +859,15 @@ router.post("/UploadCommitteeImage", (req, res, next) => {
     });
 });
 router.post("/SaveCommitteeDetails", (req, res, next) => {
-    db.executeSql("INSERT INTO `committee`(`institute_id`, `commTitle`,`commImage`, `createddate`) VALUES ('" + req.body.institute_id + "','" + req.body.infraTitle + "','" + req.body.infraImage + "',CURRENT_TIMESTAMP)", function (data, err) {
+    console.log(req.body)
+    db.executeSql("INSERT INTO `committee`(`institute_id`, `commTitle`,`commImage`, `createddate`) VALUES ('" + req.body.institute_id + "','" + req.body.commTitle + "','" + req.body.commImage + "',CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
             res.json("error");
             console.log(err)
         } else {
-            if (req.body.infraMultiImage.length > 0) {
-                for (let i = 0; i < req.body.infraMultiImage.length; i++) {
-                    db.executeSql("INSERT INTO `commimage`(`commId`, `image`) VALUES (" + data.insertId + ",'" + req.body.infraMultiImage[i] + "');", function (data1, err) {
+            if (req.body.commMultiImage.length > 0) {
+                for (let i = 0; i < req.body.commMultiImage.length; i++) {
+                    db.executeSql("INSERT INTO `commimage`(`commId`, `image`) VALUES (" + data.insertId + ",'" + req.body.commMultiImage[i] + "');", function (data1, err) {
                         if (err) {
                             res.json("error");
                         } else {
@@ -918,6 +919,7 @@ router.post("/deleteCommitteeImage",(req,res,next)=>{
             return res.json('sucess');
         }  
     });
+   
 })
 router.get("/RemoveCommitteeDetails/:id", (req, res, next) => {
     // db.executeSql("DELETE FROM `infrastructure` WHERE id=" + req.params.id + ";", function (data, err) {
@@ -931,8 +933,9 @@ router.get("/RemoveCommitteeDetails/:id", (req, res, next) => {
         if (err) {
             console.log("Error in store.js", err);
         } else {
-            if(data[0].commImage != 'null'){
-                fs.unlink('/var/www/html/cesbackend'+data[0].commImage, function (err) {
+            if(data[0].commImage != 'null' && data[0].commImage != 'undefined'){
+                // fs.unlink('/var/www/html/cesbackend'+data[0].commImage, function (err)
+                fs.unlink('F:/pranav/CES/CES-main/ces-society-backend'+data[0].commImage, function (err) {
                     if (err) {
                         throw err;
                     }else{
