@@ -875,7 +875,7 @@ router.post("/SaveCommitteeDetails", (req, res, next) => {
                     });
                 }
             }
-            const values = [req.body.infraDetails]
+            const values = [req.body.commDetails]
             const escapedValues = values.map(mysql.escape);
             db.executeSql1("UPDATE committee SET commDetails=" + escapedValues + " WHERE id= " + data.insertId, escapedValues, function (data1, err) {
                 if (err) {
