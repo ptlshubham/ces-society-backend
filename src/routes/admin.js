@@ -651,10 +651,20 @@ router.get("/RemoveInfraDetails/:id", (req, res, next) => {
         if (err) {
             console.log("Error in store.js", err);
         } else {
-            if(data[0].infraImage != 'null'){
+            if(data[0].infraImage != 'null' && data[0].infraImage != 'undefined'){
                 fs.unlink('/var/www/html/cesbackend'+data[0].infraImage, function (err) {
                     if (err) {
-                        throw err;
+                        if(err){
+                            db.executeSql("DELETE FROM `infrastructure` WHERE id=" + req.params.id, function (data, err) {
+                                if (err) {
+                                    console.log(err);
+                                } else {
+                                    return res.json(data);
+                                }
+                            })
+                        }
+                        // throw err;
+
                     }else{
                         db.executeSql("DELETE FROM `infrastructure` WHERE id=" + req.params.id, function (data, err) {
                             if (err) {
@@ -937,7 +947,13 @@ router.get("/RemoveCommitteeDetails/:id", (req, res, next) => {
                 // fs.unlink('/var/www/html/cesbackend'+data[0].commImage, function (err)
                 fs.unlink('F:/pranav/CES/CES-main/ces-society-backend'+data[0].commImage, function (err) {
                     if (err) {
-                        throw err;
+                        db.executeSql("DELETE FROM `committee` WHERE id=" + req.params.id, function (data, err) {
+                            if (err) {
+                                console.log(err);
+                            } else {
+                                return res.json(data);
+                            }
+                        })
                     }else{
                         db.executeSql("DELETE FROM `committee` WHERE id=" + req.params.id, function (data, err) {
                             if (err) {
