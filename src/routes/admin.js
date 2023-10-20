@@ -903,16 +903,18 @@ router.post("/SaveCommitteeDetails", (req, res, next) => {
 
 });
 router.post("/UpdateCommitteeDetails", (req, res, next) => {
-    db.executeSql("UPDATE `committee` SET `commTitle`='" + req.body.infraTitle + "',`commImage`='" + req.body.infraImage + "',`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id + ";", function (data, err) {
+    console.log(req.body);
+    db.executeSql("UPDATE `committee` SET `commTitle`='" + req.body.commTitle + "',`commImage`='" + req.body.commImage + "',`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id + ";", function (data, err) {
         if (err) {
+            console.log(err);
             res.json("error");
         } else {
-            const values = [req.body.infraDetails]
+            const values = [req.body.commDetails]
             const escapedValues = values.map(mysql.escape);
             db.executeSql1("UPDATE committee SET commDetails=" + escapedValues + " WHERE id= " + req.body.id, escapedValues, function (data1, err) {
                 if (err) {
-                    res.json("error");
                     console.log(err)
+                    res.json("error");
                 } else {
                 }
             });
@@ -978,7 +980,7 @@ router.get("/RemoveCommitteeDetails/:id", (req, res, next) => {
     });
 });
 router.get("/GetCommitteeDetailsById/:id", (req, res, next) => {
-    db.executeSql("SELECT * FROM committee WHERE institute_id=" + req.params.id + " ORDER BY createddate DESC;", function (data, err) {
+    db.executeSql("SELECT * FROM committee WHERE institute_id=" + req.params.id + " ORDER BY createddate ASC;", function (data, err) {
         if (err) {
             console.log(err);
         } else {
