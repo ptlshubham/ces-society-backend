@@ -805,7 +805,7 @@ router.post("/UploadMoreImage", (req, res, next) => {
 
 
 
-router.post("/UploadCommMultiImage", midway.checkToken, (req, res, next) => {
+router.post("/UploadCommMultiImage", (req, res, next) => {
     var imgname = generateUUID();
     const storage = multer.diskStorage({
         destination: function (req, file, cb) {
