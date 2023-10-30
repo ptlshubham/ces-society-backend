@@ -805,6 +805,85 @@ router.post("/UploadMoreImage", (req, res, next) => {
 
 
 
+
+
+
+router.get("/GetCommitteeDetailsById/:id", (req, res, next) => {
+    db.executeSql("SELECT * FROM committee WHERE institute_id=" + req.params.id + " ORDER BY createddate ASC;", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+router.get("/GetCommitteeMultiImagesById/:id", (req, res, next) => {
+    console.log(req.params)
+    db.executeSql("SELECT * FROM commimage WHERE commId=" + req.params.id + ";", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+router.post("/deleteCommitteeImage",(req,res,next)=>{
+
+    fs.unlink('/var/www/html/cesbackend'+req.body.img, function (err) {
+        if (err) {
+            throw err;
+        }else{
+            return res.json('sucess');
+        }  
+    });
+   
+});
+router.get("/RemoveCommitteeDetails/:id", (req, res, next) => {
+    // db.executeSql("DELETE FROM `infrastructure` WHERE id=" + req.params.id + ";", function (data, err) {
+    //     if (err) {
+    //         console.log(err);
+    //     } else {
+    //         return res.json(data);
+    //     }
+    // });
+    db.executeSql("SELECT * FROM committee WHERE id=" + req.params.id + ";", function (data, err) {
+        if (err) {
+            console.log("Error in store.js", err);
+        } else {
+            if(data[0].commImage != 'null' && data[0].commImage != 'undefined'){
+                // fs.unlink('/var/www/html/cesbackend'+data[0].commImage, function (err)
+                fs.unlink('F:/pranav/CES/CES-main/ces-society-backend'+data[0].commImage, function (err) {
+                    if (err) {
+                        db.executeSql("DELETE FROM `committee` WHERE id=" + req.params.id, function (data, err) {
+                            if (err) {
+                                console.log(err);
+                            } else {
+                                return res.json(data);
+                            }
+                        })
+                    }else{
+                        db.executeSql("DELETE FROM `committee` WHERE id=" + req.params.id, function (data, err) {
+                            if (err) {
+                                console.log(err);
+                            } else {
+                                return res.json(data);
+                            }
+                        })
+                    }  
+                });
+            }else{
+                db.executeSql("DELETE FROM `committee` WHERE id=" + req.params.id, function (data, err) {
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        return res.json(data);
+                    }
+                })
+            }
+           
+        }
+    });
+});
 router.post("/UploadCommMultiImage", (req, res, next) => {
     var imgname = generateUUID();
     const storage = multer.diskStorage({
@@ -868,6 +947,26 @@ router.post("/UploadCommitteeImage", (req, res, next) => {
         return res.json('/images/committee/' + req.file.filename);
     });
 });
+router.post("/UpdateCommitteeDetails", (req, res, next) => {
+    console.log(req.body);
+    db.executeSql("UPDATE `committee` SET `commTitle`='" + req.body.commTitle + "',`commImage`='" + req.body.commImage + "',`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id + ";", function (data, err) {
+        if (err) {
+            console.log(err);
+            res.json("error");
+        } else {
+            const values = [req.body.commDetails]
+            const escapedValues = values.map(mysql.escape);
+            db.executeSql1("UPDATE committee SET commDetails=" + escapedValues + " WHERE id= " + req.body.id, escapedValues, function (data1, err) {
+                if (err) {
+                    console.log(err)
+                    res.json("error");
+                } else {
+                }
+            });
+            return res.json('success');
+        }
+    });
+});
 router.post("/SaveCommitteeDetails", (req, res, next) => {
     console.log(req.body)
     db.executeSql("INSERT INTO `committee`(`institute_id`, `commTitle`,`commImage`, `createddate`) VALUES ('" + req.body.institute_id + "','" + req.body.commTitle + "','" + req.body.commImage + "',CURRENT_TIMESTAMP)", function (data, err) {
@@ -902,27 +1001,28 @@ router.post("/SaveCommitteeDetails", (req, res, next) => {
     // return res.json('success');
 
 });
-router.post("/UpdateCommitteeDetails", (req, res, next) => {
-    console.log(req.body);
-    db.executeSql("UPDATE `committee` SET `commTitle`='" + req.body.commTitle + "',`commImage`='" + req.body.commImage + "',`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id + ";", function (data, err) {
+
+
+router.get("/GetPlacementDetailsById/:id", (req, res, next) => {
+    db.executeSql("SELECT * FROM placement WHERE institute_id=" + req.params.id + " ORDER BY createddate ASC;", function (data, err) {
         if (err) {
             console.log(err);
-            res.json("error");
         } else {
-            const values = [req.body.commDetails]
-            const escapedValues = values.map(mysql.escape);
-            db.executeSql1("UPDATE committee SET commDetails=" + escapedValues + " WHERE id= " + req.body.id, escapedValues, function (data1, err) {
-                if (err) {
-                    console.log(err)
-                    res.json("error");
-                } else {
-                }
-            });
-            return res.json('success');
+            return res.json(data);
         }
-    });
+    })
 });
-router.post("/deleteCommitteeImage",(req,res,next)=>{
+router.get("/GetPlacementMultiImagesById/:id", (req, res, next) => {
+    console.log(req.params)
+    db.executeSql("SELECT * FROM placementimage WHERE placementId=" + req.params.id + ";", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+router.post("/deletePlacementImage",(req,res,next)=>{
 
     fs.unlink('/var/www/html/cesbackend'+req.body.img, function (err) {
         if (err) {
@@ -932,8 +1032,8 @@ router.post("/deleteCommitteeImage",(req,res,next)=>{
         }  
     });
    
-})
-router.get("/RemoveCommitteeDetails/:id", (req, res, next) => {
+});
+router.get("/RemovePlacementDetails/:id", (req, res, next) => {
     // db.executeSql("DELETE FROM `infrastructure` WHERE id=" + req.params.id + ";", function (data, err) {
     //     if (err) {
     //         console.log(err);
@@ -941,15 +1041,15 @@ router.get("/RemoveCommitteeDetails/:id", (req, res, next) => {
     //         return res.json(data);
     //     }
     // });
-    db.executeSql("SELECT * FROM committee WHERE id=" + req.params.id + ";", function (data, err) {
+    db.executeSql("SELECT * FROM placement WHERE id=" + req.params.id + ";", function (data, err) {
         if (err) {
             console.log("Error in store.js", err);
         } else {
-            if(data[0].commImage != 'null' && data[0].commImage != 'undefined'){
+            if(data[0].placeImage != 'null' && data[0].placeImage != 'undefined'){
                 // fs.unlink('/var/www/html/cesbackend'+data[0].commImage, function (err)
-                fs.unlink('F:/pranav/CES/CES-main/ces-society-backend'+data[0].commImage, function (err) {
+                fs.unlink('F:/pranav/CES/CES-main/ces-society-backend'+data[0].placeImage, function (err) {
                     if (err) {
-                        db.executeSql("DELETE FROM `committee` WHERE id=" + req.params.id, function (data, err) {
+                        db.executeSql("DELETE FROM `placement` WHERE id=" + req.params.id, function (data, err) {
                             if (err) {
                                 console.log(err);
                             } else {
@@ -957,7 +1057,7 @@ router.get("/RemoveCommitteeDetails/:id", (req, res, next) => {
                             }
                         })
                     }else{
-                        db.executeSql("DELETE FROM `committee` WHERE id=" + req.params.id, function (data, err) {
+                        db.executeSql("DELETE FROM `placement` WHERE id=" + req.params.id, function (data, err) {
                             if (err) {
                                 console.log(err);
                             } else {
@@ -967,7 +1067,7 @@ router.get("/RemoveCommitteeDetails/:id", (req, res, next) => {
                     }  
                 });
             }else{
-                db.executeSql("DELETE FROM `committee` WHERE id=" + req.params.id, function (data, err) {
+                db.executeSql("DELETE FROM `placement` WHERE id=" + req.params.id, function (data, err) {
                     if (err) {
                         console.log(err);
                     } else {
@@ -979,25 +1079,126 @@ router.get("/RemoveCommitteeDetails/:id", (req, res, next) => {
         }
     });
 });
-router.get("/GetCommitteeDetailsById/:id", (req, res, next) => {
-    db.executeSql("SELECT * FROM committee WHERE institute_id=" + req.params.id + " ORDER BY createddate ASC;", function (data, err) {
+router.post("/UploadPlacementMultiImage", (req, res, next) => {
+    var imgname = generateUUID();
+    const storage = multer.diskStorage({
+        destination: function (req, file, cb) {
+            cb(null, 'images/commmulti');
+        },
+        // By default, multer removes file extensions so let's add them back
+        filename: function (req, file, cb) {
+            cb(null, imgname + path.extname(file.originalname));
+        }
+    });
+    let upload = multer({ storage: storage }).single('file');
+    upload(req, res, function (err) {
+        console.log("path=", config.url + 'images/placemulti/' + req.file.filename);
+
+        if (req.fileValidationError) {
+            console.log("err1", req.fileValidationError);
+            return res.json("err1", req.fileValidationError);
+        } else if (!req.file) {
+            console.log('Please select an image to upload');
+            return res.json('Please select an image to upload');
+        } else if (err instanceof multer.MulterError) {
+            console.log("err3");
+            return res.json("err3", err);
+        } else if (err) {
+            console.log("err4");
+            return res.json("err4", err);
+        }
+        return res.json('/images/placemulti/' + req.file.filename);
+    });
+});
+router.post("/UploadPlacementImage", (req, res, next) => {
+    var imgname = generateUUID();
+    const storage = multer.diskStorage({
+        destination: function (req, file, cb) {
+            cb(null, 'images/placement');
+        },
+        // By default, multer removes file extensions so let's add them back
+        filename: function (req, file, cb) {
+            cb(null, imgname + path.extname(file.originalname));
+        }
+    });
+    let upload = multer({ storage: storage }).single('file');
+    upload(req, res, function (err) {
+        // console.log(req);
+        console.log("path=", config.url + 'images/placement/' + req.file.filename);
+
+        if (req.fileValidationError) {
+            console.log("err1", req.fileValidationError);
+            return res.json("err1", req.fileValidationError);
+        } else if (!req.file) {
+            console.log('Please select an image to upload');
+            return res.json('Please select an image to upload');
+        } else if (err instanceof multer.MulterError) {
+            console.log("err3");
+            return res.json("err3", err);
+        } else if (err) {
+            console.log("err4");
+            return res.json("err4", err);
+        }
+        return res.json('/images/placement/' + req.file.filename);
+    });
+});
+router.post("/UpdatePlacementDetails", (req, res, next) => {
+    console.log(req.body);
+    db.executeSql("UPDATE `placement` SET `placeTitle`='" + req.body.commTitle + "',`placeImage`='" + req.body.commImage + "',`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id + ";", function (data, err) {
         if (err) {
             console.log(err);
+            res.json("error");
         } else {
-            return res.json(data);
+            const values = [req.body.commDetails]
+            const escapedValues = values.map(mysql.escape);
+            db.executeSql1("UPDATE placement SET placeDetails=" + escapedValues + " WHERE id= " + req.body.id, escapedValues, function (data1, err) {
+                if (err) {
+                    console.log(err)
+                    res.json("error");
+                } else {
+                }
+            });
+            return res.json('success');
         }
-    })
+    });
 });
-router.get("/GetCommitteeMultiImagesById/:id", (req, res, next) => {
-    console.log(req.params)
-    db.executeSql("SELECT * FROM commimage WHERE commId=" + req.params.id + ";", function (data, err) {
+router.post("/SavePlacementDetails", (req, res, next) => {
+    console.log(req.body)
+    db.executeSql("INSERT INTO `placement`(`institute_id`, `placeTitle`,`placeImage`, `createddate`) VALUES ('" + req.body.institute_id + "','" + req.body.placeTitle + "','" + req.body.placeImage + "',CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
-            console.log(err);
+            res.json("error");
+            console.log(err)
         } else {
-            return res.json(data);
+            if (req.body.placeMultiImage.length > 0) {
+                for (let i = 0; i < req.body.placeMultiImage.length; i++) {
+                    db.executeSql("INSERT INTO `placementimage`(`placementId`, `image`) VALUES (" + data.insertId + ",'" + req.body.placeMultiImage[i] + "');", function (data1, err) {
+                        if (err) {
+                            res.json("error");
+                        } else {
+                        }
+                    });
+                }
+            }
+            const values = [req.body.placeDetails]
+            const escapedValues = values.map(mysql.escape);
+            db.executeSql1("UPDATE placement SET placeDetails=" + escapedValues + " WHERE id= " + data.insertId, escapedValues, function (data1, err) {
+                if (err) {
+                    res.json("error");
+                    console.log(err)
+                } else {
+                    return res.json('success');
+
+                }
+            });
+            // return res.json('success');
         }
-    })
+    });
+    // return res.json('success');
+
 });
+
+
+
 
 
 
