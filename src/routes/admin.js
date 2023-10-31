@@ -1149,7 +1149,7 @@ router.post("/UpdatePlacementDetails", (req, res, next) => {
             console.log(err);
             res.json("error");
         } else {
-            const values = [req.body.commDetails]
+            const values = [req.body.placeDetails]
             const escapedValues = values.map(mysql.escape);
             db.executeSql1("UPDATE placement SET placeDetails=" + escapedValues + " WHERE id= " + req.body.id, escapedValues, function (data1, err) {
                 if (err) {
@@ -1182,6 +1182,70 @@ router.post("/SavePlacementDetails", (req, res, next) => {
             const values = [req.body.placeDetails]
             const escapedValues = values.map(mysql.escape);
             db.executeSql1("UPDATE placement SET placeDetails=" + escapedValues + " WHERE id= " + data.insertId, escapedValues, function (data1, err) {
+                if (err) {
+                    res.json("error");
+                    console.log(err)
+                } else {
+                    return res.json('success');
+
+                }
+            });
+            // return res.json('success');
+        }
+    });
+    // return res.json('success');
+
+});
+
+
+router.get("/GetResearchDetailsById/:id", (req, res, next) => {
+    db.executeSql("SELECT * FROM research WHERE institute_id=" + req.params.id + " ORDER BY createddate ASC;", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+router.get("/RemoveResearchDetails/:id", (req, res, next) => {
+    db.executeSql("DELETE FROM `research` WHERE id=" + req.params.id, function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+router.post("/UpdateResearchDetails", (req, res, next) => {
+    console.log(req.body);
+    db.executeSql("UPDATE `research` SET `researchTitle`='" + req.body.researchTitle + "',`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id + ";", function (data, err) {
+        if (err) {
+            console.log(err);
+            res.json("error");
+        } else {
+            const values = [req.body.researchDetails]
+            const escapedValues = values.map(mysql.escape);
+            db.executeSql1("UPDATE research SET researchDetails=" + escapedValues + " WHERE id= " + req.body.id, escapedValues, function (data1, err) {
+                if (err) {
+                    console.log(err)
+                    res.json("error");
+                } else {
+                }
+            });
+            return res.json('success');
+        }
+    });
+});
+router.post("/SaveResearchDetails", (req, res, next) => {
+    console.log(req.body)
+    db.executeSql("INSERT INTO `research`(`institute_id`, `researchTitle`, `createddate`) VALUES ('" + req.body.institute_id + "','" + req.body.researchTitle + "',CURRENT_TIMESTAMP)", function (data, err) {
+        if (err) {
+            res.json("error");
+            console.log(err)
+        } else {
+            const values = [req.body.researchDetails]
+            const escapedValues = values.map(mysql.escape);
+            db.executeSql1("UPDATE research SET researchDetails=" + escapedValues + " WHERE id= " + data.insertId, escapedValues, function (data1, err) {
                 if (err) {
                     res.json("error");
                     console.log(err)
