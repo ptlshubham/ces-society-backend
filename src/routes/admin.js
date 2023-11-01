@@ -1260,13 +1260,6 @@ router.post("/SaveResearchDetails", (req, res, next) => {
     // return res.json('success');
 
 });
-
-
-
-
-
-
-
 router.post("/SaveAlumniDetails", (req, res, next) => {
     db.executeSql("INSERT INTO `alumni`(`instituteName`, `alumniName`, `alumniCourse`, `alumniYear`, `contactNumber`, `email`, `createddate`) VALUES  ('" + req.body.instituteName + "','" + req.body.alumniName + "','" + req.body.alumniCourse + "','" + req.body.alumniYear + "','" + req.body.contactNumber + "','" + req.body.email + "',CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
@@ -1282,7 +1275,6 @@ router.post("/SaveAlumniDetails", (req, res, next) => {
         }
     });
 });
-
 router.post("/SaveRahatokarshDonation", (req, res, next) => {
     db.executeSql("INSERT INTO `rahatokarsh`(`name`, `number`, `email`, `amount`, `isactive`, `createddate`) VALUES  ('" + req.body.donnerName + "','" + req.body.contactNumber + "','" + req.body.email + "','" + req.body.donationAmount + "',false,CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
@@ -1309,22 +1301,73 @@ router.get("/GetRahatokarshDonationList", (req, res, next) => {
 });
 
 
-// // Adding functionality
-// doc
 
-//     .fontSize(27)
-//     .text('This the article for GeeksforGeeks', 100, 100);
+router.post("/SaveNewNaacDetails", (req, res, next) => {
+    console.log(req.body)
+    db.executeSql("INSERT INTO `naacnew`(`instituteId`, `criteria`, `createddate`) VALUES ('" + req.body.institute_id + "','" + req.body.selectedCriteria + "',CURRENT_TIMESTAMP)", function (data, err) {
+        if (err) {
+            res.json("error");
+            console.log(err)
+        } else {
+            const values = [req.body.naacDetails]
+            const escapedValues = values.map(mysql.escape);
+            db.executeSql1("UPDATE naacnew SET details=" + escapedValues + " WHERE id= " + data.insertId, escapedValues, function (data1, err) {
+                if (err) {
+                    res.json("error");
+                    console.log(err)
+                } else {
+                    return res.json('success');
 
-// // Adding an image in the pdf.
+                }
+            });
+            // return res.json('success');
+        }
+    });
+    // return res.json('success');
 
-// doc.image('images/blogs/3b993646-e4bf-442a-8af1.jpg', {
-//     fit: [400, 400],
-//     align: 'justify',
-//     valign: 'justify'
-// });
+});
 
-// // Finalize PDF file
-// doc.end();
+router.get("/GetNewNaacDetailsById/:id", (req, res, next) => {
+    db.executeSql("SELECT * FROM naacnew WHERE instituteid=" + req.params.id + " ORDER BY createddate ASC;", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+router.get("/removeNewNaacDetails/:id", (req, res, next) => {
+    db.executeSql("DELETE FROM `naacnew` WHERE id=" + req.params.id, function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json('sucess');
+        }
+    })
+});
+
+router.post("/UpdateNewNaacDetails", (req, res, next) => {
+    console.log(req.body);
+    db.executeSql("UPDATE `naacnew` SET `criteria`='" + req.body.selectedCriteria + "',`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id + ";", function (data, err) {
+        if (err) {
+            console.log(err);
+            res.json("error");
+        } else {
+            const values = [req.body.naacDetails]
+            const escapedValues = values.map(mysql.escape);
+            db.executeSql1("UPDATE naacnew SET details=" + escapedValues + " WHERE id= " + req.body.id, escapedValues, function (data1, err) {
+                if (err) {
+                    console.log(err)    
+                    res.json("error");
+                } else {
+                }
+            });
+            return res.json('success');
+        }
+    });
+});
+
+
 
 
 
