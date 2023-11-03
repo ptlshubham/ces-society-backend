@@ -196,10 +196,10 @@ router.post("/RemoveImagesByIdDetails", (req, res, next) => {
         if (err) {
             console.log("Error in store.js", err);
         } else {
-            fs.unlink('/var/www/html/cesbackend'+data[0].files, function (err) {
+            fs.unlink('/var/www/html/cesbackend' + data[0].files, function (err) {
                 if (err) {
                     throw err;
-                }else{
+                } else {
                     db.executeSql("DELETE FROM `image` WHERE id=" + req.body.id + ";", function (data, err) {
                         if (err) {
                             console.log(err);
@@ -207,7 +207,7 @@ router.post("/RemoveImagesByIdDetails", (req, res, next) => {
                             return res.json(data);
                         }
                     })
-                }  
+                }
             });
         }
     });
@@ -530,10 +530,10 @@ router.get("/RemoveBlogDetails/:id", (req, res, next) => {
         if (err) {
             console.log("Error in store.js", err);
         } else {
-            fs.unlink('/var/www/html/cesbackend'+data[0].blogImage, function (err) {
+            fs.unlink('/var/www/html/cesbackend' + data[0].blogImage, function (err) {
                 if (err) {
                     throw err;
-                }else{
+                } else {
                     db.executeSql("DELETE FROM blog WHERE id=" + req.params.id + ";", function (data, err) {
                         if (err) {
                             console.log(err);
@@ -541,7 +541,7 @@ router.get("/RemoveBlogDetails/:id", (req, res, next) => {
                             return res.json(data);
                         }
                     })
-                }  
+                }
             });
         }
     });
@@ -636,14 +636,14 @@ router.post("/UpdateInfraDetails", (req, res, next) => {
         }
     });
 });
-router.post("/deleteInfraImage",(req,res,next)=>{
+router.post("/deleteInfraImage", (req, res, next) => {
 
-    fs.unlink('/var/www/html/cesbackend'+req.body.img, function (err) {
+    fs.unlink('/var/www/html/cesbackend' + req.body.img, function (err) {
         if (err) {
             throw err;
-        }else{
+        } else {
             return res.json('sucess');
-        }  
+        }
     });
 })
 router.get("/RemoveInfraDetails/:id", (req, res, next) => {
@@ -651,10 +651,10 @@ router.get("/RemoveInfraDetails/:id", (req, res, next) => {
         if (err) {
             console.log("Error in store.js", err);
         } else {
-            if(data[0].infraImage != 'null' && data[0].infraImage != 'undefined'){
-                fs.unlink('/var/www/html/cesbackend'+data[0].infraImage, function (err) {
+            if (data[0].infraImage != 'null' && data[0].infraImage != 'undefined') {
+                fs.unlink('/var/www/html/cesbackend' + data[0].infraImage, function (err) {
                     if (err) {
-                        if(err){
+                        if (err) {
                             db.executeSql("DELETE FROM `infrastructure` WHERE id=" + req.params.id, function (data, err) {
                                 if (err) {
                                     console.log(err);
@@ -665,7 +665,7 @@ router.get("/RemoveInfraDetails/:id", (req, res, next) => {
                         }
                         // throw err;
 
-                    }else{
+                    } else {
                         db.executeSql("DELETE FROM `infrastructure` WHERE id=" + req.params.id, function (data, err) {
                             if (err) {
                                 console.log(err);
@@ -673,10 +673,10 @@ router.get("/RemoveInfraDetails/:id", (req, res, next) => {
                                 return res.json(data);
                             }
                         })
-                    }  
+                    }
                 });
             }
-            else{
+            else {
                 db.executeSql("DELETE FROM `infrastructure` WHERE id=" + req.params.id, function (data, err) {
                     if (err) {
                         console.log(err);
@@ -827,16 +827,16 @@ router.get("/GetCommitteeMultiImagesById/:id", (req, res, next) => {
         }
     })
 });
-router.post("/deleteCommitteeImage",(req,res,next)=>{
+router.post("/deleteCommitteeImage", (req, res, next) => {
 
-    fs.unlink('/var/www/html/cesbackend'+req.body.img, function (err) {
+    fs.unlink('/var/www/html/cesbackend' + req.body.img, function (err) {
         if (err) {
             throw err;
-        }else{
+        } else {
             return res.json('sucess');
-        }  
+        }
     });
-   
+
 });
 router.get("/RemoveCommitteeDetails/:id", (req, res, next) => {
     // db.executeSql("DELETE FROM `infrastructure` WHERE id=" + req.params.id + ";", function (data, err) {
@@ -850,9 +850,9 @@ router.get("/RemoveCommitteeDetails/:id", (req, res, next) => {
         if (err) {
             console.log("Error in store.js", err);
         } else {
-            if(data[0].commImage != 'null' && data[0].commImage != 'undefined'){
+            if (data[0].commImage != 'null' && data[0].commImage != 'undefined') {
                 // fs.unlink('/var/www/html/cesbackend'+data[0].commImage, function (err)
-                fs.unlink('F:/pranav/CES/CES-main/ces-society-backend'+data[0].commImage, function (err) {
+                fs.unlink('F:/pranav/CES/CES-main/ces-society-backend' + data[0].commImage, function (err) {
                     if (err) {
                         db.executeSql("DELETE FROM `committee` WHERE id=" + req.params.id, function (data, err) {
                             if (err) {
@@ -861,7 +861,7 @@ router.get("/RemoveCommitteeDetails/:id", (req, res, next) => {
                                 return res.json(data);
                             }
                         })
-                    }else{
+                    } else {
                         db.executeSql("DELETE FROM `committee` WHERE id=" + req.params.id, function (data, err) {
                             if (err) {
                                 console.log(err);
@@ -869,9 +869,9 @@ router.get("/RemoveCommitteeDetails/:id", (req, res, next) => {
                                 return res.json(data);
                             }
                         })
-                    }  
+                    }
                 });
-            }else{
+            } else {
                 db.executeSql("DELETE FROM `committee` WHERE id=" + req.params.id, function (data, err) {
                     if (err) {
                         console.log(err);
@@ -880,7 +880,7 @@ router.get("/RemoveCommitteeDetails/:id", (req, res, next) => {
                     }
                 })
             }
-           
+
         }
     });
 });
@@ -1022,16 +1022,16 @@ router.get("/GetPlacementMultiImagesById/:id", (req, res, next) => {
         }
     })
 });
-router.post("/deletePlacementImage",(req,res,next)=>{
+router.post("/deletePlacementImage", (req, res, next) => {
 
-    fs.unlink('/var/www/html/cesbackend'+req.body.img, function (err) {
+    fs.unlink('/var/www/html/cesbackend' + req.body.img, function (err) {
         if (err) {
             throw err;
-        }else{
+        } else {
             return res.json('sucess');
-        }  
+        }
     });
-   
+
 });
 router.get("/RemovePlacementDetails/:id", (req, res, next) => {
     // db.executeSql("DELETE FROM `infrastructure` WHERE id=" + req.params.id + ";", function (data, err) {
@@ -1045,9 +1045,9 @@ router.get("/RemovePlacementDetails/:id", (req, res, next) => {
         if (err) {
             console.log("Error in store.js", err);
         } else {
-            if(data[0].placeImage != 'null' && data[0].placeImage != 'undefined'){
+            if (data[0].placeImage != 'null' && data[0].placeImage != 'undefined') {
                 // fs.unlink('/var/www/html/cesbackend'+data[0].commImage, function (err)
-                fs.unlink('F:/pranav/CES/CES-main/ces-society-backend'+data[0].placeImage, function (err) {
+                fs.unlink('F:/pranav/CES/CES-main/ces-society-backend' + data[0].placeImage, function (err) {
                     if (err) {
                         db.executeSql("DELETE FROM `placement` WHERE id=" + req.params.id, function (data, err) {
                             if (err) {
@@ -1056,7 +1056,7 @@ router.get("/RemovePlacementDetails/:id", (req, res, next) => {
                                 return res.json(data);
                             }
                         })
-                    }else{
+                    } else {
                         db.executeSql("DELETE FROM `placement` WHERE id=" + req.params.id, function (data, err) {
                             if (err) {
                                 console.log(err);
@@ -1064,9 +1064,9 @@ router.get("/RemovePlacementDetails/:id", (req, res, next) => {
                                 return res.json(data);
                             }
                         })
-                    }  
+                    }
                 });
-            }else{
+            } else {
                 db.executeSql("DELETE FROM `placement` WHERE id=" + req.params.id, function (data, err) {
                     if (err) {
                         console.log(err);
@@ -1075,7 +1075,7 @@ router.get("/RemovePlacementDetails/:id", (req, res, next) => {
                     }
                 })
             }
-           
+
         }
     });
 });
@@ -1301,6 +1301,201 @@ router.get("/GetRahatokarshDonationList", (req, res, next) => {
 });
 
 
+router.get("/GetCampusDetailsById/:id", (req, res, next) => {
+    db.executeSql("SELECT * FROM campus WHERE institute_id=" + req.params.id + " ORDER BY createddate ASC;", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+router.get("/GetCampusMultiImagesById/:id", (req, res, next) => {
+    console.log(req.params)
+    db.executeSql("SELECT * FROM campusimage WHERE campusId=" + req.params.id + ";", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+router.post("/deleteCampusImage", (req, res, next) => {
+
+    fs.unlink('/var/www/html/cesbackend' + req.body.img, function (err) {
+        if (err) {
+            throw err;
+        } else {
+            return res.json('sucess');
+        }
+    });
+
+});
+router.get("/RemoveCampusDetails/:id", (req, res, next) => {
+    // db.executeSql("DELETE FROM `infrastructure` WHERE id=" + req.params.id + ";", function (data, err) {
+    //     if (err) {
+    //         console.log(err);
+    //     } else {
+    //         return res.json(data);
+    //     }
+    // });
+    db.executeSql("SELECT * FROM campus WHERE id=" + req.params.id + ";", function (data, err) {
+        if (err) {
+            console.log("Error in store.js", err);
+        } else {
+            if (data[0].campusImage != 'null' && data[0].campusImage != 'undefined') {
+                // fs.unlink('/var/www/html/cesbackend'+data[0].commImage, function (err)
+                fs.unlink('F:/pranav/CES/CES-main/ces-society-backend' + data[0].placeImage, function (err) {
+                    if (err) {
+                        db.executeSql("DELETE FROM `campus` WHERE id=" + req.params.id, function (data, err) {
+                            if (err) {
+                                console.log(err);
+                            } else {
+                                return res.json(data);
+                            }
+                        })
+                    } else {
+                        db.executeSql("DELETE FROM `campus` WHERE id=" + req.params.id, function (data, err) {
+                            if (err) {
+                                console.log(err);
+                            } else {
+                                return res.json(data);
+                            }
+                        })
+                    }
+                });
+            } else {
+                db.executeSql("DELETE FROM `campus` WHERE id=" + req.params.id, function (data, err) {
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        return res.json(data);
+                    }
+                })
+            }
+
+        }
+    });
+});
+router.post("/UploadCampusMultiImage", (req, res, next) => {
+    var imgname = generateUUID();
+    const storage = multer.diskStorage({
+        destination: function (req, file, cb) {
+            cb(null, 'images/campusmulti');
+        },
+        // By default, multer removes file extensions so let's add them back
+        filename: function (req, file, cb) {
+            cb(null, imgname + path.extname(file.originalname));
+        }
+    });
+    let upload = multer({ storage: storage }).single('file');
+    upload(req, res, function (err) {
+        console.log("path=", config.url + 'images/campusmulti/' + req.file.filename);
+
+        if (req.fileValidationError) {
+            console.log("err1", req.fileValidationError);
+            return res.json("err1", req.fileValidationError);
+        } else if (!req.file) {
+            console.log('Please select an image to upload');
+            return res.json('Please select an image to upload');
+        } else if (err instanceof multer.MulterError) {
+            console.log("err3");
+            return res.json("err3", err);
+        } else if (err) {
+            console.log("err4");
+            return res.json("err4", err);
+        }
+        return res.json('/images/campusmulti/' + req.file.filename);
+    });
+});
+router.post("/UploadCampusImage", (req, res, next) => {
+    var imgname = generateUUID();
+    const storage = multer.diskStorage({
+        destination: function (req, file, cb) {
+            cb(null, 'images/campus');
+        },
+        // By default, multer removes file extensions so let's add them back
+        filename: function (req, file, cb) {
+            cb(null, imgname + path.extname(file.originalname));
+        }
+    });
+    let upload = multer({ storage: storage }).single('file');
+    upload(req, res, function (err) {
+        // console.log(req);
+        console.log("path=", config.url + 'images/campus/' + req.file.filename);
+
+        if (req.fileValidationError) {
+            console.log("err1", req.fileValidationError);
+            return res.json("err1", req.fileValidationError);
+        } else if (!req.file) {
+            console.log('Please select an image to upload');
+            return res.json('Please select an image to upload');
+        } else if (err instanceof multer.MulterError) {
+            console.log("err3");
+            return res.json("err3", err);
+        } else if (err) {
+            console.log("err4");
+            return res.json("err4", err);
+        }
+        return res.json('/images/campus/' + req.file.filename);
+    });
+});
+router.post("/UpdateCampusDetails", (req, res, next) => {
+    console.log(req.body);
+    db.executeSql("UPDATE `campus` SET `campusTitle`='" + req.body.campusTitle + "',`campusImage`='" + req.body.campusImage + "',`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id + ";", function (data, err) {
+        if (err) {
+            console.log(err);
+            res.json("error");
+        } else {
+            const values = [req.body.campusDetails]
+            const escapedValues = values.map(mysql.escape);
+            db.executeSql1("UPDATE campus SET campusDetails=" + escapedValues + " WHERE id= " + req.body.id, escapedValues, function (data1, err) {
+                if (err) {
+                    console.log(err)
+                    res.json("error");
+                } else {
+                }
+            });
+            return res.json('success');
+        }
+    });
+});
+router.post("/SaveCampusDetails", (req, res, next) => {
+    console.log(req.body)
+    db.executeSql("INSERT INTO `campus`(`institute_id`, `campusTitle`,`campusImage`, `createddate`) VALUES ('" + req.body.institute_id + "','" + req.body.campusTitle + "','" + req.body.campusImage + "',CURRENT_TIMESTAMP)", function (data, err) {
+        if (err) {
+            res.json("error");
+            console.log(err)
+        } else {
+            if (req.body.campusMultiImage.length > 0) {
+                for (let i = 0; i < req.body.campusMultiImage.length; i++) {
+                    db.executeSql("INSERT INTO `campusimage`(`campusId`, `image`) VALUES (" + data.insertId + ",'" + req.body.campusMultiImage[i] + "');", function (data1, err) {
+                        if (err) {
+                            res.json("error");
+                        } else {
+                        }
+                    });
+                }
+            }
+            const values = [req.body.campusDetails]
+            const escapedValues = values.map(mysql.escape);
+            db.executeSql1("UPDATE campus SET campusDetails=" + escapedValues + " WHERE id= " + data.insertId, escapedValues, function (data1, err) {
+                if (err) {
+                    res.json("error");
+                    console.log(err)
+                } else {
+                    return res.json('success');
+
+                }
+            });
+            // return res.json('success');
+        }
+    });
+    // return res.json('success');
+
+});
+
+
 
 router.post("/SaveNewNaacDetails", (req, res, next) => {
     console.log(req.body)
@@ -1357,7 +1552,7 @@ router.post("/UpdateNewNaacDetails", (req, res, next) => {
             const escapedValues = values.map(mysql.escape);
             db.executeSql1("UPDATE naacnew SET details=" + escapedValues + " WHERE id= " + req.body.id, escapedValues, function (data1, err) {
                 if (err) {
-                    console.log(err)    
+                    console.log(err)
                     res.json("error");
                 } else {
                 }
@@ -1721,10 +1916,10 @@ router.get("/RemoveResultDetailsById/:id", (req, res, next) => {
         if (err) {
             console.log("Error in store.js", err);
         } else {
-            fs.unlink('/var/www/html/cesbackend'+data[0].image, function (err) {
+            fs.unlink('/var/www/html/cesbackend' + data[0].image, function (err) {
                 if (err) {
                     throw err;
-                }else{
+                } else {
                     db.executeSql("DELETE FROM `result` WHERE id=" + req.params.id, function (data, err) {
                         if (err) {
                             console.log(err);
@@ -1732,11 +1927,11 @@ router.get("/RemoveResultDetailsById/:id", (req, res, next) => {
                             return res.json(data);
                         }
                     })
-                }  
+                }
             });
         }
     });
-  
+
 });
 router.get("/GetResultDetailsById/:id", (req, res, next) => {
     db.executeSql("SELECT * FROM result WHERE institute_id=" + req.params.id + " ORDER BY createddate DESC;", function (data, err) {
@@ -1905,15 +2100,15 @@ router.get("/RemoveStudentListData/:id", (req, res, next) => {
 router.get("/GetNewsByIdDetails/:id", (req, res, next) => {
     let date = new Date();
     const day = new String(date.getDate());
-    let mnth = date.getUTCMonth()+1;
-    if(mnth <=9){
-        mnth = '0'+mnth;
+    let mnth = date.getUTCMonth() + 1;
+    if (mnth <= 9) {
+        mnth = '0' + mnth;
         console.log(mnth);
     }
     const year = date.getFullYear();
-    const concat = '' + year+'-'+ mnth+'-'+day;
+    const concat = '' + year + '-' + mnth + '-' + day;
     console.log(concat);
-    db.executeSql("SELECT * FROM news WHERE institute_id="+req.params.id+" and (startDate IS NULL OR startDate<='"+concat+"') and (endDate IS NULL OR endDate>='"+concat+"')  ORDER BY date DESC ;", function (data, err) {
+    db.executeSql("SELECT * FROM news WHERE institute_id=" + req.params.id + " and (startDate IS NULL OR startDate<='" + concat + "') and (endDate IS NULL OR endDate>='" + concat + "')  ORDER BY date DESC ;", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -1946,11 +2141,11 @@ router.get("/RemoveNewsByIdDetails/:id", (req, res, next) => {
         if (err) {
             console.log("Error in store.js", err);
         } else {
-            if(data[0].files != null){
-                fs.unlink('/var/www/html/cesbackend'+data[0].files, function (err) {
+            if (data[0].files != null) {
+                fs.unlink('/var/www/html/cesbackend' + data[0].files, function (err) {
                     if (err) {
                         throw err;
-                    }else{
+                    } else {
                         db.executeSql("DELETE FROM `news` WHERE id=" + req.params.id, function (data, err) {
                             if (err) {
                                 console.log(err);
@@ -1958,9 +2153,9 @@ router.get("/RemoveNewsByIdDetails/:id", (req, res, next) => {
                                 return res.json(data);
                             }
                         })
-                    }  
+                    }
                 });
-            }else{
+            } else {
                 db.executeSql("DELETE FROM news WHERE id=" + req.params.id, function (data, err) {
                     if (err) {
                         console.log(err);
@@ -1968,51 +2163,51 @@ router.get("/RemoveNewsByIdDetails/:id", (req, res, next) => {
                         return res.json(data);
                     }
                 })
-            } 
+            }
         }
-    }); 
+    });
 });
 router.get("/RemoveAnswerkeyByIdDetails/:id", (req, res, next) => {
     db.executeSql("SELECT * FROM answerkey WHERE id=" + req.params.id + ";", function (data, err) {
         if (err) {
             console.log("Error in store.js", err);
         } else {
-                fs.unlink('/var/www/html/cesbackend'+data[0].files, function (err) {
-                    if (err) {
-                        throw err;
-                    }else{
-                        db.executeSql("DELETE FROM `answerkey` WHERE id=" + req.params.id, function (data, err) {
-                            if (err) {
-                                console.log(err);
-                            } else {
-                                return res.json(data);
-                            }
-                        })
-                    }  
-                }); 
+            fs.unlink('/var/www/html/cesbackend' + data[0].files, function (err) {
+                if (err) {
+                    throw err;
+                } else {
+                    db.executeSql("DELETE FROM `answerkey` WHERE id=" + req.params.id, function (data, err) {
+                        if (err) {
+                            console.log(err);
+                        } else {
+                            return res.json(data);
+                        }
+                    })
+                }
+            });
         }
-    }); 
+    });
 });
 router.get("/RemoveOtherDetailsById/:id", (req, res, next) => {
     db.executeSql("SELECT * FROM others WHERE id=" + req.params.id + ";", function (data, err) {
         if (err) {
             console.log("Error in store.js", err);
         } else {
-                fs.unlink('/var/www/html/cesbackend'+data[0].files, function (err) {
-                    if (err) {
-                        throw err;
-                    }else{
-                        db.executeSql("DELETE FROM others WHERE id=" + req.params.id, function (data, err) {
-                            if (err) {
-                                console.log(err);
-                            } else {
-                                return res.json(data);
-                            }
-                        })
-                    }  
-                }); 
+            fs.unlink('/var/www/html/cesbackend' + data[0].files, function (err) {
+                if (err) {
+                    throw err;
+                } else {
+                    db.executeSql("DELETE FROM others WHERE id=" + req.params.id, function (data, err) {
+                        if (err) {
+                            console.log(err);
+                        } else {
+                            return res.json(data);
+                        }
+                    })
+                }
+            });
         }
-    });   
+    });
 });
 
 router.post("/SaveOthersDataList", (req, res, next) => {
@@ -2066,7 +2261,7 @@ router.get("/GetSubToSubMenuGroupBy", (req, res, next) => {
 })
 
 router.get("/RemoveLinkByID/:id", (req, res, next) => {
-    db.executeSql("select * from naaclink where id="+req.params.id,function(data,err){
+    db.executeSql("select * from naaclink where id=" + req.params.id, function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -2112,16 +2307,16 @@ router.post("/SendCriteriaDetails", (req, res, next) => {
     })
 });
 router.get("/RemoveCrietriaListURL/:id", (req, res, next) => {
-    db.executeSql("select * from naac where id="+req.params.id,function(data,err){
+    db.executeSql("select * from naac where id=" + req.params.id, function (data, err) {
         if (err) {
             console.log(err);
         } else {
-            fs.unlink('/var/www/html/cesbackend'+data[0].paralink, function (err) {
+            fs.unlink('/var/www/html/cesbackend' + data[0].paralink, function (err) {
                 if (err) throw err;
                 // if no error, file has been deleted successfully
                 console.log('File deleted!12');
             });
-            fs.unlink('/var/www/html/cesbackend'+data[0].attachlink, function (err) {
+            fs.unlink('/var/www/html/cesbackend' + data[0].attachlink, function (err) {
                 if (err) throw err;
                 // if no error, file has been deleted successfully
                 console.log('File deleted!');
@@ -2204,14 +2399,14 @@ router.get("/GetMagazineList", (req, res, next) => {
     })
 });
 router.get("/RemoveMagazineList/:id", (req, res, next) => {
-    db.executeSql("select * from magazine WHERE id=" + req.params.id + ";",function(data,err){
+    db.executeSql("select * from magazine WHERE id=" + req.params.id + ";", function (data, err) {
         if (err) {
             console.log(err);
         } else {
-            fs.unlink('/var/www/html/cesbackend'+data[0].files, function (err) {
+            fs.unlink('/var/www/html/cesbackend' + data[0].files, function (err) {
                 if (err) {
                     throw err;
-                }else{
+                } else {
                     db.executeSql("DELETE FROM magazine WHERE id=" + req.params.id + ";", function (data, err) {
                         if (err) {
                             console.log(err);
@@ -2219,10 +2414,10 @@ router.get("/RemoveMagazineList/:id", (req, res, next) => {
                             return res.json(data);
                         }
                     })
-                }  
+                }
             });
         }
-    })  
+    })
 });
 router.get("/GetOthersByIdDetails/:id", (req, res, next) => {
     db.executeSql("SELECT * FROM others WHERE institute_id=" + req.params.id + " ORDER BY createddate DESC;", function (data, err) {
@@ -2392,25 +2587,21 @@ router.post("/UpdatePassword", (req, res, next) => {
         }
     });
 });
-
-
-
 router.get("/RemoveRecentUoloadImage", midway.checkToken, (req, res, next) => {
     db.executeSql("SELECT * FROM image ORDER BY createddate DESC LIMIT 1", function (data, err) {
         if (err) {
             console.log("Error in store.js", err);
         } else {
-            fs.unlink('/var/www/html/cesbackend'+data[0].files, function (err) {
+            fs.unlink('/var/www/html/cesbackend' + data[0].files, function (err) {
                 if (err) {
                     throw err;
-                }else{
+                } else {
                     return res.json(data);
-                }  
+                }
             });
         }
     });
 })
-
 router.post("/Verification", (req, res, next) => {
     let otp = Math.floor(100000 + Math.random() * 900000);
     db.executeSql("INSERT INTO `otp`(`otp`,`createddate`,`createdtime`,`role`,`isactive`,`email`) VALUES (" + otp + ",CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'" + req.body.role + "',true,'" + req.body.email + "')", function (data1, err) {
@@ -2426,7 +2617,6 @@ router.post("/Verification", (req, res, next) => {
         }
     })
 });
-
 router.post("/GetRegisterOtp", (req, res, next) => {
     console.log(req.body)
     db.executeSql("select * from otp where email = '" + req.body.email + "'", function (data, err) {
@@ -2439,8 +2629,6 @@ router.post("/GetRegisterOtp", (req, res, next) => {
 
 
 });
-
-
 function generateUUID() {
     var d = new Date().getTime();
     var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx'.replace(/[xy]/g, function (c) {
