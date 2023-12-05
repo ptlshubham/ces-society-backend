@@ -2627,7 +2627,124 @@ router.post("/GetRegisterOtp", (req, res, next) => {
         }
     });
 
+});
+router.post("/UploadPhotoContestImage", (req, res, next) => {
+    var imgname = generateUUID();
+    const storage = multer.diskStorage({
+        destination: function (req, file, cb) {
+            cb(null, 'images/contest');
+        },
+        // By default, multer removes file extensions so let's add them back
+        filename: function (req, file, cb) {
 
+            cb(null, imgname + path.extname(file.originalname));
+        }
+    });
+    let upload = multer({ storage: storage }).single('file');
+    upload(req, res, function (err) {
+        console.log("path=", config.url + 'images/contest/' + req.file.filename);
+
+        if (req.fileValidationError) {
+            console.log("err1", req.fileValidationError);
+            return res.json("err1", req.fileValidationError);
+        } else if (!req.file) {
+            console.log('Please select an image to upload');
+            return res.json('Please select an image to upload');
+        } else if (err instanceof multer.MulterError) {
+            console.log("err3");
+            return res.json("err3", err);
+        } else if (err) {
+            console.log("err4");
+            return res.json("err4", err);
+        }
+        return res.json('/images/contest/' + req.file.filename);
+    });
+});
+router.post("/UploadContestMultiImage", (req, res, next) => {
+    var imgname = generateUUID();
+    const storage = multer.diskStorage({
+        destination: function (req, file, cb) {
+            cb(null, 'images/contest');
+        },
+        // By default, multer removes file extensions so let's add them back
+        filename: function (req, file, cb) {
+            cb(null, imgname + path.extname(file.originalname));
+        }
+    });
+    let upload = multer({ storage: storage }).single('file');
+    upload(req, res, function (err) {
+        console.log("path=", config.url + 'images/contest/' + req.file.filename);
+
+        if (req.fileValidationError) {
+            console.log("err1", req.fileValidationError);
+            return res.json("err1", req.fileValidationError);
+        } else if (!req.file) {
+            console.log('Please select an image to upload');
+            return res.json('Please select an image to upload');
+        } else if (err instanceof multer.MulterError) {
+            console.log("err3");
+            return res.json("err3", err);
+        } else if (err) {
+            console.log("err4");
+            return res.json("err4", err);
+        }
+        return res.json('/images/contest/' + req.file.filename);
+    });
+});
+router.post("/SavePhotoContestDetails", (req, res, next) => {
+    console.log(req.body);
+    db.executeSql("INSERT INTO `photocontest`(`name`, `contact`, `birthday`, `image`, `isactive`, `createddate`) VALUES  ('" + req.body.name + "','" + req.body.contact + "','" + req.body.birthday + "','" + req.body.image + "',true,CURRENT_TIMESTAMP)", function (data, err) {
+        if (err) {
+            res.json("error");
+            console.log(err)
+        } else {
+            if (req.body.contestMultiImage.length > 0) {
+                for (let i = 0; i < req.body.contestMultiImage.length; i++) {
+                    db.executeSql("INSERT INTO `contestimages`(`userid`, `image`,`createddate`) VALUES(" + data.insertId + ",'" + req.body.contestMultiImage[i] + "',CURRENT_TIMESTAMP);", function (data1, err) {
+                        if (err) {
+                            res.json("error");
+                        } else {
+                        }
+                    });
+                }
+            }
+        }
+        return res.json('success');
+    });
+
+});
+router.get("/GetPhotoContestList", (req, res, next) => {
+    db.executeSql("SELECT * FROM photocontest;", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+router.get("/GetPhotoContestImagesById/:id", (req, res, next) => {
+    db.executeSql("SELECT * FROM contestimages WHERE userid=" + req.params.id + ";", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+router.get("/RemovePhotoContestDetailsById/:id", (req, res, next) => {
+    db.executeSql("DELETE FROM `photocontest` WHERE id=" + req.params.id + ";", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            db.executeSql("DELETE FROM `contestimages` WHERE userid=" + req.params.id + ";", function (data, err) {
+                if (err) {
+                    console.log(err);
+                } else {
+                }
+            })
+        }
+        return res.json(data);
+    })
 });
 function generateUUID() {
     var d = new Date().getTime();
