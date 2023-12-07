@@ -2220,8 +2220,8 @@ router.post("/SaveOthersDataList", (req, res, next) => {
         }
     });
 });
-router.get("/GetNaacLinkData", (req, res, next) => {
-    db.executeSql("SELECT * FROM naaclink;", function (data, err) {
+router.get("/GetNaacLinkData/:id", (req, res, next) => {
+    db.executeSql("SELECT * FROM naaclink WHERE institute_id=" + req.params.id + " ORDER BY createddate DESC;", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -2232,7 +2232,7 @@ router.get("/GetNaacLinkData", (req, res, next) => {
 
 router.post("/SaveNaacLinkDetails", (req, res, next) => {
     console.log(req.body)
-    db.executeSql("INSERT INTO `naaclink`(`criteria`, `subMenu`, `subToSub`, `linkName`, `link`, `isactive`, `createddate`) VALUES ('" + req.body.criteria + "','" + req.body.subMenu + "','" + req.body.subToSub + "','" + req.body.paraname + "','" + req.body.paralink + "',true,CURRENT_TIMESTAMP)", function (data, err) {
+    db.executeSql("INSERT INTO `naaclink`(`institute_id`,`criteria`, `subMenu`, `subToSub`, `linkName`, `link`, `isactive`, `createddate`) VALUES ('" + req.body.institute_id + "','" + req.body.criteria + "','" + req.body.subMenu + "','" + req.body.subToSub + "','" + req.body.paraname + "','" + req.body.paralink + "',true,CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
             res.json("error");
             console.log(err)
@@ -2241,8 +2241,9 @@ router.post("/SaveNaacLinkDetails", (req, res, next) => {
         }
     });
 });
-router.get("/GetSubMenuGroupBy", (req, res, next) => {
-    db.executeSql("SELECT subMenu,COUNT(*) FROM naaclink GROUP BY subMenu;", function (data, err) {
+router.get("/GetSubMenuGroupBy/:id", (req, res, next) => {
+    console.log(req.params)
+    db.executeSql("SELECT subMenu,COUNT(*) FROM naaclink WHERE institute_id=" + req.params.id + " GROUP BY subMenu;", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -2250,8 +2251,8 @@ router.get("/GetSubMenuGroupBy", (req, res, next) => {
         }
     })
 })
-router.get("/GetSubToSubMenuGroupBy", (req, res, next) => {
-    db.executeSql("SELECT subToSub,COUNT(*) FROM naaclink GROUP BY subToSub;", function (data, err) {
+router.get("/GetSubToSubMenuGroupBy/:id", (req, res, next) => {
+    db.executeSql("SELECT subToSub,COUNT(*) FROM naaclink WHERE institute_id=" + req.params.id + " GROUP BY subToSub;", function (data, err) {
         if (err) {
             console.log(err);
         } else {
