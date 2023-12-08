@@ -1254,11 +1254,67 @@ router.post("/SaveResearchDetails", (req, res, next) => {
 
                 }
             });
-            // return res.json('success');
         }
     });
-    // return res.json('success');
+});
 
+router.get("/GetSyllabusDetailsById/:id", (req, res, next) => {
+    db.executeSql("SELECT * FROM syllabus WHERE institute_id=" + req.params.id + " ORDER BY createddate ASC;", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+router.get("/RemoveSyllabusDetails/:id", (req, res, next) => {
+    db.executeSql("DELETE FROM `syllabus` WHERE id=" + req.params.id, function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+router.post("/UpdateSyllabusDetails", (req, res, next) => {
+    console.log(req.body);
+    db.executeSql("UPDATE `syllabus` SET `syllabusTitle`='" + req.body.syllabusTitle + "',`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id + ";", function (data, err) {
+        if (err) {
+            console.log(err);
+            res.json("error");
+        } else {
+            const values = [req.body.syllabusDetails]
+            const escapedValues = values.map(mysql.escape);
+            db.executeSql1("UPDATE syllabus SET syllabusDetails=" + escapedValues + " WHERE id= " + req.body.id, escapedValues, function (data1, err) {
+                if (err) {
+                    console.log(err)
+                    res.json("error");
+                } else {
+                }
+            });
+            return res.json('success');
+        }
+    });
+});
+router.post("/SaveSyllabusDetails", (req, res, next) => {
+    console.log(req.body)
+    db.executeSql("INSERT INTO `syllabus`(`institute_id`, `syllabusTitle`, `createddate`) VALUES ('" + req.body.institute_id + "','" + req.body.syllabusTitle + "',CURRENT_TIMESTAMP)", function (data, err) {
+        if (err) {
+            res.json("error");
+            console.log(err)
+        } else {
+            const values = [req.body.syllabusDetails]
+            const escapedValues = values.map(mysql.escape);
+            db.executeSql1("UPDATE syllabus SET syllabusDetails=" + escapedValues + " WHERE id= " + data.insertId, escapedValues, function (data1, err) {
+                if (err) {
+                    res.json("error");
+                    console.log(err)
+                } else {
+                    return res.json('success');
+                }
+            });
+        }
+    });
 });
 router.post("/SaveAlumniDetails", (req, res, next) => {
     db.executeSql("INSERT INTO `alumni`(`instituteName`, `alumniName`, `alumniCourse`, `alumniYear`, `contactNumber`, `email`, `createddate`) VALUES  ('" + req.body.instituteName + "','" + req.body.alumniName + "','" + req.body.alumniCourse + "','" + req.body.alumniYear + "','" + req.body.contactNumber + "','" + req.body.email + "',CURRENT_TIMESTAMP)", function (data, err) {
