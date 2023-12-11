@@ -1331,6 +1331,15 @@ router.post("/SaveAlumniDetails", (req, res, next) => {
         }
     });
 });
+router.get("/RemoveAlumniByIdDetails/:id", (req, res, next) => {
+    db.executeSql("DELETE FROM alumni WHERE id=" + req.params.id + ";", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
 router.post("/SaveRahatokarshDonation", (req, res, next) => {
     db.executeSql("INSERT INTO `rahatokarsh`(`name`, `number`, `email`, `amount`, `isactive`, `createddate`) VALUES  ('" + req.body.donnerName + "','" + req.body.contactNumber + "','" + req.body.email + "','" + req.body.donationAmount + "',false,CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
