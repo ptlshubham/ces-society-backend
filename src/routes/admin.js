@@ -2163,21 +2163,11 @@ router.get("/RemoveStudentListData/:id", (req, res, next) => {
 });
 
 router.get("/GetNewsByIdDetails/:id", (req, res, next) => {
-    let date = new Date();
-    const day = new String(date.getDate());
-    let mnth = date.getUTCMonth() + 1;
-    if (mnth <= 9) {
-        mnth = '0' + mnth;
-        console.log(mnth);
-    }
-    const year = date.getFullYear();
-    const concat = '' + year + '-' + mnth + '-' + day;
-    console.log(concat);
-    db.executeSql("SELECT * FROM news WHERE institute_id=" + req.params.id + " and (startDate IS NULL OR startDate<='" + concat + "') and (endDate IS NULL OR endDate>='" + concat + "')  ORDER BY date DESC ;", function (data, err) {
+    db.executeSql("SELECT * FROM news WHERE institute_id=" + req.params.id + " ORDER BY date DESC ;", function (data1, err) {
         if (err) {
             console.log(err);
         } else {
-            return res.json(data);
+            return res.json(data1);
         }
     })
 });
@@ -2542,34 +2532,26 @@ router.get("/GetAllNewsDetails/:id", (req, res, next) => {
         if (err) {
             console.log(err);
         } else {
-            db.executeSql("SELECT * FROM news WHERE (institute_id=" + req.params.id + " OR institute_id=" + data[0].id + ") AND isactive=true ORDER BY date DESC ;", function (data1, err) {
+            let date = new Date();
+            const day = new String(date.getDate());
+            let mnth = date.getUTCMonth() + 1;
+            if (mnth <= 9) {
+                mnth = '0' + mnth;
+                console.log(mnth);
+            }
+            const year = date.getFullYear();
+            const concat = '' + year + '-' + mnth + '-' + day;
+            console.log(concat, 'ed');
+            db.executeSql("SELECT * FROM news WHERE institute_id=" + req.params.id + " and (startDate IS NULL OR startDate<='" + concat + "') and (endDate IS NULL OR endDate>='" + concat + "') and isactive=true ORDER BY date DESC ;", function (data, err) {
                 if (err) {
                     console.log(err);
                 } else {
-                    return res.json(data1);
+                    return res.json(data);
                 }
             })
-
         }
     })
 });
-// router.get("/GetAllAnswerkeyDetails/:id", (req, res, next) => {
-//     db.executeSql("SELECT * FROM institute WHERE url='www.cesociety.in';", function (data, err) {
-//         if (err) {
-//             console.log(err);
-//         } else {
-//             db.executeSql("SELECT * FROM Answerkey WHERE (institute_id=" + req.params.id + " OR institute_id=" + data[0].id + ") AND isactive=true ORDER BY date DESC ;", function (data1, err) {
-//                 if (err) {
-//                     console.log(err);
-//                 } else {
-//                     return res.json(data1);
-//                 }
-//             })
-
-//         }
-//     })
-// });
-
 router.post("/SaveGatePassUserList", (req, res, next) => {
     db.executeSql("INSERT INTO `gatepass`(`role`, `institute`, `meetingWith`, `purpose`, `name`, `dateTime`, `contact`, `createddate`) VALUES ('" + req.body.role + "','" + req.body.institute + "','" + req.body.meetingWith + "','" + req.body.purpose + "','" + req.body.name + "','" + req.body.dateTime + "'," + req.body.contact + ",CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
