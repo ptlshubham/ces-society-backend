@@ -16,6 +16,9 @@ const doc = new PDFDocument({
     size: 'A4',
 });
 
+
+
+
 router.get("/GetInstituteDetailByURL/:id", (req, res, next) => {
     console.log(req.params, 'institute');
     db.executeSql("SELECT * FROM institute WHERE url='" + req.params.id + "';", function (data, err) {
@@ -92,6 +95,7 @@ router.post("/UploadGalleryImages", (req, res, next) => {
         destination: function (req, file, cb) {
             cb(null, 'images/gallery');
         },
+        // By default, multer removes file extensions so let's add them back
         filename: function (req, file, cb) {
 
             cb(null, imgname + path.extname(file.originalname));
@@ -265,6 +269,7 @@ router.post("/SaveStaffProfileImages", (req, res, next) => {
         destination: function (req, file, cb) {
             cb(null, 'images/staff');
         },
+        // By default, multer removes file extensions so let's add them back
         filename: function (req, file, cb) {
 
             cb(null, imgname + path.extname(file.originalname));
@@ -376,6 +381,7 @@ router.post("/SaveBulkDonnersDetails", (req, res, next) => {
             }
         });
     }
+    // return res.json('success');
 });
 
 router.post("/SaveBeneficiaryDetails", (req, res, next) => {
@@ -446,6 +452,7 @@ router.post("/uploadBlogImages", (req, res, next) => {
         destination: function (req, file, cb) {
             cb(null, 'images/blogs');
         },
+        // By default, multer removes file extensions so let's add them back
         filename: function (req, file, cb) {
 
             cb(null, imgname + path.extname(file.originalname));
@@ -605,8 +612,11 @@ router.post("/SaveInfrastructureDetails", (req, res, next) => {
 
                 }
             });
+            // return res.json('success');
         }
     });
+    // return res.json('success');
+
 });
 router.post("/UpdateInfraDetails", (req, res, next) => {
     db.executeSql("UPDATE `infrastructure` SET `infraTitle`='" + req.body.infraTitle + "',`infraImage`='" + req.body.infraImage + "',`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id + ";", function (data, err) {
@@ -653,6 +663,8 @@ router.get("/RemoveInfraDetails/:id", (req, res, next) => {
                                 }
                             })
                         }
+                        // throw err;
+
                     } else {
                         db.executeSql("DELETE FROM `infrastructure` WHERE id=" + req.params.id, function (data, err) {
                             if (err) {
@@ -692,6 +704,7 @@ router.post("/UploadInfraImage", (req, res, next) => {
         destination: function (req, file, cb) {
             cb(null, 'images/infra');
         },
+        // By default, multer removes file extensions so let's add them back
         filename: function (req, file, cb) {
 
             cb(null, imgname + path.extname(file.originalname));
@@ -723,6 +736,7 @@ router.post("/UploadInfraMultiImage", midway.checkToken, (req, res, next) => {
         destination: function (req, file, cb) {
             cb(null, 'images/infraMulti');
         },
+        // By default, multer removes file extensions so let's add them back
         filename: function (req, file, cb) {
             cb(null, imgname + path.extname(file.originalname));
         }
@@ -763,6 +777,7 @@ router.post("/UploadMoreImage", (req, res, next) => {
         destination: function (req, file, cb) {
             cb(null, 'images/more');
         },
+        // By default, multer removes file extensions so let's add them back
         filename: function (req, file, cb) {
 
             cb(null, imgname + path.extname(file.originalname));
@@ -787,6 +802,12 @@ router.post("/UploadMoreImage", (req, res, next) => {
         return res.json('/images/more/' + req.file.filename);
     });
 });
+
+
+
+
+
+
 router.get("/GetCommitteeDetailsById/:id", (req, res, next) => {
     db.executeSql("SELECT * FROM committee WHERE institute_id=" + req.params.id + " ORDER BY createddate ASC;", function (data, err) {
         if (err) {
@@ -807,6 +828,7 @@ router.get("/GetCommitteeMultiImagesById/:id", (req, res, next) => {
     })
 });
 router.post("/deleteCommitteeImage", (req, res, next) => {
+
     fs.unlink('/var/www/html/cesbackend' + req.body.img, function (err) {
         if (err) {
             throw err;
@@ -817,6 +839,13 @@ router.post("/deleteCommitteeImage", (req, res, next) => {
 
 });
 router.get("/RemoveCommitteeDetails/:id", (req, res, next) => {
+    // db.executeSql("DELETE FROM `infrastructure` WHERE id=" + req.params.id + ";", function (data, err) {
+    //     if (err) {
+    //         console.log(err);
+    //     } else {
+    //         return res.json(data);
+    //     }
+    // });
     db.executeSql("SELECT * FROM committee WHERE id=" + req.params.id + ";", function (data, err) {
         if (err) {
             console.log("Error in store.js", err);
@@ -861,6 +890,7 @@ router.post("/UploadCommMultiImage", (req, res, next) => {
         destination: function (req, file, cb) {
             cb(null, 'images/commmulti');
         },
+        // By default, multer removes file extensions so let's add them back
         filename: function (req, file, cb) {
             cb(null, imgname + path.extname(file.originalname));
         }
@@ -891,12 +921,14 @@ router.post("/UploadCommitteeImage", (req, res, next) => {
         destination: function (req, file, cb) {
             cb(null, 'images/committee');
         },
+        // By default, multer removes file extensions so let's add them back
         filename: function (req, file, cb) {
             cb(null, imgname + path.extname(file.originalname));
         }
     });
     let upload = multer({ storage: storage }).single('file');
     upload(req, res, function (err) {
+        // console.log(req);
         console.log("path=", config.url + 'images/committee/' + req.file.filename);
 
         if (req.fileValidationError) {
@@ -963,8 +995,11 @@ router.post("/SaveCommitteeDetails", (req, res, next) => {
 
                 }
             });
+            // return res.json('success');
         }
     });
+    // return res.json('success');
+
 });
 
 
@@ -1041,8 +1076,9 @@ router.post("/UploadPlacementMultiImage", (req, res, next) => {
     var imgname = generateUUID();
     const storage = multer.diskStorage({
         destination: function (req, file, cb) {
-            cb(null, 'images/placemulti');
+            cb(null, 'images/commmulti');
         },
+        // By default, multer removes file extensions so let's add them back
         filename: function (req, file, cb) {
             cb(null, imgname + path.extname(file.originalname));
         }
@@ -1073,12 +1109,14 @@ router.post("/UploadPlacementImage", (req, res, next) => {
         destination: function (req, file, cb) {
             cb(null, 'images/placement');
         },
+        // By default, multer removes file extensions so let's add them back
         filename: function (req, file, cb) {
             cb(null, imgname + path.extname(file.originalname));
         }
     });
     let upload = multer({ storage: storage }).single('file');
     upload(req, res, function (err) {
+        // console.log(req);
         console.log("path=", config.url + 'images/placement/' + req.file.filename);
 
         if (req.fileValidationError) {
@@ -1145,8 +1183,11 @@ router.post("/SavePlacementDetails", (req, res, next) => {
 
                 }
             });
+            // return res.json('success');
         }
     });
+    // return res.json('success');
+
 });
 
 
@@ -1277,6 +1318,7 @@ router.post("/SaveAlumniDetails", (req, res, next) => {
                 name: req.body.alumniName,
             };
             mail('alumni.html', replacements, req.body.email, "Alumni Registered Successfully", " ")
+            // res.json(data);
             return res.json('success');
         }
     });
@@ -1300,6 +1342,7 @@ router.post("/SaveRahatokarshDonation", (req, res, next) => {
                 name: req.body.donnerName,
             };
             mail('donation.html', replacements, req.body.email, "Thank You For Contributing.", " ")
+            // res.json(data);
             return res.json('success');
         }
     });
@@ -1346,6 +1389,13 @@ router.post("/deleteCampusImage", (req, res, next) => {
 
 });
 router.get("/RemoveCampusDetails/:id", (req, res, next) => {
+    // db.executeSql("DELETE FROM `infrastructure` WHERE id=" + req.params.id + ";", function (data, err) {
+    //     if (err) {
+    //         console.log(err);
+    //     } else {
+    //         return res.json(data);
+    //     }
+    // });
     db.executeSql("SELECT * FROM campus WHERE id=" + req.params.id + ";", function (data, err) {
         if (err) {
             console.log("Error in store.js", err);
@@ -1390,6 +1440,7 @@ router.post("/UploadCampusMultiImage", (req, res, next) => {
         destination: function (req, file, cb) {
             cb(null, 'images/campusmulti');
         },
+        // By default, multer removes file extensions so let's add them back
         filename: function (req, file, cb) {
             cb(null, imgname + path.extname(file.originalname));
         }
@@ -1420,12 +1471,14 @@ router.post("/UploadCampusImage", (req, res, next) => {
         destination: function (req, file, cb) {
             cb(null, 'images/campus');
         },
+        // By default, multer removes file extensions so let's add them back
         filename: function (req, file, cb) {
             cb(null, imgname + path.extname(file.originalname));
         }
     });
     let upload = multer({ storage: storage }).single('file');
     upload(req, res, function (err) {
+        // console.log(req);
         console.log("path=", config.url + 'images/campus/' + req.file.filename);
 
         if (req.fileValidationError) {
@@ -1492,8 +1545,11 @@ router.post("/SaveCampusDetails", (req, res, next) => {
 
                 }
             });
+            // return res.json('success');
         }
     });
+    // return res.json('success');
+
 });
 
 
@@ -1516,8 +1572,11 @@ router.post("/SaveNewNaacDetails", (req, res, next) => {
 
                 }
             });
+            // return res.json('success');
         }
     });
+    // return res.json('success');
+
 });
 
 router.get("/GetNewNaacDetailsById/:id", (req, res, next) => {
@@ -1560,8 +1619,13 @@ router.post("/UpdateNewNaacDetails", (req, res, next) => {
     });
 });
 
+
+
+
+
 router.post("/GenerateRahatokarshCertficate", (req, res, next) => {
     console.log(req.body, 'Certificate')
+    // Saving the pdf file in root directory.
     db.executeSql("UPDATE `rahatokarsh` SET `isactive`=true,`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id, function (data, err) {
         if (err) {
             res.json("error");
@@ -1789,6 +1853,7 @@ router.post("/SaveContactUsDetails", (req, res, next) => {
                 name: req.body.name,
             };
             mail('feedback-ces.html', replacements, req.body.email, "Feedback Submitted", " ")
+            // res.json(data);
             return res.json('success');
         }
     });
@@ -1812,6 +1877,8 @@ router.post("/SaveCounselingDetails", (req, res, next) => {
             let staticEmail = 'ces.counseling2019@gmail.com';
             mail('appointement-ces.html', replacements, req.body.email, "Appointement Submitted")
             mail('appointement-booked.html', replacements, staticEmail, "Appointement Submitted")
+
+            // res.json(data);
             return res.json('success');
         }
     });
@@ -1947,10 +2014,21 @@ router.post("/UploadPDF", (req, res, next) => {
     upload(req, res, function (err) {
         console.log('/pdf/' + req.file.filename)
         return res.json('/pdf/' + req.file.filename)
+        // return res.json('/images/infra/' + req.file.filename);
     });
 
 });
 
+// router.post("/SaveNewsDataList", (req, res, next) => {
+//     db.executeSql("INSERT INTO `news`(`institute_id`, `date`, `message`, `files`, `createddate`) VALUES ('" + req.body.institute_id + "','" + req.body.date + "','" + req.body.message + "','" + req.body.files + "',CURRENT_TIMESTAMP)", function (data, err) {
+//         if (err) {
+//             res.json("error");
+//             console.log(err)
+//         } else {
+//             return res.json('success');
+//         }
+//     });
+// });
 router.post("/SaveNewsDataList", (req, res, next) => {
     console.log(req.body, 'jbdjbjfds');
     db.executeSql("INSERT INTO `news`(`institute_id`, `date`, `files`,`isactive`,`startDate`, `endDate`,`createddate`) VALUES (" + req.body.institute_id + ",'" + req.body.date + "','" + req.body.files + "',true,'" + req.body.startDate + "','" + req.body.endDate + "',CURRENT_TIMESTAMP)", function (data, err) {
@@ -2234,6 +2312,16 @@ router.get("/RemoveLinkByID/:id", (req, res, next) => {
         if (err) {
             console.log(err);
         } else {
+            // fs.unlink('/var/www/html/cesbackend'+data[0].paralink, function (err) {
+            //     if (err) throw err;
+            //     // if no error, file has been deleted successfully
+            //     console.log('File deleted!12');
+            // });
+            // fs.unlink('/var/www/html/cesbackend'+data[0].attachlink, function (err) {
+            //     if (err) throw err;
+            //     // if no error, file has been deleted successfully
+            //     console.log('File deleted!');
+            // });
             db.executeSql("DELETE FROM naaclink WHERE id=" + req.params.id + ";", function (data, err) {
                 if (err) {
                     console.log(err);
@@ -2272,10 +2360,12 @@ router.get("/RemoveCrietriaListURL/:id", (req, res, next) => {
         } else {
             fs.unlink('/var/www/html/cesbackend' + data[0].paralink, function (err) {
                 if (err) throw err;
+                // if no error, file has been deleted successfully
                 console.log('File deleted!12');
             });
             fs.unlink('/var/www/html/cesbackend' + data[0].attachlink, function (err) {
                 if (err) throw err;
+                // if no error, file has been deleted successfully
                 console.log('File deleted!');
             });
             db.executeSql("DELETE FROM naac WHERE id=" + req.params.id + ";", function (data, err) {
@@ -2407,6 +2497,7 @@ function mail(filename, data, toemail, subj, mailname) {
         html: htmlToSend,
     };
     transporter.sendMail(mailOptions, function (error, info) {
+        // console.log('Mail Sent')
         if (error) {
             console.log(error);
             res.json("Errror");
@@ -2452,6 +2543,23 @@ router.get("/GetAllNewsDetails/:id", (req, res, next) => {
         }
     })
 });
+// router.get("/GetAllAnswerkeyDetails/:id", (req, res, next) => {
+//     db.executeSql("SELECT * FROM institute WHERE url='www.cesociety.in';", function (data, err) {
+//         if (err) {
+//             console.log(err);
+//         } else {
+//             db.executeSql("SELECT * FROM Answerkey WHERE (institute_id=" + req.params.id + " OR institute_id=" + data[0].id + ") AND isactive=true ORDER BY date DESC ;", function (data1, err) {
+//                 if (err) {
+//                     console.log(err);
+//                 } else {
+//                     return res.json(data1);
+//                 }
+//             })
+
+//         }
+//     })
+// });
+
 router.post("/SaveGatePassUserList", (req, res, next) => {
     db.executeSql("INSERT INTO `gatepass`(`role`, `institute`, `meetingWith`, `purpose`, `name`, `dateTime`, `contact`, `createddate`) VALUES ('" + req.body.role + "','" + req.body.institute + "','" + req.body.meetingWith + "','" + req.body.purpose + "','" + req.body.name + "','" + req.body.dateTime + "'," + req.body.contact + ",CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
@@ -2508,6 +2616,18 @@ router.post("/GetOneTimePassword", (req, res, next) => {
         }
     });
 });
+// router.post("/ChackForPassword", midway.checkToken, (req, res, next) => {
+//     var salt = '7fa73b47df808d36c5fe328546ddef8b9011b2c6';
+//     var repass = salt + '' + req.body.pass;
+//     var encPassword = crypto.createHash('sha1').update(repass).digest('hex');
+//     db.executeSql("select * from users where userid=" + req.body.id + " and password='" + encPassword + "'", function(data, err) {
+//         if (err) {
+//             console.log(err);
+//         } else {
+//             return res.json(data)
+//         }
+//     })
+// })
 
 router.post("/UpdatePassword", (req, res, next) => {
     console.log(req.body);
@@ -2563,6 +2683,7 @@ router.post("/GetRegisterOtp", (req, res, next) => {
         }
     });
 
+
 });
 router.post("/UploadPhotoContestImage", (req, res, next) => {
     var imgname = generateUUID();
@@ -2570,6 +2691,7 @@ router.post("/UploadPhotoContestImage", (req, res, next) => {
         destination: function (req, file, cb) {
             cb(null, 'images/contest');
         },
+        // By default, multer removes file extensions so let's add them back
         filename: function (req, file, cb) {
 
             cb(null, imgname + path.extname(file.originalname));
@@ -2601,6 +2723,7 @@ router.post("/UploadContestMultiImage", (req, res, next) => {
         destination: function (req, file, cb) {
             cb(null, 'images/contest');
         },
+        // By default, multer removes file extensions so let's add them back
         filename: function (req, file, cb) {
             cb(null, imgname + path.extname(file.originalname));
         }
