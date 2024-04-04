@@ -2588,6 +2588,27 @@ router.get("/RemovePhotoContestDetailsById/:id", (req, res, next) => {
         return res.json(data);
     })
 });
+
+router.post("/SaveAdmissionDetails", (req, res, next) => {
+    db.executeSql("INSERT INTO `admission`(`institute_id`, `subject`, `studentname`, `city`, `email`, `contact`, `lastdegree`, `clgname`, `bachelorsubject`, `cgpa`, `createddate`) VALUES ('" + req.body.institute_id + "','" + req.body.subject + "','" + req.body.studentname + "','" + req.body.city + "','" + req.body.email + "'," + req.body.contact + ",'" + req.body.lastdegree + "','" + req.body.clgname + "','" + req.body.bachelorsubject + "','" + req.body.cgpa + "',CURRENT_TIMESTAMP)", function (data, err) {
+        if (err) {
+            res.json("error");
+            console.log(err)
+        } else {
+            return res.json('success');
+        }
+    });
+});
+
+router.get("/GetAdmissionListData/:id", (req, res, next) => {
+    db.executeSql("SELECT * FROM `admission` WHERE institute_id=" + req.params.id + ";", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
 function generateUUID() {
     var d = new Date().getTime();
     var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx'.replace(/[xy]/g, function (c) {
