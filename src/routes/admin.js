@@ -15,6 +15,29 @@ const doc = new PDFDocument({
     layout: 'landscape',
     size: 'A4',
 });
+const Razorpay = require('razorpay');
+
+// Razorpay Api start Here
+
+const instance = new Razorpay({
+    key_id: 'rzp_test_2j2jo8TdvwxDZh',
+    key_secret: 'R1QQC17HYgstnl2GxRffgu9a'
+});
+
+router.get('/fetchPayment/:paymentId', async (req, res) => {
+    const { paymentId } = req.params;
+    try {
+        const payment = await instance.payments.fetch(paymentId);
+        res.json(payment);
+        console.log(payment);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Razorpay Api End Here
+
 
 router.get("/GetInstituteDetailByURL/:id", (req, res, next) => {
     console.log(req.params, 'institute');
@@ -822,8 +845,8 @@ router.get("/RemoveCommitteeDetails/:id", (req, res, next) => {
             console.log("Error in store.js", err);
         } else {
             if (data[0].commImage != 'null' && data[0].commImage != 'undefined') {
-                fs.unlink('/var/www/html/cesbackend'+data[0].commImage, function (err){
-                // fs.unlink('F:/pranav/CES/CES-main/ces-society-backend' + data[0].commImage, function (err) {
+                fs.unlink('/var/www/html/cesbackend' + data[0].commImage, function (err) {
+                    // fs.unlink('F:/pranav/CES/CES-main/ces-society-backend' + data[0].commImage, function (err) {
                     if (err) {
                         db.executeSql("DELETE FROM `committee` WHERE id=" + req.params.id, function (data, err) {
                             if (err) {
@@ -1004,8 +1027,8 @@ router.get("/RemovePlacementDetails/:id", (req, res, next) => {
             console.log("Error in store.js", err);
         } else {
             if (data[0].placeImage != 'null' && data[0].placeImage != 'undefined') {
-                fs.unlink('/var/www/html/cesbackend'+data[0].placeImage, function (err){
-                // fs.unlink('F:/pranav/CES/CES-main/ces-society-backend' + data[0].placeImage, function (err) {
+                fs.unlink('/var/www/html/cesbackend' + data[0].placeImage, function (err) {
+                    // fs.unlink('F:/pranav/CES/CES-main/ces-society-backend' + data[0].placeImage, function (err) {
                     if (err) {
                         db.executeSql("DELETE FROM `placement` WHERE id=" + req.params.id, function (data, err) {
                             if (err) {
@@ -1290,16 +1313,109 @@ router.get("/RemoveAlumniByIdDetails/:id", (req, res, next) => {
         }
     })
 });
+router.post("/Upload80GTaxImage", (req, res, next) => {
+    var imgname = generateUUID();
+    const storage = multer.diskStorage({
+        destination: function (req, file, cb) {
+            cb(null, 'images/tax');
+        },
+        filename: function (req, file, cb) {
+
+            cb(null, imgname + path.extname(file.originalname));
+        }
+    });
+    let upload = multer({ storage: storage }).single('file');
+    upload(req, res, function (err) {
+        console.log("path=", config.url + 'images/tax/' + req.file.filename);
+
+        if (req.fileValidationError) {
+            console.log("err1", req.fileValidationError);
+            return res.json("err1", req.fileValidationError);
+        } else if (!req.file) {
+            console.log('Please select an image to upload');
+            return res.json('Please select an image to upload');
+        } else if (err instanceof multer.MulterError) {
+            console.log("err3");
+            return res.json("err3", err);
+        } else if (err) {
+            console.log("err4");
+            return res.json("err4", err);
+        }
+        return res.json('/images/tax/' + req.file.filename);
+    });
+});
 router.post("/SaveRahatokarshDonation", (req, res, next) => {
-    db.executeSql("INSERT INTO `rahatokarsh`(`name`, `number`, `email`, `amount`, `isactive`, `createddate`) VALUES  ('" + req.body.donnerName + "','" + req.body.contactNumber + "','" + req.body.email + "','" + req.body.donationAmount + "',false,CURRENT_TIMESTAMP)", function (data, err) {
+    db.executeSql("INSERT INTO `rahatokarsh`(`name`, `number`, `email`, `city`, `paymentId`, `amount`, `idProof`, `isactive`, `createddate`) VALUES  ('" + req.body.donnerName + "','" + req.body.contact + "','" + req.body.email + "','" + req.body.city + "','" + req.body.paymentId + "','" + req.body.donationAmount + "','" + req.body.taxImage + "',false,CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
             res.json("error");
             console.log(err)
         } else {
+            let cert_name = Date.now();
+            doc.pipe(fs.createWriteStream('certificate/' + cert_name + '.pdf'));
+            db.executeSql("update rahatokarsh set certificate= '/certificate/" + cert_name + ".pdf'  where id=" + data.insertId, function (data1, err) {
+                if (err) {
+                    console.log(err);
+                }
+            })
+            function jumpLine(doc, lines) {
+                for (let index = 0; index < lines; index++) {
+                    doc.moveDown();
+                }
+            }
+            doc.image('src/assets/example.jpg', 0, 0, {
+                fit: [doc.page.width, doc.page.height],
+                align: 'center',
+            });
+            jumpLine(doc, 4)
+            jumpLine(doc, 2)
+            const start = 85;
+            doc
+                .font('src/assets/fonts/NotoSansJP-Bold.otf')
+                .fontSize(22)
+                .fill('#021c27')
+                .text(req.body.donnerName, 85, 335, {
+                    align: 'center',
+                });
+            jumpLine(doc, 2)
+            const lineSize = 300;
+            const signatureHeight = 390;
+            const startLine1 = 85;
+            const endLine1 = 128 + lineSize;
+            const startLine2 = endLine1 + 32;
+            const endLine2 = startLine2 + lineSize;
+            const startLine3 = endLine2 + 32;
+            const endLine3 = startLine3 + lineSize;
+            const datetime = new Date(); // Replace this with your datetime object
+            const date = datetime.toISOString().slice(0, 10);
+            doc
+                .font('src/assets/fonts/NotoSansJP-Bold.otf')
+                .fontSize(16)
+                .fill('#021c27')
+                .text(date, startLine1, signatureHeight + 90, {
+                    columns: 1,
+                    columnGap: 0,
+                    height: 40,
+                    width: lineSize,
+                    align: 'center',
+                });
+            doc
+                .font('src/assets/fonts/NotoSansJP-Bold.otf')
+                .fontSize(16)
+                .fill('#021c27')
+                .text('0' + data.insertId, startLine2, signatureHeight + 90, {
+                    columns: 1,
+                    columnGap: 0,
+                    height: 40,
+                    width: lineSize,
+                    align: 'center',
+                });
+            doc.end();
             const replacements = {
                 name: req.body.donnerName,
+                link: 'http://localhost:9000/certificate/' + cert_name + '.pdf'
             };
-            mail('donation.html', replacements, req.body.email, "Thank You For Contributing.", " ")
+            // mail('donation.html', replacements, req.body.email, "Thank You For Contributing.", " ")
+            mail('certification.html', replacements, req.body.email, "Thank You For Donating.", " ")
             return res.json('success');
         }
     });
@@ -1351,8 +1467,8 @@ router.get("/RemoveCampusDetails/:id", (req, res, next) => {
             console.log("Error in store.js", err);
         } else {
             if (data[0].campusImage != 'null' && data[0].campusImage != 'undefined') {
-                fs.unlink('/var/www/html/cesbackend'+data[0].campusImage, function (err){
-                // fs.unlink('F:/pranav/CES/CES-main/ces-society-backend' + data[0].campusImage, function (err) {
+                fs.unlink('/var/www/html/cesbackend' + data[0].campusImage, function (err) {
+                    // fs.unlink('F:/pranav/CES/CES-main/ces-society-backend' + data[0].campusImage, function (err) {
                     if (err) {
                         db.executeSql("DELETE FROM `campus` WHERE id=" + req.params.id, function (data, err) {
                             if (err) {
@@ -1560,215 +1676,7 @@ router.post("/UpdateNewNaacDetails", (req, res, next) => {
     });
 });
 
-router.post("/GenerateRahatokarshCertficate", (req, res, next) => {
-    console.log(req.body, 'Certificate')
-    db.executeSql("UPDATE `rahatokarsh` SET `isactive`=true,`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id, function (data, err) {
-        if (err) {
-            res.json("error");
-            console.log(err)
-        } else {
-            let cert_name = Date.now();
-            doc.pipe(fs.createWriteStream('certificate/' + cert_name + '.pdf'));
-            db.executeSql("update rahatokarsh set certificate= '/certificate/" + cert_name + ".pdf'  where id=" + req.body.id, function (data1, err) {
-                if (err) {
-                    console.log(err);
-                }
-            })
-            function jumpLine(doc, lines) {
-                for (let index = 0; index < lines; index++) {
-                    doc.moveDown();
-                }
-            }
-            // doc.rect(0, 0, doc.page.width, doc.page.height).fill('#fff');
 
-            // doc.fontSize(8);
-
-            // Margin
-            // const distanceMargin = 12;
-
-            // doc
-            //     .fillAndStroke('#203154')
-            //     .lineWidth(2)
-            //     .lineJoin('round')
-            //     .rect(
-            //         distanceMargin,
-            //         distanceMargin,
-            //         doc.page.width - distanceMargin * 2,
-            //         doc.page.height - distanceMargin * 2,
-            //     )
-            //     .stroke();
-            doc.image('src/assets/example.jpg', 0, 0, {
-                fit: [doc.page.width, doc.page.height],
-                align: 'center',
-            });
-            jumpLine(doc, 4)
-            jumpLine(doc, 2)
-            const start = 85;
-            doc
-                .font('src/assets/fonts/NotoSansJP-Bold.otf')
-                .fontSize(22)
-                .fill('#021c27')
-                .text(req.body.name, 85, 335, {
-                    align: 'center',
-                });
-            jumpLine(doc, 2)
-            //  doc.lineWidth(1);
-            // Signatures
-            const lineSize = 300;
-            const signatureHeight = 390;
-            // doc.fillAndStroke('#021c27');
-            // doc.strokeOpacity(0.2);
-            const startLine1 = 85;
-            const endLine1 = 128 + lineSize;
-            // doc
-            //     .moveTo(startLine1, signatureHeight)
-            //     .lineTo(endLine1, signatureHeight)
-            //     .stroke();
-            const startLine2 = endLine1 + 32;
-            const endLine2 = startLine2 + lineSize;
-            // doc
-            //     .moveTo(startLine2, signatureHeight)
-            //     .lineTo(endLine2, signatureHeight)
-            //     .stroke();
-
-            const startLine3 = endLine2 + 32;
-            const endLine3 = startLine3 + lineSize;
-            // doc
-            //     .moveTo(startLine3, signatureHeight)
-            //     .lineTo(endLine3, signatureHeight)
-            //     .stroke();
-            const datetime = new Date(); // Replace this with your datetime object
-            const date = datetime.toISOString().slice(0, 10);
-            doc
-                .font('src/assets/fonts/NotoSansJP-Bold.otf')
-                .fontSize(16)
-                .fill('#021c27')
-                .text(date, startLine1, signatureHeight + 90, {
-                    columns: 1,
-                    columnGap: 0,
-                    height: 40,
-                    width: lineSize,
-                    align: 'center',
-                });
-
-            // doc
-            //     .font('src/assets/fonts/NotoSansJP-Light.otf')
-            //     .fontSize(10)
-            //     .fill('#021c27')
-            //     .text('Associate Professor', startLine1, signatureHeight + 95, {
-            //         columns: 1,
-            //         columnGap: 0,
-            //         height: 40,
-            //         width: lineSize,
-            //         align: 'center',
-            //     });
-
-            doc
-                .font('src/assets/fonts/NotoSansJP-Bold.otf')
-                .fontSize(16)
-                .fill('#021c27')
-                .text('0000' + req.body.id, startLine2, signatureHeight + 90, {
-                    columns: 1,
-                    columnGap: 0,
-                    height: 40,
-                    width: lineSize,
-                    align: 'center',
-                });
-
-            // doc
-            // .font('src/assets/fonts/NotoSansJP-Light.otf')
-            // .fontSize(10)
-            // .fill('#021c27')
-            // .text('Student', startLine2, signatureHeight + 25, {
-            //     columns: 1,
-            //     columnGap: 0,
-            //     height: 40,
-            //     width: lineSize,
-            //     align: 'center',
-            // });
-
-            // doc
-            //     .font('src/assets/fonts/NotoSansJP-Bold.otf')
-            //     .fontSize(10)
-            //     .fill('#021c27')
-            //     .text('Jane Doe', startLine3, signatureHeight + 10, {
-            //         columns: 1,
-            //         columnGap: 0,
-            //         height: 40,
-            //         width: lineSize,
-            //         align: 'center',
-            //     });
-
-            // doc
-            //     .font('src/assets/fonts/NotoSansJP-Light.otf')
-            //     .fontSize(10)
-            //     .fill('#021c27')
-            //     .text('Director', startLine3, signatureHeight + 25, {
-            //         columns: 1,
-            //         columnGap: 0,
-            //         height: 40,
-            //         width: lineSize,
-            //         align: 'center',
-            //     });
-
-            // jumpLine(doc, 4);
-
-            // // Validation link
-            // const link =
-            //     'https://validate-your-certificate.hello/validation-code-here';
-
-            // const linkWidth = doc.widthOfString(link);
-            // const linkHeight = doc.currentLineHeight();
-
-            // doc
-            //     .underline(
-            //         doc.page.width / 2 - linkWidth / 2,
-            //         448,
-            //         linkWidth,
-            //         linkHeight,
-            //         { color: '#021c27' },
-            //     )
-            //     .link(
-            //         doc.page.width / 2 - linkWidth / 2,
-            //         448,
-            //         linkWidth,
-            //         linkHeight,
-            //         link,
-            //     );
-
-            // doc
-            //     .font('src/assets/fonts/NotoSansJP-Light.otf')
-            //     .fontSize(10)
-            //     .fill('#021c27')
-            //     .text(
-            //         link,
-            //         doc.page.width / 2 - linkWidth / 2,
-            //         448,
-            //         linkWidth,
-            //         linkHeight
-            //     );
-
-            // Footer
-            // const bottomHeight = doc.page.height - 100;
-
-            // doc.image('src/assets/qr.png', doc.page.width / 2 - 30, bottomHeight, {
-            //     fit: [60, 60],
-            // });
-
-            doc.end();
-            // return res.json(data);
-            const replacements = {
-                name: req.body.name,
-                link: 'http://localhost:9000/certificate/' + cert_name + '.pdf'
-                // download: 
-            };
-            mail('certification.html', replacements, req.body.email, "Thank You For Donating.", " ")
-            // res.json(data);
-            return res.json('success');
-
-        }
-    });
-});
 router.get("/GetAlumniDetails", (req, res, next) => {
     db.executeSql("SELECT * FROM alumni ORDER BY createddate DESC;", function (data, err) {
         if (err) {
