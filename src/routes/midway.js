@@ -35,12 +35,21 @@ let checkToken = (req, res, next) => {
         else{
           // console.log("ornv")
           // if((user1.user1.username == decoded.username)&&(user1.user1.password == decoded.password)){
-            req.decoded = decoded;
-            next();
+           
+          // req.decoded = decoded; "Changes from shubham Patel"
+            // next();"Changes from shubham Patel"
+
           // }
+          let err = new Error('unautherize');
+            err.status = 401;
+            res.status(err.status || 500);
+            res.json({
+              error: {
+                status: 401,
+                massage: err.message
+              }
+            });
         }
-        
-       
       }
     });
   } else {

@@ -232,25 +232,159 @@ router.post("/RemoveImagesByIdDetails", (req, res, next) => {
     });
 });
 
+router.post("/DeleteDepartmentImage", (req, res, next) => {
+
+    fs.unlink('/var/www/html/cesbackend' + req.body.img, function (err) {
+        if (err) {
+            throw err;
+        } else {
+            return res.json('sucess');
+        }
+    });
+})
+
+router.post("/UploadDepartmentImage", (req, res, next) => {
+    var imgname = generateUUID();
+    const storage = multer.diskStorage({
+        destination: function (req, file, cb) {
+            cb(null, 'images/dep');
+        },
+        filename: function (req, file, cb) {
+
+            cb(null, imgname + path.extname(file.originalname));
+        }
+    });
+    let upload = multer({ storage: storage }).single('file');
+    upload(req, res, function (err) {
+        console.log("path=", config.url + 'images/dep/' + req.file.filename);
+
+        if (req.fileValidationError) {
+            console.log("err1", req.fileValidationError);
+            return res.json("err1", req.fileValidationError);
+        } else if (!req.file) {
+            console.log('Please select an image to upload');
+            return res.json('Please select an image to upload');
+        } else if (err instanceof multer.MulterError) {
+            console.log("err3");
+            return res.json("err3", err);
+        } else if (err) {
+            console.log("err4");
+            return res.json("err4", err);
+        }
+        return res.json('/images/dep/' + req.file.filename);
+    });
+});
+
+router.post("/UploadDepartmentMultiImage", midway.checkToken, (req, res, next) => {
+    var imgname = generateUUID();
+    const storage = multer.diskStorage({
+        destination: function (req, file, cb) {
+            cb(null, 'images/depMulti');
+        },
+        filename: function (req, file, cb) {
+            cb(null, imgname + path.extname(file.originalname));
+        }
+    });
+    let upload = multer({ storage: storage }).single('file');
+    upload(req, res, function (err) {
+        console.log("path=", config.url + 'images/depMulti/' + req.file.filename);
+
+        if (req.fileValidationError) {
+            console.log("err1", req.fileValidationError);
+            return res.json("err1", req.fileValidationError);
+        } else if (!req.file) {
+            console.log('Please select an image to upload');
+            return res.json('Please select an image to upload');
+        } else if (err instanceof multer.MulterError) {
+            console.log("err3");
+            return res.json("err3", err);
+        } else if (err) {
+            console.log("err4");
+            return res.json("err4", err);
+        }
+        return res.json('/images/depMulti/' + req.file.filename);
+    });
+});
+
 router.post("/SaveDepartmentList", (req, res, next) => {
-    db.executeSql("INSERT INTO `department_list`(`institute_id`, `department`, `createddate`) VALUES (" + req.body.institute_id + ",'" + req.body.department + "',CURRENT_TIMESTAMP)", function (data, err) {
+    console.log(req.body)
+    db.executeSql("INSERT INTO `department_list`(`institute_id`, `department`,`depimage`, `createddate`) VALUES ('" + req.body.institute_id + "','" + req.body.department + "','" + req.body.depImage + "',CURRENT_TIMESTAMP)", function (data, err) {
+        if (err) {
+            res.json("error");
+            console.log(err)
+        } else {
+            if (req.body.depMulti.length > 0) {
+                for (let i = 0; i < req.body.depMulti.length; i++) {
+                    db.executeSql("INSERT INTO `departmentimages`(`depid`, `image`, `createddate`) VALUES (" + data.insertId + ",'" + req.body.depMulti[i] + "',CURRENT_TIMESTAMP);", function (data1, err) {
+                        if (err) {
+                            res.json("error");
+                        } else {
+                        }
+                    });
+                }
+            }
+            const values = [req.body.depdetails]
+            const escapedValues = values.map(mysql.escape);
+            db.executeSql1("UPDATE department_list SET depdetails=" + escapedValues + " WHERE id= " + data.insertId, escapedValues, function (data1, err) {
+                if (err) {
+                    res.json("error");
+                    console.log(err)
+                } else {
+                    return res.json('success');
+
+                }
+            });
+        }
+    });
+});
+
+router.get("/GetDepMultiImageById/:id", (req, res, next) => {
+    console.log(req.params)
+    db.executeSql("SELECT * FROM departmentimages WHERE depid=" + req.params.id + ";", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+
+router.post("/UpdateDepartmentList", (req, res, next) => {
+    db.executeSql("UPDATE `department_list` SET `department`='" + req.body.department + "',`depimage`='" + req.body.depImage + "',`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id + ";", function (data, err) {
         if (err) {
             res.json("error");
         } else {
+            const values = [req.body.depdetails]
+            const escapedValues = values.map(mysql.escape);
+            db.executeSql1("UPDATE department_list SET depdetails=" + escapedValues + " WHERE id= " + req.body.id, escapedValues, function (data1, err) {
+                if (err) {
+                    res.json("error");
+                    console.log(err)
+                } else {
+                    if (req.body.depMulti.length > 0) {
+                        db.executeSql("DELETE FROM `departmentimages` WHERE depid=" + req.body.id, function (data, err) {
+                            if (err) {
+                                console.log(err);
+                            } else {
+                                for (let i = 0; i < req.body.depMulti.length; i++) {
+                                    db.executeSql("INSERT INTO `departmentimages`(`depid`, `image`, `createddate`) VALUES (" + req.body.id + ",'" + req.body.depMulti[i].url + "',CURRENT_TIMESTAMP);", function (data1, err) {
+                                        if (err) {
+                                            res.json("error");
+                                        } else {
+                                            return;
+                                        }
+                                    });
+                                }
+                            }
+                        })
+                    }
+                }
+            });
             return res.json('success');
         }
     });
 });
 
-router.post("/UpdateDepartmentList", (req, res, next) => {
-    db.executeSql("UPDATE `department_list` SET `department`='" + req.body.department + "',`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id + ";", function (data, err) {
-        if (err) {
-            res.json("error");
-        } else {
-            return res.json('success');
-        }
-    });
-});
 
 router.get("/GetDepartmentByIdDetails/:id", (req, res, next) => {
     db.executeSql("SELECT * FROM `department_list` WHERE institute_id=" + req.params.id + " ORDER BY createddate DESC;", function (data, err) {
@@ -2609,6 +2743,85 @@ router.get("/GetAdmissionListData/:id", (req, res, next) => {
         }
     })
 });
+
+
+router.post("/SaveEmployeeProfileImages", (req, res, next) => {
+    var imgname = generateUUID();
+    const storage = multer.diskStorage({
+        destination: function (req, file, cb) {
+            cb(null, 'images/employee');
+        },
+        filename: function (req, file, cb) {
+
+            cb(null, imgname + path.extname(file.originalname));
+        }
+    });
+    let upload = multer({ storage: storage }).single('file');
+    upload(req, res, function (err) {
+        console.log("path=", config.url + 'images/employee/' + req.file.filename);
+        if (req.fileValidationError) {
+            console.log("err1", req.fileValidationError);
+            return res.json("err1", req.fileValidationError);
+        } else if (!req.file) {
+            console.log('Please select an image to upload');
+            return res.json('Please select an image to upload');
+        } else if (err instanceof multer.MulterError) {
+            console.log("err3");
+            return res.json("err3", err);
+        } else if (err) {
+            console.log("err4");
+            return res.json("err4", err);
+        }
+        return res.json('/images/employee/' + req.file.filename);
+    });
+});
+
+router.post("/SaveEmployeeDetailsList", (req, res, next) => {
+    console.log(req.body, 'Hii I ma Staff')
+    db.executeSql("INSERT INTO `company`(`name`, `email`, `contact`, `password`, `role`, `profile_image`, `birthday_date`, `isactive`, `iscompany`, `createddate`) VALUES ('" + req.body.name + "','" + req.body.email + "'," + req.body.contact + ",'" + encPassword + "','" + req.body.role + "','" + req.body.profile + "','" + req.body.birthday_date + "',true,true,CURRENT_TIMESTAMP)", function (data, err) {
+        if (err) {
+            res.json("error");
+            console.log(err)
+        } else {
+            console.log(data, 'Response')
+            return res.json(data);
+        }
+    });
+});
+
+router.post("/UpdateEmployeeDetailsById", (req, res, next) => {
+    console.log(req.body, 'Update Staff')
+    db.executeSql("UPDATE `company` SET `name`='" + req.body.name + "',`email`='" + req.body.email + "',`contact`='" + req.body.contact + "',`profile_image`='" + req.body.profile + "',`birthday_date`='" + req.body.birthday_date + "',`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.staffId, function (data, err) {
+        if (err) {
+            res.json("error");
+            console.log(err)
+        } else {
+            return res.json(data);
+        }
+    });
+});
+
+router.get("/GetAllEmployeeDetails/:id", (req, res, next) => {
+    db.executeSql("SELECT * FROM `company`", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+
+router.get("/RemoveEmployeeDetailsById/:id", (req, res, next) => {
+    db.executeSql("DELETE FROM `company` WHERE id=" + req.params.id, function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+
+
 function generateUUID() {
     var d = new Date().getTime();
     var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx'.replace(/[xy]/g, function (c) {
