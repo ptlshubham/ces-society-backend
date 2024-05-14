@@ -2778,6 +2778,10 @@ router.post("/SaveEmployeeProfileImages", (req, res, next) => {
 
 router.post("/SaveEmployeeDetailsList", (req, res, next) => {
     console.log(req.body, 'Hii I ma Staff')
+    var salt = "7fa73b47df808d36c5fe328546ddef8b9011b2c6";
+    var repass = salt + "" + req.body.password;
+    console.log(encPassword);
+    var encPassword = crypto.createHash("sha1").update(repass).digest("hex");
     db.executeSql("INSERT INTO `company`(`name`, `email`, `contact`, `password`, `role`, `profile_image`, `birthday_date`, `isactive`, `iscompany`, `createddate`) VALUES ('" + req.body.name + "','" + req.body.email + "'," + req.body.contact + ",'" + encPassword + "','" + req.body.role + "','" + req.body.profile + "','" + req.body.birthday_date + "',true,true,CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
             res.json("error");
@@ -2791,7 +2795,7 @@ router.post("/SaveEmployeeDetailsList", (req, res, next) => {
 
 router.post("/UpdateEmployeeDetailsById", (req, res, next) => {
     console.log(req.body, 'Update Staff')
-    db.executeSql("UPDATE `company` SET `name`='" + req.body.name + "',`email`='" + req.body.email + "',`contact`='" + req.body.contact + "',`profile_image`='" + req.body.profile + "',`birthday_date`='" + req.body.birthday_date + "',`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.staffId, function (data, err) {
+    db.executeSql("UPDATE `company` SET `role`='" + req.body.role + "',`name`='" + req.body.name + "',`email`='" + req.body.email + "',`contact`='" + req.body.contact + "',`profile_image`='" + req.body.profile + "',`birthday_date`='" + req.body.birthday_date + "',`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id, function (data, err) {
         if (err) {
             res.json("error");
             console.log(err)
@@ -2801,8 +2805,8 @@ router.post("/UpdateEmployeeDetailsById", (req, res, next) => {
     });
 });
 
-router.get("/GetAllEmployeeDetails/:id", (req, res, next) => {
-    db.executeSql("SELECT * FROM `company`", function (data, err) {
+router.get("/GetAllEmployeeDetails", (req, res, next) => {
+    db.executeSql("SELECT * FROM company;", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -2819,6 +2823,76 @@ router.get("/RemoveEmployeeDetailsById/:id", (req, res, next) => {
             return res.json(data);
         }
     })
+});
+
+router.post("/SaveClientImage", (req, res, next) => {
+    var imgname = generateUUID();
+    const storage = multer.diskStorage({
+        destination: function (req, file, cb) {
+            cb(null, 'images/clientlogo');
+        },
+        filename: function (req, file, cb) {
+
+            cb(null, imgname + path.extname(file.originalname));
+        }
+    });
+    let upload = multer({ storage: storage }).single('file');
+    upload(req, res, function (err) {
+        console.log("path=", config.url + 'images/clientlogo/' + req.file.filename);
+        if (req.fileValidationError) {
+            console.log("err1", req.fileValidationError);
+            return res.json("err1", req.fileValidationError);
+        } else if (!req.file) {
+            console.log('Please select an image to upload');
+            return res.json('Please select an image to upload');
+        } else if (err instanceof multer.MulterError) {
+            console.log("err3");
+            return res.json("err3", err);
+        } else if (err) {
+            console.log("err4");
+            return res.json("err4", err);
+        }
+        return res.json('/images/clientlogo/' + req.file.filename);
+    });
+});
+router.post("/SaveClientDetails", (req, res, next) => {
+    console.log(req.body, 'client list');
+    db.executeSql("INSERT INTO `clients`(`name`, `logo`, `businesstype`, `post`, `story`, `reels`, `extra`, `media`, `username`, `password`, `facebooklink`, `twitterlink`, `linkedinlink`, `youtubelink`, `isactive`, `createddate`) VALUES ('" + req.body.name + "','" + req.body.profile + "','" + req.body.businesstype + "','" + req.body.post + "','" + req.body.story + "','" + req.body.reels + "','" + req.body.extra + "','" + req.body.selectedmedia + "','" + req.body.username + "','" + req.body.password + "','" + req.body.facebooklink + "','" + req.body.twitterlink + "','" + req.body.linkedinlink + "','" + req.body.youtubelink + "',true,CURRENT_TIMESTAMP)", function (data, err) {
+        if (err) {
+            console.log(err);
+            return res.status(500).json({ message: "Error occurred while saving client details." });
+        } else {
+            console.log(req.body.managers.length);
+            for (let i = 0; i < req.body.managers.length; i++) {
+                const manager = req.body.managers[i];
+                if (manager && manager.id) {
+                    db.executeSql("INSERT INTO `assignedmanager`(`clientid`, `managerid`) VALUES (" + data.insertId + "," + manager.id + ")", function (data1, err) {
+                        if (err) {
+                            console.log(err);
+                            return res.status(500).json({ message: "Error occurred while assigning designer." });
+                        }
+                    });
+                } else {
+                    console.log("Invalid manager object:", manager);
+                }
+            }
+            for (let i = 0; i < req.body.designers.length; i++) {
+                const designer = req.body.designers[i];
+                if (designer && designer.id) {
+                    db.executeSql("INSERT INTO `assigneddesigner`(`clientid`, `designerid`) VALUES (" + data.insertId + "," + designer.id + ")", function (data2, err) {
+                        if (err) {
+                            console.log(err);
+                            return res.status(500).json({ message: "Error occurred while assigning manager." });
+                        }
+                    });
+                } else {
+                    console.log("Invalid designer object:", designer);
+                }
+            }
+
+            return res.status(200).json({ message: "Client details saved successfully." }); // Set return header here
+        }
+    });
 });
 
 
