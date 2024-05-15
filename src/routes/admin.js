@@ -2806,7 +2806,7 @@ router.post("/UpdateEmployeeDetailsById", (req, res, next) => {
 });
 
 router.get("/GetAllEmployeeDetails", (req, res, next) => {
-    db.executeSql("SELECT * FROM company;", function (data, err) {
+    db.executeSql("SELECT * FROM company where isactive=true;", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -2816,7 +2816,7 @@ router.get("/GetAllEmployeeDetails", (req, res, next) => {
 });
 
 router.get("/RemoveEmployeeDetailsById/:id", (req, res, next) => {
-    db.executeSql("DELETE FROM `company` WHERE id=" + req.params.id, function (data, err) {
+    db.executeSql("UPDATE `company` SET `isactive`=false,`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.params.id, function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -2866,7 +2866,7 @@ router.post("/SaveClientDetails", (req, res, next) => {
             for (let i = 0; i < req.body.managers.length; i++) {
                 const manager = req.body.managers[i];
                 if (manager && manager.id) {
-                    db.executeSql("INSERT INTO `assignedemployee`(`clientid`, `managerid`) VALUES (" + data.insertId + "," + manager.id + ")", function (data1, err) {
+                    db.executeSql("INSERT INTO `assignedemployee`(`clientid`, `empid`) VALUES (" + data.insertId + "," + manager.id + ")", function (data1, err) {
                         if (err) {
                             console.log(err);
                             return res.status(500).json({ message: "Error occurred while assigning designer." });
@@ -2879,7 +2879,7 @@ router.post("/SaveClientDetails", (req, res, next) => {
             for (let i = 0; i < req.body.designers.length; i++) {
                 const designer = req.body.designers[i];
                 if (designer && designer.id) {
-                    db.executeSql("INSERT INTO `assignedemployee`(`clientid`, `designerid`) VALUES (" + data.insertId + "," + designer.id + ")", function (data2, err) {
+                    db.executeSql("INSERT INTO `assignedemployee`(`clientid`, `empid`) VALUES (" + data.insertId + "," + designer.id + ")", function (data2, err) {
                         if (err) {
                             console.log(err);
                             return res.status(500).json({ message: "Error occurred while assigning manager." });
@@ -2895,6 +2895,35 @@ router.post("/SaveClientDetails", (req, res, next) => {
     });
 });
 
+router.get("/GetAllClientDetails", (req, res, next) => {
+    db.executeSql("SELECT * FROM clients where isactive=true;", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+
+router.get("/GetAssignedEmployeeDetails/:id", (req, res, next) => {
+    db.executeSql("SELECT * FROM assignedemployee where clientid=" + req.params.id + ";", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+
+router.get("/RemoveClientDetailsById/:id", (req, res, next) => {
+    db.executeSql("UPDATE `clients` SET `isactive`=false,`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.params.id, function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
 
 function generateUUID() {
     var d = new Date().getTime();
