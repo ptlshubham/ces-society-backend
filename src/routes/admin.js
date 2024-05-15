@@ -2906,7 +2906,7 @@ router.get("/GetAllClientDetails", (req, res, next) => {
 });
 
 router.get("/GetAssignedEmployeeDetails/:id", (req, res, next) => {
-    db.executeSql("SELECT * FROM assignedemployee where clientid=" + req.params.id + ";", function (data, err) {
+    db.executeSql("SELECT ae.id AS assigned_employee_id, ae.clientid, ae.empid, c.id AS company_id,c.name,c.email,c.contact,c.password,c.role,c.profile_image,c.birthday_date,c.isactive,c.iscompany,c.createddate,c.updateddate FROM assignedemployee ae INNER JOIN company c ON ae.empid = c.id where ae.clientid = " + req.params.id + "; ", function (data, err) {
         if (err) {
             console.log(err);
         } else {
