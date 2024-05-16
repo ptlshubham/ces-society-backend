@@ -2862,7 +2862,6 @@ router.post("/SaveClientDetails", (req, res, next) => {
             console.log(err);
             return res.status(500).json({ message: "Error occurred while saving client details." });
         } else {
-            console.log(req.body.managers.length);
             for (let i = 0; i < req.body.managers.length; i++) {
                 const manager = req.body.managers[i];
                 if (manager && manager.id) {
@@ -2917,6 +2916,154 @@ router.get("/GetAssignedEmployeeDetails/:id", (req, res, next) => {
 
 router.get("/RemoveClientDetailsById/:id", (req, res, next) => {
     db.executeSql("UPDATE `clients` SET `isactive`=false,`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.params.id, function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+
+router.post("/UploadTokenImage", (req, res, next) => {
+    var imgname = generateUUID();
+    const storage = multer.diskStorage({
+        destination: function (req, file, cb) {
+            cb(null, 'images/token');
+        },
+        filename: function (req, file, cb) {
+
+            cb(null, imgname + path.extname(file.originalname));
+        }
+    });
+    let upload = multer({ storage: storage }).single('file');
+    upload(req, res, function (err) {
+        console.log("path=", config.url + 'images/token/' + req.file.filename);
+        if (req.fileValidationError) {
+            console.log("err1", req.fileValidationError);
+            return res.json("err1", req.fileValidationError);
+        } else if (!req.file) {
+            console.log('Please select an image to upload');
+            return res.json('Please select an image to upload');
+        } else if (err instanceof multer.MulterError) {
+            console.log("err3");
+            return res.json("err3", err);
+        } else if (err) {
+            console.log("err4");
+            return res.json("err4", err);
+        }
+        return res.json('/images/token/' + req.file.filename);
+    });
+});
+
+router.post("/UploadTokenMultiImage", (req, res, next) => {
+    var imgname = generateUUID();
+    const storage = multer.diskStorage({
+        destination: function (req, file, cb) {
+            cb(null, 'images/tokenmulti');
+        },
+        filename: function (req, file, cb) {
+            cb(null, imgname + path.extname(file.originalname));
+        }
+    });
+    let upload = multer({ storage: storage }).single('file');
+    upload(req, res, function (err) {
+        console.log("path=", config.url + 'images/tokenmulti/' + req.file.filename);
+
+        if (req.fileValidationError) {
+            console.log("err1", req.fileValidationError);
+            return res.json("err1", req.fileValidationError);
+        } else if (!req.file) {
+            console.log('Please select an image to upload');
+            return res.json('Please select an image to upload');
+        } else if (err instanceof multer.MulterError) {
+            console.log("err3");
+            return res.json("err3", err);
+        } else if (err) {
+            console.log("err4");
+            return res.json("err4", err);
+        }
+        return res.json('/images/tokenmulti/' + req.file.filename);
+    });
+});
+
+router.get("/GetALLTokenDetails", (req, res, next) => {
+    db.executeSql("SELECT * FROM tokens ORDER BY createddate DESC;", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+
+router.post("/SaveTokenDetailsList", (req, res, next) => {
+    db.executeSql("INSERT INTO `tokens`(`clientid`, `clientname`, `label`, `deliverydate`, `createdby`, `title`, `image`, `status`, `isactive`, `unread`, `createddate`) VALUES (" + req.body.clientid + ",'" + req.body.clientname + "','" + req.body.label + "','" + req.body.deliverydate + "','" + req.body.createdby + "','" + req.body.title + "','" + req.body.image + "','" + req.body.status + "',true,true,CURRENT_TIMESTAMP)", function (data, err) {
+        if (err) {
+            res.json("error");
+            console.log(err)
+        } else {
+            if (req.body.tokenMultiImage.length > 0) {
+                for (let i = 0; i < req.body.tokenMultiImage.length; i++) {
+                    db.executeSql("INSERT INTO `tokensimage`(`tokenid`, `image`) VALUES (" + data.insertId + ",'" + req.body.tokenMultiImage[i] + "');", function (data1, err) {
+                        if (err) {
+                            res.json("error");
+                        } else {
+                        }
+                    });
+                }
+            }
+            const values = [req.body.description]
+            const escapedValues = values.map(mysql.escape);
+            db.executeSql1("UPDATE tokens SET description=" + escapedValues + " WHERE id= " + data.insertId, escapedValues, function (data1, err) {
+                if (err) {
+                    res.json("error");
+                    console.log(err)
+                } else {
+                    for (let i = 0; i < req.body.managers.length; i++) {
+                        const manager = req.body.managers[i];
+                        if (manager && manager.empid) {
+                            db.executeSql("INSERT INTO `assignedtokenemployee`(`tokenid`, `empid`) VALUES (" + data.insertId + "," + manager.empid + ")", function (data1, err) {
+                                if (err) {
+                                    console.log(err);
+                                    return res.status(500).json({ message: "Error occurred while assigning designer." });
+                                }
+                            });
+                        } else {
+                            console.log("Invalid manager object:", manager);
+                        }
+                    }
+                    for (let i = 0; i < req.body.designers.length; i++) {
+                        const designer = req.body.designers[i];
+                        if (designer && designer.empid) {
+                            db.executeSql("INSERT INTO `assignedtokenemployee`(`tokenid`, `empid`) VALUES (" + data.insertId + "," + designer.empid + ")", function (data2, err) {
+                                if (err) {
+                                    console.log(err);
+                                    return res.status(500).json({ message: "Error occurred while assigning manager." });
+                                }
+                            });
+                        } else {
+                            console.log("Invalid designer object:", designer);
+                        }
+                    }
+                    return res.status(200).json({ message: "Token details saved successfully." }); // Set return header here
+                }
+            });
+        }
+    });
+});
+
+router.get("/UpdateTokenUnreadStatus/:id", (req, res, next) => {
+    db.executeSql("UPDATE `tokens` SET `unread`= false,`updateddate`= CURRENT_TIMESTAMP WHERE id=" + req.params.id, function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+
+router.get("/GetALLTokenImage/:id", (req, res, next) => {
+    db.executeSql("SELECT * FROM tokensimage where id=" + req.params.id + ";", function (data, err) {
         if (err) {
             console.log(err);
         } else {
