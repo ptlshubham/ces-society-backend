@@ -2996,6 +2996,17 @@ router.get("/GetALLTokenDetails", (req, res, next) => {
     })
 });
 
+router.get("/GetEmployeeTokenById/:id", (req, res, next) => {
+    db.executeSql("SELECT a.*, t.* FROM assignedtokenemployee AS a INNER JOIN tokens AS t ON a.tokenid = t.id WHERE a.empid = " + req.params.id + " ORDER BY t.createddate DESC; ", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+
+
 router.post("/SaveTokenDetailsList", (req, res, next) => {
     db.executeSql("INSERT INTO `tokens`(`clientid`, `clientname`, `label`, `deliverydate`, `createdby`, `title`, `image`, `status`, `isactive`, `unread`, `createddate`) VALUES (" + req.body.clientid + ",'" + req.body.clientname + "','" + req.body.label + "','" + req.body.deliverydate + "','" + req.body.createdby + "','" + req.body.title + "','" + req.body.image + "','" + req.body.status + "',true,true,CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
@@ -3070,6 +3081,19 @@ router.get("/GetALLTokenImage/:id", (req, res, next) => {
             return res.json(data);
         }
     })
+});
+
+router.post("/UpdateTokenStatusDetails", (req, res, next) => {
+    console.log(req.body,'Status')
+    for (let i = 0; i < req.body.designers.length; i++) {
+        db.executeSql("UPDATE `tokens` SET `status`= '" + req.body[i].status + "',`updateddate`= CURRENT_TIMESTAMP WHERE id=" + req.body[i].id, function (data, err) {
+            if (err) {
+                console.log(err);
+            } else {
+                return res.json(data);
+            }
+        })
+    }
 });
 
 function generateUUID() {
