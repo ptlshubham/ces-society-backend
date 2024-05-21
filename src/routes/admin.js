@@ -3105,6 +3105,51 @@ router.post("/UpdateTokenStatusDetails", (req, res, next) => {
     }
 });
 
+router.post("/ChackForPassword", (req, res, next) => {
+    var salt = "7fa73b47df808d36c5fe328546ddef8b9011b2c6";
+    var repass = salt + "" + req.body.password;
+    var encPassword = crypto.createHash("sha1").update(repass).digest("hex");
+    db.executeSql("select * from company where id=" + req.body.id + " and password='" + encPassword + "'", function (data, err) {
+        if (err) {
+            res.status(500).json({ error: "An internal server error occurred" });
+        } else {
+            if (data.length > 0) {
+                res.json({ message: "success" });
+            } else {
+                res.json({ error: "Invalid credentials" });
+            }
+        }
+    });
+});
+router.post("/UpdateCompanyPassword", (req, res, next) => {
+    console.log(req.body);
+    var salt = "7fa73b47df808d36c5fe328546ddef8b9011b2c6";
+    var repass = salt + "" + req.body.password;
+
+    var encPassword = crypto.createHash("sha1").update(repass).digest("hex");
+    db.executeSql("UPDATE company SET password='" + encPassword + "' WHERE id=" + req.body.id + ";",
+        function (data, err) {
+            if (err) {
+                console.log("Error in store.js", err);
+            } else {
+                console.log("shsyuhgsuygdyusgdyus", data);
+                return res.json(data);
+
+            }
+        }
+    );
+});
+
+router.get("/getEmployeeDataById/:id", midway.checkToken, (req, res, next) => {
+    db.executeSql("SELECT * FROM `company` where id=" + req.params.id + ";", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    });
+});
+
 function generateUUID() {
     var d = new Date().getTime();
     var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx'.replace(/[xy]/g, function (c) {
