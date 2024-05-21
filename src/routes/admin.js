@@ -3006,6 +3006,15 @@ router.get("/GetEmployeeTokenById/:id", (req, res, next) => {
     })
 });
 
+router.get("/GetAssignedEmpTokenById/:id", (req, res, next) => {
+    db.executeSql("SELECT ate.id, ate.tokenid, ate.empid, c.* FROM assignedtokenemployee AS ate INNER JOIN company AS c ON ate.empid = c.id WHERE ate.tokenid = " + req.params.id + "; ", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
 
 router.post("/SaveTokenDetailsList", (req, res, next) => {
     db.executeSql("INSERT INTO `tokens`(`clientid`, `clientname`, `label`, `deliverydate`, `createdby`, `title`, `image`, `status`, `isactive`, `unread`, `createddate`) VALUES (" + req.body.clientid + ",'" + req.body.clientname + "','" + req.body.label + "','" + req.body.deliverydate + "','" + req.body.createdby + "','" + req.body.title + "','" + req.body.image + "','" + req.body.status + "',true,true,CURRENT_TIMESTAMP)", function (data, err) {
@@ -3074,7 +3083,7 @@ router.get("/UpdateTokenUnreadStatus/:id", (req, res, next) => {
 });
 
 router.get("/GetALLTokenImage/:id", (req, res, next) => {
-    db.executeSql("SELECT * FROM tokensimage where id=" + req.params.id + ";", function (data, err) {
+    db.executeSql("SELECT * FROM tokensimage where tokenid=" + req.params.id + ";", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -3084,7 +3093,7 @@ router.get("/GetALLTokenImage/:id", (req, res, next) => {
 });
 
 router.post("/UpdateTokenStatusDetails", (req, res, next) => {
-    console.log(req.body,'Status')
+    console.log(req.body, 'Status')
     for (let i = 0; i < req.body.designers.length; i++) {
         db.executeSql("UPDATE `tokens` SET `status`= '" + req.body[i].status + "',`updateddate`= CURRENT_TIMESTAMP WHERE id=" + req.body[i].id, function (data, err) {
             if (err) {
