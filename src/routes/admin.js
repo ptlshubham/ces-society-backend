@@ -3175,15 +3175,18 @@ router.get("/getEmployeeDataById/:id", midway.checkToken, (req, res, next) => {
 });
 
 router.post("/SaveAttendanceDetails", midway.checkToken, (req, res, next) => {
-    console.log(req.body);
-    db.executeSql("INSERT INTO `attendance`(`eid`, `date`, `status`, `isactive`, `createddate`) VALUES ('" + req.body.eid + "',CURRENT_TIMESTAMP," + req.body.status + ",true,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP);", function (data, err) {
-        if (err) {
-            console.log(err);
-        } else {
-            return res.json("success");
-        }
+    console.log(req.body, 'attendence');
+    for (let i = 0; i < req.body.length; i++) {
+        db.executeSql("INSERT INTO `attendance`(`eid`, `date`, `status`, `isactive`, `createddate`) VALUES (" + req.body[i].employeeId + ",'" + req.body[i].startDate + "','" + req.body[i].option + "',true,CURRENT_TIMESTAMP)", function (data, err) {
+            if (err) {
+                console.log(err);
+            } else {
+                if (i == req.body.length - 1) {
+                    return res.json("success");
+                }
+            }
+        });
     }
-    );
 });
 function generateUUID() {
     var d = new Date().getTime();
