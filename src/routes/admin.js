@@ -1995,7 +1995,9 @@ router.post("/UploadPDF", (req, res, next) => {
 
 router.post("/SaveNewsDataList", (req, res, next) => {
     console.log(req.body, 'jbdjbjfds');
-    db.executeSql("INSERT INTO `news`(`institute_id`, `date`, `files`,`isactive`,`startDate`, `endDate`,`createddate`) VALUES (" + req.body.institute_id + ",'" + req.body.date + "','" + req.body.files + "',true,'" + req.body.startDate + "','" + req.body.endDate + "',CURRENT_TIMESTAMP)", function (data, err) {
+    const startDate = req.body.startDate ? mysql.escape(req.body.startDate) : 'NULL';
+    const endDate = req.body.endDate ? mysql.escape(req.body.endDate) : 'NULL';
+    db.executeSql("INSERT INTO `news`(`institute_id`, `date`, `files`,`isactive`,`startDate`, `endDate`,`createddate`) VALUES (" + req.body.institute_id + ",'" + req.body.date + "','" + req.body.files + "',true,${startDate}, ${endDate},CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
             console.log(err)
             res.json("error");
@@ -2483,7 +2485,6 @@ router.get("/GetAllNewsDetails/:id", (req, res, next) => {
             }
             const year = date.getFullYear();
             const concat = '' + year + '-' + mnth + '-' + day;
-            console.log(concat, 'ed');
             db.executeSql("SELECT * FROM news WHERE institute_id=" + req.params.id + " and (startDate IS NULL OR startDate<='" + concat + "') and (endDate IS NULL OR endDate>='" + concat + "') and isactive=true ORDER BY date DESC ;", function (data, err) {
                 if (err) {
                     console.log(err);
@@ -2814,9 +2815,18 @@ router.get("/GetAllEmployeeDetails", (req, res, next) => {
         }
     })
 });
+router.get("/GetEmployeeDetails", (req, res, next) => {
+    db.executeSql("SELECT * FROM company;", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
 
-router.get("/RemoveEmployeeDetailsById/:id", (req, res, next) => {
-    db.executeSql("UPDATE `company` SET `isactive`=false,`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.params.id, function (data, err) {
+router.post("/RemoveEmployeeDetailsById", (req, res, next) => {
+    db.executeSql("UPDATE `company` SET `isactive`=" + req.body.isactive + ",`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id + ";", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -2855,6 +2865,7 @@ router.post("/SaveClientImage", (req, res, next) => {
         return res.json('/images/clientlogo/' + req.file.filename);
     });
 });
+
 router.post("/SaveClientDetails", (req, res, next) => {
     console.log(req.body, 'client list');
     db.executeSql("INSERT INTO `clients`(`name`, `logo`, `businesstype`, `post`, `story`, `reels`, `extra`, `media`, `username`, `password`, `facebooklink`, `twitterlink`, `linkedinlink`, `youtubelink`, `isactive`, `createddate`) VALUES ('" + req.body.name + "','" + req.body.profile + "','" + req.body.businesstype + "','" + req.body.post + "','" + req.body.story + "','" + req.body.reels + "','" + req.body.extra + "','" + req.body.selectedmedia + "','" + req.body.username + "','" + req.body.password + "','" + req.body.facebooklink + "','" + req.body.twitterlink + "','" + req.body.linkedinlink + "','" + req.body.youtubelink + "',true,CURRENT_TIMESTAMP)", function (data, err) {
@@ -3133,6 +3144,7 @@ router.post("/ChackForPassword", (req, res, next) => {
         }
     });
 });
+
 router.post("/UpdateCompanyPassword", (req, res, next) => {
     console.log(req.body);
     var salt = "7fa73b47df808d36c5fe328546ddef8b9011b2c6";
@@ -3161,6 +3173,7 @@ router.get("/getEmployeeDataById/:id", midway.checkToken, (req, res, next) => {
         }
     });
 });
+
 router.post("/SaveAttendanceDetails", midway.checkToken, (req, res, next) => {
     console.log(req.body);
     db.executeSql("INSERT INTO `attendance`(`eid`, `date`, `status`, `isactive`, `createddate`) VALUES ('" + req.body.eid + "',CURRENT_TIMESTAMP," + req.body.status + ",true,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP);", function (data, err) {
