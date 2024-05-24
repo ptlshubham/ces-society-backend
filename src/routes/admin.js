@@ -3188,6 +3188,59 @@ router.post("/SaveAttendanceDetails", midway.checkToken, (req, res, next) => {
         });
     }
 });
+
+router.get("/GetAllAttendanceList", midway.checkToken, (req, res, next) => {
+    db.executeSql("SELECT  A.`id`, A.`eid`, A.`date`, A.`status`, A.`isactive`, A.`createddate`, A.`updateddate`,C.`id` AS company_id, C.`name`, C.`email`, C.`contact`, C.`password`, C.`role`, C.`profile_image`, C.`birthday_date`, C.`isactive` AS company_isactive, C.`iscompany`, C.`createddate` AS company_createddate, C.`updateddate` AS company_updateddate FROM `attendance` AS A JOIN `company` AS C ON A.`eid` = C.`id`;", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    });
+});
+
+router.post("/SaveTodoListDetails", (req, res, next) => {
+    db.executeSql("INSERT INTO `todolist`(`empid`, `date`, `title`, `description`, `category`, `createddate`) VALUES ('" + req.body.empid + "','" + req.body.date + "','" + req.body.title + "','" + req.body.description + "','" + req.body.category + "',CURRENT_TIMESTAMP)", function (data, err) {
+        if (err) {
+            res.json("error");
+            console.log(err)
+        } else {
+            return res.json('success');
+        }
+    });
+});
+
+router.get("/GetALLTodoListById/:id", (req, res, next) => {
+    db.executeSql("SELECT * FROM todolist where empid=" + req.params.id + ";", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+
+router.get("/RemoveTodoListById/:id", (req, res, next) => {
+    db.executeSql("DELETE FROM `todolist` WHERE id=" + req.params.id + ";", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+
+router.post("/UpdateTodoListById", (req, res, next) => {
+    db.executeSql("UPDATE `todolist` SET `title`='" + req.body.title + "',`description`='" + req.body.description + "',`category`='" + req.body.category + "' where id=" + req.body.id + ";", function (data, err) {
+        if (err) {
+            res.json("error");
+            console.log(err)
+        } else {
+            return res.json('success');
+        }
+    });
+});
+
 function generateUUID() {
     var d = new Date().getTime();
     var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx'.replace(/[xy]/g, function (c) {
