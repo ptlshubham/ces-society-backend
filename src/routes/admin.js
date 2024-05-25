@@ -2905,6 +2905,49 @@ router.post("/SaveClientDetails", (req, res, next) => {
     });
 });
 
+router.post("/UpdateClientDetailsByID", (req, res, next) => {
+    db.executeSql("UPDATE `clients` SET `name`='" + req.body.name + "',`logo`='" + req.body.profile + "',`businesstype`='" + req.body.businesstype + "',`post`='" + req.body.post + "',`story`='" + req.body.story + "',`reels`='" + req.body.reels + "',`extra`='" + req.body.extra + "',`username`='" + req.body.username + "',`password`='" + req.body.password + "',`facebooklink`='" + req.body.facebooklink + "',`twitterlink`='" + req.body.twitterlink + "',`linkedinlink`='" + req.body.linkedinlink + "',`youtubelink`='" + req.body.youtubelink + "',`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id + "", function (data, err) {
+        if (err) {
+            console.log(err);
+            return res.status(500).json({ message: "Error occurred while saving client details." });
+        } else {
+            db.executeSql("DELETE FROM `assignedemployee` WHERE clientid=" + req.body.id + ";", function (data, err) {
+                if (err) {
+                    console.log(err);
+                } else {
+                    for (let i = 0; i < req.body.updatedManagers.length; i++) {
+                        const manager = req.body.updatedManagers[i];
+                        if (manager && manager.empid) {
+                            db.executeSql("INSERT INTO `assignedemployee`(`clientid`, `empid`) VALUES (" + req.body.id + "," + manager.empid + ")", function (data1, err) {
+                                if (err) {
+                                    console.log(err);
+                                    return res.status(500).json({ message: "Error occurred while assigning designer." });
+                                }
+                            });
+                        } else {
+                            console.log("Invalid manager object:", manager);
+                        }
+                    }
+                    for (let i = 0; i < req.body.updatedDesigners.length; i++) {
+                        const designer = req.body.updatedDesigners[i];
+                        if (designer && designer.empid) {
+                            db.executeSql("INSERT INTO `assignedemployee`(`clientid`, `empid`) VALUES (" + req.body.id + "," + designer.empid + ")", function (data2, err) {
+                                if (err) {
+                                    console.log(err);
+                                    return res.status(500).json({ message: "Error occurred while assigning manager." });
+                                }
+                            });
+                        } else {
+                            console.log("Invalid designer object:", designer);
+                        }
+                    }
+                    return res.status(200).json({ message: "Client details saved successfully." }); // Set return header here
+                }
+            })
+        }
+    });
+});
+
 router.get("/GetAllClientDetails", (req, res, next) => {
     db.executeSql("SELECT * FROM clients where isactive=true;", function (data, err) {
         if (err) {
@@ -2916,7 +2959,7 @@ router.get("/GetAllClientDetails", (req, res, next) => {
 });
 
 router.get("/GetAssignedEmployeeDetails/:id", (req, res, next) => {
-    db.executeSql("SELECT ae.id AS assigned_employee_id, ae.clientid, ae.empid, c.id AS company_id,c.name,c.email,c.contact,c.password,c.role,c.profile_image,c.birthday_date,c.isactive,c.iscompany,c.createddate,c.updateddate FROM assignedemployee ae INNER JOIN company c ON ae.empid = c.id where ae.clientid = " + req.params.id + "; ", function (data, err) {
+    db.executeSql("SELECT ae.id AS assigned_employee_id, ae.clientid AS id, ae.empid, c.id AS company_id,c.name,c.email,c.contact,c.password,c.role,c.profile_image,c.birthday_date,c.isactive,c.iscompany,c.createddate,c.updateddate FROM assignedemployee ae INNER JOIN company c ON ae.empid = c.id where ae.clientid = " + req.params.id + "; ", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -3240,6 +3283,70 @@ router.post("/UpdateTodoListById", (req, res, next) => {
         }
     });
 });
+
+router.post("/SaveSchedulerDetails", (req, res, next) => {
+    db.executeSql("INSERT INTO `scheduler`(`clientid`, `managerid`, `designerid`, `date`, `title`, `description`, `createddate`) VALUES (" + req.body.clientid + "," + req.body.managerid + "," + req.body.designerid + ",'" + req.body.date + "','" + req.body.title + "','" + req.body.description + "',CURRENT_TIMESTAMP)", function (data, err) {
+        if (err) {
+            res.json("error");
+            console.log(err)
+        } else {
+            return res.json('success');
+        }
+    });
+});
+
+router.get("/GetALLSchedulerById/:id", (req, res, next) => {
+    db.executeSql("SELECT * FROM scheduler where clientid=" + req.params.id + ";", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+
+router.get("/RemoveSchedulerById/:id", (req, res, next) => {
+    db.executeSql("DELETE FROM `scheduler` WHERE id=" + req.params.id + ";", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+
+router.post("/UpdateSchedulerById", (req, res, next) => {
+    db.executeSql("UPDATE `scheduler` SET `designerid`=" + req.body.designerid + ",`title`='" + req.body.title + "',`description`='" + req.body.description + "' WHERE id=" + req.body.id + ";", function (data, err) {
+        if (err) {
+            res.json("error");
+            console.log(err)
+        } else {
+            return res.json('success');
+        }
+    });
+});
+
+router.post("/UpdateDailyWorkById", (req, res, next) => {
+    db.executeSql("UPDATE `scheduler` SET `iscompleted`=true,`completeddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id + ";", function (data, err) {
+        if (err) {
+            res.json("error");
+            console.log(err)
+        } else {
+            return res.json('success');
+        }
+    });
+});
+
+router.get("/GetALLDailyWork", (req, res, next) => {
+    db.executeSql("SELECT * FROM scheduler;", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+
 
 function generateUUID() {
     var d = new Date().getTime();
