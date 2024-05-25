@@ -2776,7 +2776,16 @@ router.post("/SaveEmployeeProfileImages", (req, res, next) => {
         return res.json('/images/employee/' + req.file.filename);
     });
 });
-
+router.post("/UpdateEmployeeLogo", midway.checkToken, (req, res, next) => {
+    console.log(req.body, "Profile")
+    db.executeSql("UPDATE `company` SET profile_image='" + req.body.image + "',updateddate=CURRENT_TIMESTAMP WHERE id=" + req.body.id + ";", function (data, err) {
+        if (err) {
+            console.log("Error in store.js", err);
+        } else {
+            return res.json(data);
+        }
+    });
+});
 router.post("/SaveEmployeeDetailsList", (req, res, next) => {
     console.log(req.body, 'Hii I ma Staff')
     var salt = "7fa73b47df808d36c5fe328546ddef8b9011b2c6";
@@ -2834,6 +2843,7 @@ router.post("/RemoveEmployeeDetailsById", (req, res, next) => {
         }
     })
 });
+
 
 router.post("/SaveClientImage", (req, res, next) => {
     var imgname = generateUUID();
@@ -3217,6 +3227,15 @@ router.get("/getEmployeeDataById/:id", midway.checkToken, (req, res, next) => {
     });
 });
 
+router.get("/getClientDetailsById/:id", midway.checkToken, (req, res, next) => {
+    db.executeSql("SELECT * FROM `tokens` where id=" + req.params.id + ";", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    });
+});
 router.post("/SaveAttendanceDetails", midway.checkToken, (req, res, next) => {
     console.log(req.body, 'attendence');
     for (let i = 0; i < req.body.length; i++) {
