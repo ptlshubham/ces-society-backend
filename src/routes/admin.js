@@ -3304,7 +3304,7 @@ router.post("/UpdateTodoListById", (req, res, next) => {
 });
 
 router.post("/SaveSchedulerDetails", (req, res, next) => {
-    db.executeSql("INSERT INTO `scheduler`(`clientid`, `managerid`, `designerid`, `date`, `title`, `description`, `createddate`) VALUES (" + req.body.clientid + "," + req.body.managerid + "," + req.body.designerid + ",'" + req.body.date + "','" + req.body.title + "','" + req.body.description + "',CURRENT_TIMESTAMP)", function (data, err) {
+    db.executeSql("INSERT INTO `scheduler`(`clientid`, `managerid`, `designerid`, `date`, `title`, `description`, `unread`, `createddate`) VALUES (" + req.body.clientid + "," + req.body.managerid + "," + req.body.designerid + ",'" + req.body.date + "','" + req.body.title + "','" + req.body.description + "',true,CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
             res.json("error");
             console.log(err)
@@ -3346,7 +3346,7 @@ router.post("/UpdateSchedulerById", (req, res, next) => {
 });
 
 router.post("/UpdateDailyWorkById", (req, res, next) => {
-    db.executeSql("UPDATE `scheduler` SET `iscompleted`=true,`completeddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id + ";", function (data, err) {
+    db.executeSql("UPDATE `scheduler` SET `iscompleted`=" + req.body.iscompleted + ",`completeddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id + ";", function (data, err) {
         if (err) {
             res.json("error");
             console.log(err)
@@ -3357,7 +3357,7 @@ router.post("/UpdateDailyWorkById", (req, res, next) => {
 });
 
 router.get("/GetALLDailyWork", (req, res, next) => {
-    db.executeSql("SELECT * FROM scheduler;", function (data, err) {
+    db.executeSql("SELECT sch.id, sch.clientid, sch.managerid, sch.designerid, sch.date, sch.title, sch.description, sch.unread, sch.iscompleted, sch.completeddate, sch.createddate, cl.name AS clientname,mgr.name AS managername,des.name AS designername FROM scheduler sch INNER JOIN clients cl ON sch.clientid = cl.id LEFT JOIN company mgr ON sch.managerid = mgr.id LEFT JOIN company des ON sch.designerid = des.id ORDER BY sch.date ASC;", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -3366,6 +3366,15 @@ router.get("/GetALLDailyWork", (req, res, next) => {
     })
 });
 
+router.get("/UpdateDailyWorkUnreadStatus/:id", (req, res, next) => {
+    db.executeSql("UPDATE `scheduler` SET `unread`= false WHERE id=" + req.params.id, function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
 
 function generateUUID() {
     var d = new Date().getTime();
