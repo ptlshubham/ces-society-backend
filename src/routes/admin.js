@@ -3080,7 +3080,57 @@ router.get("/GetAssignedEmpTokenById/:id", (req, res, next) => {
     })
 });
 
+function companymail(filename, data, toemail, subj, mailname) {
+    const transporter = nodemailer.createTransport({
+        service: "gmail",
+        host: 'smtp.gmail.com',
+        auth: {
+            user: 'ptlshubham@gmail.com',
+            pass: 'ndbtiwksxsszdqob'
+        },
+    });
+    const filePath = 'src/assets/emailtemplets/' + filename;
+    const source = fs.readFileSync(filePath, 'utf-8').toString();
+    const template = handlebars.compile(source);
+    const replacements = data;
+    const htmlToSend = template(replacements);
+    const mailOptions = {
+        from: `"Foster" <ptlshubham@gmail.com>`, // Replace with your name and Hostinger email
+        subject: subj,
+        to: toemail,
+        Name: mailname,
+        html: htmlToSend,
+    };
+    transporter.sendMail(mailOptions, function (error, info) {
+        if (error) {
+            console.log(error);
+            res.json("Errror");
+        } else {
+            console.log('Email sent: ' + info.response);
+            res.json(data);
+        }
+    });
+}
+
+function formatDateTime(date) {
+    const options = {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+    };
+    return new Intl.DateTimeFormat('en-GB', options).format(date);
+}
+function stripHtml(str) {
+    return str ? str.replace(/<\/?[^>]+(>|$)/g, "") : "";
+}
 router.post("/SaveTokenDetailsList", (req, res, next) => {
+    // console.log(req.body)
+    const managerNames = req.body.managers.map(manager => manager.name).join(', ');
+    const designerNames = req.body.designers.map(designer => designer.name).join(', ');
+
     db.executeSql("INSERT INTO `tokens`(`clientid`, `clientname`, `label`, `deliverydate`, `createdby`, `title`, `image`, `status`, `isactive`, `unread`, `createddate`) VALUES (" + req.body.clientid + ",'" + req.body.clientname + "','" + req.body.label + "','" + req.body.deliverydate + "','" + req.body.createdby + "','" + req.body.title + "','" + req.body.image + "','" + req.body.status + "',true,true,CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
             res.json("error");
@@ -3129,9 +3179,41 @@ router.post("/SaveTokenDetailsList", (req, res, next) => {
                             console.log("Invalid designer object:", designer);
                         }
                     }
-                    return res.status(200).json({ message: "Token details saved successfully." }); // Set return header here
+                    // Generate comma-separated strings for managers and designers names
+
+                    const replacements = {
+                        TaskDate: formatDateTime(new Date()),  // Sets the current date and time in ISO format
+                        ClientName: req.body.client.name,
+                        Title: req.body.title,
+                        Description: stripHtml(req.body.description),
+                        Designer: designerNames,
+                        Managers: managerNames,  // Comma-separated manager names
+                        Name: req.body.name,
+                        DeliveryDate: req.body.deliverydate,
+                        Createdby: req.body.createdby,
+                        Label: req.body.label
+                    };
+                    if (req.body.designers.length > 0) {
+                        for (let i = 0; i < req.body.designers.length; i++) {
+                            // console.log(req.body.designers[i].email, 'designers Email');
+                            companymail('token.html', replacements, req.body.designers[i].email, "You Have a new Task.", " ");
+                        }
+                    }
+                    if (req.body.managers.length > 0) {
+                        for (let i = 0; i < req.body.managers.length; i++) {
+                            // console.log(req.body.managers[i].email, 'managers Email');
+
+                            companymail('token.html', replacements, req.body.managers[i].email, "You Have a new Task.", " ");
+                        }
+                    }
+                    if (req.body.email) {
+                        // console.log(req.body.email, 'Created Email');
+                        companymail('token.html', replacements, req.body.email, "You Have a new Task.", " ");
+                    }
+                    return res.json('success');
                 }
             });
+
         }
     });
 });
@@ -3346,14 +3428,27 @@ router.post("/UpdateSchedulerById", (req, res, next) => {
 });
 
 router.post("/UpdateDailyWorkById", (req, res, next) => {
-    db.executeSql("UPDATE `scheduler` SET `iscompleted`=" + req.body.iscompleted + ",`completeddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id + ";", function (data, err) {
-        if (err) {
-            res.json("error");
-            console.log(err)
-        } else {
-            return res.json('success');
-        }
-    });
+    if (req.body.iscompleted == true) {
+        db.executeSql("UPDATE `scheduler` SET `iscompleted`=" + req.body.iscompleted + ",`completeddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id + ";", function (data, err) {
+            if (err) {
+                res.json("error");
+                console.log(err)
+            } else {
+                return res.json('success');
+            }
+        });
+    }
+    else{
+        db.executeSql("UPDATE `scheduler` SET `iscompleted`=" + req.body.iscompleted + ",`completeddate`=null WHERE id=" + req.body.id + ";", function (data, err) {
+            if (err) {
+                res.json("error");
+                console.log(err)
+            } else {
+                return res.json('success');
+            }
+        });
+    }
+
 });
 
 router.get("/GetALLDailyWork", (req, res, next) => {
