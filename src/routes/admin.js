@@ -3471,6 +3471,20 @@ router.get("/UpdateDailyWorkUnreadStatus/:id", (req, res, next) => {
     })
 });
 
+router.post("/UpdateTokenNotification", (req, res, next) => {
+    for (let i = 0; i < req.body.length; i++) {
+        db.executeSql("UPDATE `assignedtokenemployee` SET `isnotify`=false WHERE tokenid=" + req.body[i].tokenid + " && empid=" + req.body[i].empid + "", function (data, err) {
+            if (err) {
+                console.log(err);
+            } else {
+                if (i == req.body.length - 1) {
+                    return res.json("success");
+                }
+            }
+        })
+    }
+});
+
 function generateUUID() {
     var d = new Date().getTime();
     var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx'.replace(/[xy]/g, function (c) {
