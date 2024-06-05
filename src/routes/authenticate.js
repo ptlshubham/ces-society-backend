@@ -116,7 +116,7 @@ router.post('/OrganizationLogin', (req, res, next) => {
                     let token = jwt.sign({ username: data[0].email, password: data[0].password },
                         secret,
                         {
-                            expiresIn: '1h' // expires in 24 hours
+                            expiresIn: '24h' // expires in 24 hours
                         }
                     );
                     console.log("token=", token);

@@ -3085,8 +3085,8 @@ function companymail(filename, data, toemail, subj, mailname) {
         service: "gmail",
         host: 'smtp.gmail.com',
         auth: {
-            user: 'ptlshubham@gmail.com',
-            pass: 'ndbtiwksxsszdqob'
+            user: 'fostermarketing98@gmail.com',
+            pass: 'kdyxsujdvlhhjfww'
         },
     });
     const filePath = 'src/assets/emailtemplets/' + filename;
@@ -3095,7 +3095,7 @@ function companymail(filename, data, toemail, subj, mailname) {
     const replacements = data;
     const htmlToSend = template(replacements);
     const mailOptions = {
-        from: `"Foster" <ptlshubham@gmail.com>`, // Replace with your name and Hostinger email
+        from: `"Foster" <fostermarketing98@gmail.com>`, // Replace with your name and Hostinger email
         subject: subj,
         to: toemail,
         Name: mailname,
@@ -3131,7 +3131,7 @@ router.post("/SaveTokenDetailsList", (req, res, next) => {
     const managerNames = req.body.managers.map(manager => manager.name).join(', ');
     const designerNames = req.body.designers.map(designer => designer.name).join(', ');
 
-    db.executeSql("INSERT INTO `tokens`(`clientid`, `clientname`, `label`, `deliverydate`, `createdby`, `title`, `image`, `status`, `isactive`, `unread`, `createddate`) VALUES (" + req.body.clientid + ",'" + req.body.clientname + "','" + req.body.label + "','" + req.body.deliverydate + "','" + req.body.createdby + "','" + req.body.title + "','" + req.body.image + "','" + req.body.status + "',true,true,CURRENT_TIMESTAMP)", function (data, err) {
+    db.executeSql("INSERT INTO `tokens`(`clientid`, `clientname`, `label`, `deliverydate`, `createdby`, `title`, `image`, `status`, `isactive`, `unread`, `isnotify`, `createddate`) VALUES (" + req.body.clientid + ",'" + req.body.clientname + "','" + req.body.label + "','" + req.body.deliverydate + "','" + req.body.createdby + "','" + req.body.title + "','" + req.body.image + "','" + req.body.status + "',true,true,true,CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
             res.json("error");
             console.log(err)
@@ -3452,7 +3452,7 @@ router.post("/UpdateDailyWorkById", (req, res, next) => {
 });
 
 router.get("/GetALLDailyWork", (req, res, next) => {
-    db.executeSql("SELECT sch.id, sch.clientid, sch.managerid, sch.designerid, sch.date, sch.title, sch.description, sch.unread, sch.iscompleted, sch.completeddate, sch.createddate, cl.name AS clientname,mgr.name AS managername,des.name AS designername FROM scheduler sch INNER JOIN clients cl ON sch.clientid = cl.id LEFT JOIN company mgr ON sch.managerid = mgr.id LEFT JOIN company des ON sch.designerid = des.id ORDER BY sch.date ASC;", function (data, err) {
+    db.executeSql("SELECT sch.id, sch.clientid, sch.managerid, sch.designerid, sch.date, sch.title, sch.description, sch.unread, sch.iscompleted, sch.completeddate, sch.createddate, cl.logo, cl.name AS clientname,mgr.name AS managername,des.name AS designername FROM scheduler sch INNER JOIN clients cl ON sch.clientid = cl.id LEFT JOIN company mgr ON sch.managerid = mgr.id LEFT JOIN company des ON sch.designerid = des.id ORDER BY sch.date ASC;", function (data, err) {
         if (err) {
             console.log(err);
         } else {
