@@ -3071,7 +3071,7 @@ router.get("/GetEmployeeTokenById/:id", (req, res, next) => {
 });
 
 router.get("/GetAssignedEmpTokenById/:id", (req, res, next) => {
-    db.executeSql("SELECT ate.id, ate.tokenid, ate.empid, c.* FROM assignedtokenemployee AS ate INNER JOIN company AS c ON ate.empid = c.id WHERE ate.tokenid = " + req.params.id + "; ", function (data, err) {
+    db.executeSql("SELECT ate.id, ate.tokenid, ate.empid, ate.isnotify, c.* FROM assignedtokenemployee AS ate INNER JOIN company AS c ON ate.empid = c.id WHERE ate.tokenid = " + req.params.id + "; ", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -3131,7 +3131,7 @@ router.post("/SaveTokenDetailsList", (req, res, next) => {
     const managerNames = req.body.managers.map(manager => manager.name).join(', ');
     const designerNames = req.body.designers.map(designer => designer.name).join(', ');
 
-    db.executeSql("INSERT INTO `tokens`(`clientid`, `clientname`, `label`, `deliverydate`, `createdby`, `title`, `image`, `status`, `isactive`, `unread`, `isnotify`, `createddate`) VALUES (" + req.body.clientid + ",'" + req.body.clientname + "','" + req.body.label + "','" + req.body.deliverydate + "','" + req.body.createdby + "','" + req.body.title + "','" + req.body.image + "','" + req.body.status + "',true,true,true,CURRENT_TIMESTAMP)", function (data, err) {
+    db.executeSql("INSERT INTO `tokens`(`clientid`, `clientname`, `label`, `deliverydate`, `createdby`, `title`, `image`, `status`, `isactive`, `unread`, `createddate`) VALUES (" + req.body.clientid + ",'" + req.body.clientname + "','" + req.body.label + "','" + req.body.deliverydate + "','" + req.body.createdby + "','" + req.body.title + "','" + req.body.image + "','" + req.body.status + "',true,true,CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
             res.json("error");
             console.log(err)
@@ -3156,7 +3156,7 @@ router.post("/SaveTokenDetailsList", (req, res, next) => {
                     for (let i = 0; i < req.body.managers.length; i++) {
                         const manager = req.body.managers[i];
                         if (manager && manager.empid) {
-                            db.executeSql("INSERT INTO `assignedtokenemployee`(`tokenid`, `empid`) VALUES (" + data.insertId + "," + manager.empid + ")", function (data1, err) {
+                            db.executeSql("INSERT INTO `assignedtokenemployee`(`tokenid`, `empid`, `isnotify`) VALUES (" + data.insertId + "," + manager.empid + ",true)", function (data1, err) {
                                 if (err) {
                                     console.log(err);
                                     return res.status(500).json({ message: "Error occurred while assigning designer." });
@@ -3169,7 +3169,7 @@ router.post("/SaveTokenDetailsList", (req, res, next) => {
                     for (let i = 0; i < req.body.designers.length; i++) {
                         const designer = req.body.designers[i];
                         if (designer && designer.empid) {
-                            db.executeSql("INSERT INTO `assignedtokenemployee`(`tokenid`, `empid`) VALUES (" + data.insertId + "," + designer.empid + ")", function (data2, err) {
+                            db.executeSql("INSERT INTO `assignedtokenemployee`(`tokenid`, `empid`, `isnotify`) VALUES (" + data.insertId + "," + designer.empid + ",true)", function (data2, err) {
                                 if (err) {
                                     console.log(err);
                                     return res.status(500).json({ message: "Error occurred while assigning manager." });
@@ -3438,7 +3438,7 @@ router.post("/UpdateDailyWorkById", (req, res, next) => {
             }
         });
     }
-    else{
+    else {
         db.executeSql("UPDATE `scheduler` SET `iscompleted`=" + req.body.iscompleted + ",`completeddate`=null WHERE id=" + req.body.id + ";", function (data, err) {
             if (err) {
                 res.json("error");
