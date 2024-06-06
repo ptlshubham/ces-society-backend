@@ -3438,7 +3438,7 @@ router.post("/UpdateDailyWorkById", (req, res, next) => {
             }
         });
     }
-    else{
+    else {
         db.executeSql("UPDATE `scheduler` SET `iscompleted`=" + req.body.iscompleted + ",`completeddate`=null WHERE id=" + req.body.id + ";", function (data, err) {
             if (err) {
                 res.json("error");
@@ -3469,6 +3469,23 @@ router.get("/UpdateDailyWorkUnreadStatus/:id", (req, res, next) => {
             return res.json(data);
         }
     })
+});
+router.post("/SaveBulkSchedulerDetails", (req, res, next) => {
+    console.log(req.body)
+    for (let i = 0; i < req.body.length; i++) {
+        db.executeSql("INSERT INTO `scheduler`(`clientid`,`managerid`,`designerid`, `date`, `title`, `description`, `createddate`) VALUES (" + req.body[i].clientid + "," + req.body[i].managerid + "," + req.body[i].designerid + ",'" + req.body[i].date + "','" + req.body[i].title + "','" + req.body[i].description + "',CURRENT_TIMESTAMP)", function (data, err) {
+            if (err) {
+                res.json("error");
+                console.log(err)
+            } else {
+                if (i == req.body.length - 1) {
+                    return res.json('success');
+
+                }
+            }
+        });
+    }
+    // console.log(data);
 });
 
 function generateUUID() {
