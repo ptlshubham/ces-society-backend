@@ -3071,7 +3071,7 @@ router.get("/GetEmployeeTokenById/:id", (req, res, next) => {
 });
 
 router.get("/GetAssignedEmpTokenById/:id", (req, res, next) => {
-    db.executeSql("SELECT ate.id, ate.tokenid, ate.empid, c.* FROM assignedtokenemployee AS ate INNER JOIN company AS c ON ate.empid = c.id WHERE ate.tokenid = " + req.params.id + "; ", function (data, err) {
+    db.executeSql("SELECT ate.id, ate.tokenid, ate.empid, ate.isnotify, c.* FROM assignedtokenemployee AS ate INNER JOIN company AS c ON ate.empid = c.id WHERE ate.tokenid = " + req.params.id + "; ", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -3085,8 +3085,8 @@ function companymail(filename, data, toemail, subj, mailname) {
         service: "gmail",
         host: 'smtp.gmail.com',
         auth: {
-            user: 'ptlshubham@gmail.com',
-            pass: 'ndbtiwksxsszdqob'
+            user: 'fostermarketing98@gmail.com',
+            pass: 'kdyxsujdvlhhjfww'
         },
     });
     const filePath = 'src/assets/emailtemplets/' + filename;
@@ -3095,7 +3095,7 @@ function companymail(filename, data, toemail, subj, mailname) {
     const replacements = data;
     const htmlToSend = template(replacements);
     const mailOptions = {
-        from: `"Foster" <ptlshubham@gmail.com>`, // Replace with your name and Hostinger email
+        from: `"Foster" <fostermarketing98@gmail.com>`, // Replace with your name and Hostinger email
         subject: subj,
         to: toemail,
         Name: mailname,
@@ -3156,7 +3156,7 @@ router.post("/SaveTokenDetailsList", (req, res, next) => {
                     for (let i = 0; i < req.body.managers.length; i++) {
                         const manager = req.body.managers[i];
                         if (manager && manager.empid) {
-                            db.executeSql("INSERT INTO `assignedtokenemployee`(`tokenid`, `empid`) VALUES (" + data.insertId + "," + manager.empid + ")", function (data1, err) {
+                            db.executeSql("INSERT INTO `assignedtokenemployee`(`tokenid`, `empid`, `isnotify`) VALUES (" + data.insertId + "," + manager.empid + ",true)", function (data1, err) {
                                 if (err) {
                                     console.log(err);
                                     return res.status(500).json({ message: "Error occurred while assigning designer." });
@@ -3169,7 +3169,7 @@ router.post("/SaveTokenDetailsList", (req, res, next) => {
                     for (let i = 0; i < req.body.designers.length; i++) {
                         const designer = req.body.designers[i];
                         if (designer && designer.empid) {
-                            db.executeSql("INSERT INTO `assignedtokenemployee`(`tokenid`, `empid`) VALUES (" + data.insertId + "," + designer.empid + ")", function (data2, err) {
+                            db.executeSql("INSERT INTO `assignedtokenemployee`(`tokenid`, `empid`, `isnotify`) VALUES (" + data.insertId + "," + designer.empid + ",true)", function (data2, err) {
                                 if (err) {
                                     console.log(err);
                                     return res.status(500).json({ message: "Error occurred while assigning manager." });
@@ -3452,7 +3452,7 @@ router.post("/UpdateDailyWorkById", (req, res, next) => {
 });
 
 router.get("/GetALLDailyWork", (req, res, next) => {
-    db.executeSql("SELECT sch.id, sch.clientid, sch.managerid, sch.designerid, sch.date, sch.title, sch.description, sch.unread, sch.iscompleted, sch.completeddate, sch.createddate, cl.name AS clientname,mgr.name AS managername,des.name AS designername FROM scheduler sch INNER JOIN clients cl ON sch.clientid = cl.id LEFT JOIN company mgr ON sch.managerid = mgr.id LEFT JOIN company des ON sch.designerid = des.id ORDER BY sch.date ASC;", function (data, err) {
+    db.executeSql("SELECT sch.id, sch.clientid, sch.managerid, sch.designerid, sch.date, sch.title, sch.description, sch.unread, sch.iscompleted, sch.completeddate, sch.createddate, cl.logo, cl.name AS clientname,mgr.name AS managername,des.name AS designername FROM scheduler sch INNER JOIN clients cl ON sch.clientid = cl.id LEFT JOIN company mgr ON sch.managerid = mgr.id LEFT JOIN company des ON sch.designerid = des.id ORDER BY sch.date ASC;", function (data, err) {
         if (err) {
             console.log(err);
         } else {
@@ -3486,6 +3486,20 @@ router.post("/SaveBulkSchedulerDetails", (req, res, next) => {
         });
     }
     // console.log(data);
+});
+
+router.post("/UpdateTokenNotification", (req, res, next) => {
+    for (let i = 0; i < req.body.length; i++) {
+        db.executeSql("UPDATE `assignedtokenemployee` SET `isnotify`=false WHERE tokenid=" + req.body[i].tokenid + " && empid=" + req.body[i].empid + "", function (data, err) {
+            if (err) {
+                console.log(err);
+            } else {
+                if (i == req.body.length - 1) {
+                    return res.json("success");
+                }
+            }
+        })
+    }
 });
 
 function generateUUID() {
