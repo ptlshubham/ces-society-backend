@@ -2978,6 +2978,15 @@ router.get("/GetAssignedEmployeeDetails/:id", (req, res, next) => {
         }
     })
 });
+router.get("/GetAssignedEmployeeForChart/:id", (req, res, next) => {
+    db.executeSql("SELECT ae.id, ae.clientid, ae.empid, c.name FROM assignedemployee ae JOIN clients c ON ae.clientid = c.id WHERE ae.empid= " + req.params.id + "; ", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
 
 router.get("/RemoveClientDetailsById/:id", (req, res, next) => {
     db.executeSql("UPDATE `clients` SET `isactive`=false,`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.params.id, function (data, err) {
@@ -3477,7 +3486,6 @@ router.post("/SaveBulkSchedulerDetails", (req, res, next) => {
             } else {
                 if (i == req.body.length - 1) {
                     return res.json('success');
-
                 }
             }
         });
@@ -3498,6 +3506,42 @@ router.post("/UpdateTokenNotification", (req, res, next) => {
         })
     }
 });
+router.post("/SaveHelpTicket", midway.checkToken, (req, res, next) => {
+    db.executeSql("INSERT INTO `help`(`eid`,`title`, `description`, `status`, `isactive`, `createddate`)  VALUES (" + req.body.employeeid + ",'" + req.body.title + "','" + req.body.description + "','" + req.body.status + "', 'true', CURRENT_TIMESTAMP)", function (data, err) {
+        if (err) {
+            res.json("error");
+            console.log(err);
+        } else {
+            return res.json('success');
+        }
+    });
+});
+
+
+router.get("/GetAllHelpTicket", (req, res, next) => {
+    db.executeSql("SELECT * FROM help ORDER BY createddate DESC", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+
+router.post("/UpdateHelpTokenStatusDetails", (req, res, next) => {
+    if (req.body.isStateUpdate) {
+        console.log(req.body, 'eeffgf Status')
+        db.executeSql("UPDATE `help` SET `status`= '" + req.body.status + "',`updateddate`= CURRENT_TIMESTAMP WHERE id=" + req.body.id, function (data, err) {
+            if (err) {
+                console.log(err);
+            } else {
+                return res.json(data);
+            }
+        })
+    }
+
+});
+
 
 router.post("/SaveCESTokenDetails", (req, res, next) => {
     // console.log(req.body)
