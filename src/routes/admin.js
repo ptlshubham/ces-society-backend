@@ -524,6 +524,7 @@ router.get("/GetAllDonnerList", (req, res, next) => {
     })
 });
 router.post("/SaveBulkDonnersDetails", (req, res, next) => {
+    console.log(req.body);
     for (let i = 0; i < req.body.length; i++) {
         db.executeSql("INSERT INTO `donners`(`donationDate`, `donnerName`, `donnerCity`, `amount`, `createddate`) VALUES ('" + req.body[i].donationDate + "','" + req.body[i].donnerName + "','" + req.body[i].donnerCity + "','" + req.body[i].amount + "',CURRENT_TIMESTAMP)", function (data, err) {
             if (err) {
@@ -3239,28 +3240,24 @@ router.get("/GetALLTokenImage/:id", (req, res, next) => {
 });
 
 router.post("/UpdateTokenStatusDetails", (req, res, next) => {
-    if (req.body.isStateUpdate) {
-        console.log(req.body, 'eeffgf Status')
-
-        db.executeSql("UPDATE `tokens` SET `status`= '" + req.body.status + "',`updateddate`= CURRENT_TIMESTAMP WHERE id=" + req.body.id, function (data, err) {
-            if (err) {
-                console.log(err);
-            } else {
+    db.executeSql("UPDATE `tokens` SET `status`= '" + req.body.status + "',`updateddate`= CURRENT_TIMESTAMP WHERE id=" + req.body.id, function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            if (req.body.label == 'CES') {
+                db.executeSql("UPDATE `cestokens` SET `status`='" + req.body.status + "',`updateddate`=CURRENT_TIMESTAMP WHERE tokenid=" + req.body.id, function (data1, err) {
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        return res.json(data);
+                    }
+                })
+            }
+            else {
                 return res.json(data);
             }
-        })
-    }
-    else {
-        for (let i = 0; i < req.body.designers.length; i++) {
-            db.executeSql("UPDATE `tokens` SET `status`= '" + req.body[i].status + "',`updateddate`= CURRENT_TIMESTAMP WHERE id=" + req.body[i].id, function (data, err) {
-                if (err) {
-                    console.log(err);
-                } else {
-                    return res.json(data);
-                }
-            })
         }
-    }
+    })
 });
 
 router.post("/ChackForPassword", (req, res, next) => {
@@ -3502,6 +3499,170 @@ router.post("/UpdateTokenNotification", (req, res, next) => {
     }
 });
 
+router.post("/SaveCESTokenDetails", (req, res, next) => {
+    // console.log(req.body)
+    db.executeSql("INSERT INTO `cestokens`(`instituteid`, `institutename`, `title`, `createdby`, `contact`, `image`, `status`, `expecteddate`, `createddate`) VALUES (" + req.body.instituteid + ",'" + req.body.institutename + "','" + req.body.title + "','" + req.body.createdby + "','" + req.body.contact + "','" + req.body.image + "','" + req.body.status + "','" + req.body.expecteddate + "',CURRENT_TIMESTAMP)", function (data, err) {
+        if (err) {
+            res.json("error");
+            console.log(err)
+        } else {
+            if (req.body.tokenMultiImage.length > 0) {
+                for (let i = 0; i < req.body.tokenMultiImage.length; i++) {
+                    db.executeSql("INSERT INTO `cestokensimage`(`cestokenid`, `image`) VALUES (" + data.insertId + ",'" + req.body.tokenMultiImage[i] + "');", function (data1, err) {
+                        if (err) {
+                            res.json("error");
+                        }
+                    });
+                }
+            }
+            const values = [req.body.description]
+            const escapedValues = values.map(mysql.escape);
+            db.executeSql1("UPDATE cestokens SET description=" + escapedValues + " WHERE id= " + data.insertId, escapedValues, function (data1, err) {
+                if (err) {
+                    res.json("error");
+                    console.log(err)
+                }
+                return res.json('success');
+            });
+        }
+    });
+});
+
+router.get("/GetCESTokenImage/:id", (req, res, next) => {
+    db.executeSql("SELECT * FROM cestokensimage where cestokenid=" + req.params.id + ";", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+
+
+router.get("/RemoveCESToken/:id", (req, res, next) => {
+    db.executeSql("DELETE FROM cestokens where id=" + req.params.id + ";", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            db.executeSql("DELETE FROM cestokensimage where cestokenid=" + req.params.id + ";", function (data, err) {
+                if (err) {
+                    console.log(err);
+                } else {
+                    return res.json('sucess');
+                }
+            })
+        }
+    })
+});
+
+router.get("/GetALLCESTokenData", (req, res, next) => {
+    db.executeSql("SELECT * FROM cestokens ORDER BY createddate DESC;", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+router.post("/SaveConvertCesToTokenDetails", (req, res, next) => {
+    // console.log(req.body)
+    const managerNames = req.body.managers.map(manager => manager.name).join(', ');
+    const designerNames = req.body.designers.map(designer => designer.name).join(', ');
+
+    db.executeSql("INSERT INTO `tokens`(`clientid`, `clientname`, `label`, `deliverydate`, `createdby`, `title`, `image`, `status`, `isactive`, `unread`, `createddate`) VALUES (" + req.body.clientid + ",'" + req.body.institutename + "','" + req.body.label + "','" + req.body.expecteddate + "','" + req.body.createdby + "','" + req.body.title + "','" + req.body.image + "','" + req.body.status + "',true,true,CURRENT_TIMESTAMP)", function (data, err) {
+        if (err) {
+            res.json("error");
+            console.log(err)
+        } else {
+            if (req.body.tokenMultiImage.length > 0) {
+                for (let i = 0; i < req.body.tokenMultiImage.length; i++) {
+                    db.executeSql("INSERT INTO `tokensimage`(`tokenid`, `image`) VALUES (" + data.insertId + ",'" + req.body.tokenMultiImage[i].image + "');", function (data1, err) {
+                        if (err) {
+                            res.json("error");
+                        } else {
+                        }
+                    });
+                }
+            }
+            const values = [req.body.description]
+            const escapedValues = values.map(mysql.escape);
+            db.executeSql1("UPDATE tokens SET description=" + escapedValues + " WHERE id= " + data.insertId, escapedValues, function (data1, err) {
+                if (err) {
+                    res.json("error");
+                    console.log(err)
+                } else {
+                    for (let i = 0; i < req.body.managers.length; i++) {
+                        const manager = req.body.managers[i];
+                        if (manager && manager.empid) {
+                            db.executeSql("INSERT INTO `assignedtokenemployee`(`tokenid`, `empid`, `isnotify`) VALUES (" + data.insertId + "," + manager.empid + ",true)", function (data1, err) {
+                                if (err) {
+                                    console.log(err);
+                                    return res.status(500).json({ message: "Error occurred while assigning designer." });
+                                }
+                            });
+                        } else {
+                            console.log("Invalid manager object:", manager);
+                        }
+                    }
+                    for (let i = 0; i < req.body.designers.length; i++) {
+                        const designer = req.body.designers[i];
+                        if (designer && designer.empid) {
+                            db.executeSql("INSERT INTO `assignedtokenemployee`(`tokenid`, `empid`, `isnotify`) VALUES (" + data.insertId + "," + designer.empid + ",true)", function (data2, err) {
+                                if (err) {
+                                    console.log(err);
+                                    return res.status(500).json({ message: "Error occurred while assigning manager." });
+                                }
+                            });
+                        } else {
+                            console.log("Invalid designer object:", designer);
+                        }
+                    }
+                    // Generate comma-separated strings for managers and designers names
+                    if (req.body.id) {
+                        db.executeSql("UPDATE `cestokens` SET `isassign`=true,`tokenid`=" + data.insertId + " WHERE id=" + req.body.id + "", function (data3, err) {
+                            console.log(req.body, 'cestokens')
+                            if (err) {
+                                console.log(err);
+                                return res.status(500).json({ message: "Error occurred while assigning manager." });
+                            }
+                        });
+                    }
+                    const replacements = {
+                        TaskDate: formatDateTime(new Date()),  // Sets the current date and time in ISO format
+                        ClientName: req.body.clientname,
+                        Title: req.body.title,
+                        Description: stripHtml(req.body.description),
+                        Designer: designerNames,
+                        Managers: managerNames,  // Comma-separated manager names
+                        Name: req.body.name,
+                        DeliveryDate: req.body.deliverydate,
+                        Createdby: req.body.createdby,
+                        Label: req.body.label
+                    };
+                    if (req.body.designers.length > 0) {
+                        for (let i = 0; i < req.body.designers.length; i++) {
+                            // console.log(req.body.designers[i].email, 'designers Email');
+                            companymail('token.html', replacements, req.body.designers[i].email, "You Have a new Task.", " ");
+                        }
+                    }
+                    if (req.body.managers.length > 0) {
+                        for (let i = 0; i < req.body.managers.length; i++) {
+                            // console.log(req.body.managers[i].email, 'managers Email');
+
+                            companymail('token.html', replacements, req.body.managers[i].email, "You Have a new Task.", " ");
+                        }
+                    }
+                    if (req.body.email) {
+                        // console.log(req.body.email, 'Created Email');
+                        companymail('token.html', replacements, req.body.email, "You Have a new Task.", " ");
+                    }
+                    return res.json('success');
+                }
+            });
+
+        }
+    });
+});
 function generateUUID() {
     var d = new Date().getTime();
     var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx'.replace(/[xy]/g, function (c) {
