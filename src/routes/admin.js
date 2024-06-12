@@ -3608,6 +3608,30 @@ router.get("/GetALLCESTokenData", (req, res, next) => {
         }
     })
 });
+router.get("/GetALLDesignerSheet", (req, res, next) => {
+    db.executeSql("SELECT c.id AS empid, c.name AS empname, c.profile_image, GROUP_CONCAT(cl.id ORDER BY cl.id) AS clients_id, GROUP_CONCAT(cl.name ORDER BY cl.name) AS clientnames, COUNT(cl.id) AS numberofclients FROM company c JOIN assignedemployee ae ON c.id = ae.empid JOIN clients cl ON ae.clientid = cl.id WHERE c.isactive = true AND c.role = 'Designer' GROUP BY c.id, c.name, c.profile_image ORDER BY c.id;", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            return res.json(data);
+        }
+    })
+});
+router.get("/RemoveTokensById/:id", (req, res, next) => {
+    db.executeSql("DELETE FROM tokens where id=" + req.params.id + ";", function (data, err) {
+        if (err) {
+            console.log(err);
+        } else {
+            db.executeSql("DELETE FROM tokensimage where tokenid=" + req.params.id + ";", function (data, err) {
+                if (err) {
+                    console.log(err);
+                } else {
+                    return res.json('sucess');
+                }
+            })
+        }
+    })
+});
 router.post("/SaveConvertCesToTokenDetails", (req, res, next) => {
     // console.log(req.body)
     const managerNames = req.body.managers.map(manager => manager.name).join(', ');
