@@ -2806,7 +2806,7 @@ router.post("/SaveEmployeeDetailsList", (req, res, next) => {
 
 router.post("/UpdateEmployeeDetailsById", (req, res, next) => {
     console.log(req.body, 'Update Staff')
-    db.executeSql("UPDATE `company` SET `role`='" + req.body.role + "',`name`='" + req.body.name + "',`email`='" + req.body.email + "',`contact`='" + req.body.contact + "',`profile_image`='" + req.body.profile + "',`birthday_date`='" + req.body.birthday_date + "',`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id, function (data, err) {
+    db.executeSql("UPDATE `company` SET `role`='" + req.body.role + "',`name`='" + req.body.name + "',`email`='" + req.body.email + "',`contact`='" + req.body.contact + "',`profile_image`='" + req.body.profile_image + "',`birthday_date`='" + req.body.birthday_date + "',`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id, function (data, err) {
         if (err) {
             res.json("error");
             console.log(err)
@@ -3506,8 +3506,38 @@ router.post("/UpdateTokenNotification", (req, res, next) => {
         })
     }
 });
-router.post("/SaveHelpTicket", midway.checkToken, (req, res, next) => {
-    db.executeSql("INSERT INTO `help`(`eid`,`title`, `description`, `status`, `isactive`, `createddate`)  VALUES (" + req.body.employeeid + ",'" + req.body.title + "','" + req.body.description + "','" + req.body.status + "', 'true', CURRENT_TIMESTAMP)", function (data, err) {
+
+router.post("/UpdateTicketNotification", (req, res, next) => {
+    for (let i = 0; i < req.body.length; i++) {
+
+        db.executeSql("UPDATE `help` SET `isnotify`= false WHERE eid=" + req.body[i].eid + " && isemp=true", function (data, err) {
+            if (err) {
+                console.log(err);
+            } else {
+                if (i == req.body.length - 1) {
+                    return res.json("success");
+                }
+            }
+        })
+    }
+});
+
+router.post("/UpdateTicketForAdminNotification", (req, res, next) => {
+    for (let i = 0; i < req.body.length; i++) {
+        db.executeSql("UPDATE `help` SET `isnotify`= false WHERE isemp=false", function (data, err) {
+            if (err) {
+                console.log(err);
+            } else {
+                if (i == req.body.length - 1) {
+                    return res.json("success");
+                }
+            }
+        })
+    }
+});
+
+router.post("/SaveHelpTicket", (req, res, next) => {
+    db.executeSql("INSERT INTO `help`(`eid`, `empname`, `title`, `description`, `status`, `isactive`, `isemp`, `createddate`)  VALUES (" + req.body.employeeid + ",'" + req.body.empname + "','" + req.body.title + "','" + req.body.description + "','" + req.body.status + "', 'true'," + req.body.isemp + ", CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
             res.json("error");
             console.log(err);
