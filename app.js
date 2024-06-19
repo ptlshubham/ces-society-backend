@@ -29,6 +29,8 @@ app.use(express.static('public'));
 app.use('/images', express.static(__dirname + '/images'));
 app.use('/pdf', express.static(__dirname + '/pdf'));
 app.use('/certificate', express.static(__dirname + '/certificate'));
+app.use('/tokensFiles', express.static(__dirname + '/tokensFiles'));
+
 
 
 

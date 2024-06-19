@@ -3537,7 +3537,7 @@ router.post("/UpdateTicketForAdminNotification", (req, res, next) => {
 });
 
 router.post("/SaveHelpTicket", (req, res, next) => {
-    db.executeSql("INSERT INTO `help`(`eid`, `empname`, `title`, `description`, `status`, `isactive`, `isemp`, `createddate`)  VALUES (" + req.body.employeeid + ",'" + req.body.empname + "','" + req.body.title + "','" + req.body.description + "','" + req.body.status + "', 'true'," + req.body.isemp + ", CURRENT_TIMESTAMP)", function (data, err) {
+    db.executeSql("INSERT INTO `help`(`eid`, `empname`, `title`, `description`, `status`, `isactive`, `isemp`, `createddate`)  VALUES (" + req.body.employeeid + ",'" + req.body.empname + "','" + req.body.title + "','" + req.body.description + "','" + req.body.status + "', true," + req.body.isemp + ", CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
             res.json("error");
             console.log(err);
@@ -3575,7 +3575,7 @@ router.post("/UpdateHelpTokenStatusDetails", (req, res, next) => {
 
 router.post("/SaveCESTokenDetails", (req, res, next) => {
     // console.log(req.body)
-    db.executeSql("INSERT INTO `cestokens`(`instituteid`, `institutename`, `title`, `createdby`, `contact`, `image`, `status`, `expecteddate`, `createddate`) VALUES (" + req.body.instituteid + ",'" + req.body.institutename + "','" + req.body.title + "','" + req.body.createdby + "','" + req.body.contact + "','" + req.body.image + "','" + req.body.status + "','" + req.body.expecteddate + "',CURRENT_TIMESTAMP)", function (data, err) {
+    db.executeSql("INSERT INTO `cestokens`(`instituteid`, `institutename`, `title`, `createdby`, `contact`, `image`, `status`, `expecteddate`, `file`, `createddate`) VALUES (" + req.body.instituteid + ",'" + req.body.institutename + "','" + req.body.title + "','" + req.body.createdby + "','" + req.body.contact + "','" + req.body.image + "','" + req.body.status + "','" + req.body.expecteddate + "','" + req.body.file + "',CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
             res.json("error");
             console.log(err)
@@ -3667,7 +3667,7 @@ router.post("/SaveConvertCesToTokenDetails", (req, res, next) => {
     const managerNames = req.body.managers.map(manager => manager.name).join(', ');
     const designerNames = req.body.designers.map(designer => designer.name).join(', ');
 
-    db.executeSql("INSERT INTO `tokens`(`clientid`, `clientname`, `label`, `deliverydate`, `createdby`, `title`, `image`, `status`, `isactive`, `unread`, `createddate`) VALUES (" + req.body.clientid + ",'" + req.body.institutename + "','" + req.body.label + "','" + req.body.expecteddate + "','" + req.body.createdby + "','" + req.body.title + "','" + req.body.image + "','" + req.body.status + "',true,true,CURRENT_TIMESTAMP)", function (data, err) {
+    db.executeSql("INSERT INTO `tokens`(`clientid`, `clientname`, `label`, `deliverydate`, `createdby`, `title`, `image`, `status`, `isactive`, `unread`, `file`, `createddate`) VALUES (" + req.body.clientid + ",'" + req.body.institutename + "','" + req.body.label + "','" + req.body.expecteddate + "','" + req.body.createdby + "','" + req.body.title + "','" + req.body.image + "','" + req.body.status + "',true,true,'" + req.body.file + "',CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
             res.json("error");
             console.log(err)
@@ -3761,6 +3761,43 @@ router.post("/SaveConvertCesToTokenDetails", (req, res, next) => {
         }
     });
 });
+
+router.post("/UploadTokensFiles", (req, res, next) => {
+    const storage = multer.diskStorage({
+        destination: (req, file, cb) => {
+            cb(null, "tokensFiles/");
+        },
+        filename: (req, file, cb) => {
+            const uniqueSuffix = Date.now() + path.extname(file.originalname);
+            cb(null, uniqueSuffix);
+        }
+    });
+
+    const upload = multer({ storage: storage }).single('file');
+
+    upload(req, res, function (err) {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        if (!req.file) {
+            return res.status(400).json({ error: "No file uploaded" });
+        }
+        console.log('/tokensFiles/' + req.file.filename);
+        return res.json({ filePath: '/tokensFiles/' + req.file.filename });
+    });
+});
+
+router.post("/DeleteTokenUploadedImage", (req, res, next) => {
+    console.log(req.body)
+    fs.unlink('/var/www/html/cesbackend' + req.body.id, function (err) {
+        if (err) {
+            throw err;
+        } else {
+            return res.json('sucess');
+        }
+    });
+});
+
 function generateUUID() {
     var d = new Date().getTime();
     var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx'.replace(/[xy]/g, function (c) {
