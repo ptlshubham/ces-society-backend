@@ -3,17 +3,8 @@ const router = express.Router();
 const db = require("../db/db");
 var crypto = require('crypto');
 const jwt = require('jsonwebtoken');
+const secret = 'prnv';
 
-
-
-// var user;
-// const auth = () => {
-//     return (req, res, next) => {
-//         next()
-//     }
-// }
-
-let secret = 'prnv';
 router.post('/UserLogin', (req, res, next) => {
     console.log(req.body, "hello  im here");
     const body = req.body;
@@ -103,12 +94,18 @@ router.post('/OrganizationLogin', (req, res, next) => {
     var salt = '7fa73b47df808d36c5fe328546ddef8b9011b2c6';
     var repass = salt + '' + body.pass;
     var encPassword = crypto.createHash('sha1').update(repass).digest('hex');
-    console.log(body);
-    db.executeSql("select * from company where email='" + body.email + "';", function (data, err) {
-        console.log(data);
+
+    db.executeSql(`select * from company where email='${body.email}';`, function (data, err) {
+        if (err) {
+            console.error("Database error:", err);
+            return res.status(500).json({ error: "Internal Server Error" });
+        }
         if (data.length > 0) {
-            db.executeSql("select * from company where email='" + body.email + "' and password='" + encPassword + "';", function (data, err) {
-                console.log(data);
+            db.executeSql(`select * from company where email='${body.email}' and password='${encPassword}';`, function (data, err) {
+                if (err) {
+                    console.error("Database error:", err);
+                    return res.status(500).json({ error: "Internal Server Error" });
+                }
                 if (data.length > 0) {
                     module.exports.user = {
                         username: data[0].email, password: data[0].password
@@ -126,12 +123,12 @@ router.post('/OrganizationLogin', (req, res, next) => {
                     res.json(data);
                 }
                 else {
-                    return res.json(2);
+                    return res.status(401).json({ error: "Unauthorized: Invalid password" });
                 }
             });
         }
         else {
-            return res.json(1);
+            return res.status(401).json({ error: "Unauthorized: User not found" });
         }
     });
 });

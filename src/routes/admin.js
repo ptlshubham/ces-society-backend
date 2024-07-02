@@ -35,10 +35,7 @@ router.get('/fetchPayment/:paymentId', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-
 // Razorpay Api End Here
-
-
 router.get("/GetInstituteDetailByURL/:id", (req, res, next) => {
     console.log(req.params, 'institute');
     db.executeSql("SELECT * FROM institute WHERE url='" + req.params.id + "';", function (data, err) {
@@ -49,7 +46,6 @@ router.get("/GetInstituteDetailByURL/:id", (req, res, next) => {
         }
     })
 });
-
 router.get("/GetLastUpdateSiteById/:id", (req, res, next) => {
     db.executeSql("SELECT * FROM institute WHERE id='" + req.params.id + "';", function (data, err) {
         if (err) {
@@ -107,7 +103,6 @@ router.get("/GetAllInstituteDetails", (req, res, next) => {
         }
     })
 });
-
 router.post("/UploadGalleryImages", (req, res, next) => {
     var imgname = generateUUID();
 
@@ -140,7 +135,6 @@ router.post("/UploadGalleryImages", (req, res, next) => {
         return res.json('/images/gallery/' + req.file.filename);
     });
 });
-
 router.post("/UploadGalleryVideo", (req, res, next) => {
     const videoStorage = multer.diskStorage({
         destination: (req, file, cb) => {
@@ -172,7 +166,6 @@ router.post("/UploadGalleryVideo", (req, res, next) => {
         // return res.json('/images/infra/' + req.file.filename);
     });
 });
-
 router.post("/SaveGalleryImages", (req, res, next) => {
     db.executeSql("INSERT INTO `image`(`institute_id`, `purpose`, `image`, `isactive`, `createddate`) VALUES(" + req.body.institute_id + ",'" + req.body.purpose + "','" + req.body.image + "',true,CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
@@ -231,7 +224,6 @@ router.post("/RemoveImagesByIdDetails", (req, res, next) => {
         }
     });
 });
-
 router.post("/DeleteDepartmentImage", (req, res, next) => {
 
     fs.unlink('/var/www/html/cesbackend' + req.body.img, function (err) {
@@ -242,7 +234,6 @@ router.post("/DeleteDepartmentImage", (req, res, next) => {
         }
     });
 })
-
 router.post("/UploadDepartmentImage", (req, res, next) => {
     var imgname = generateUUID();
     const storage = multer.diskStorage({
@@ -274,7 +265,6 @@ router.post("/UploadDepartmentImage", (req, res, next) => {
         return res.json('/images/dep/' + req.file.filename);
     });
 });
-
 router.post("/UploadDepartmentMultiImage", midway.checkToken, (req, res, next) => {
     var imgname = generateUUID();
     const storage = multer.diskStorage({
@@ -305,7 +295,6 @@ router.post("/UploadDepartmentMultiImage", midway.checkToken, (req, res, next) =
         return res.json('/images/depMulti/' + req.file.filename);
     });
 });
-
 router.post("/SaveDepartmentList", (req, res, next) => {
     console.log(req.body)
     db.executeSql("INSERT INTO `department_list`(`institute_id`, `department`,`depimage`, `createddate`) VALUES ('" + req.body.institute_id + "','" + req.body.department + "','" + req.body.depImage + "',CURRENT_TIMESTAMP)", function (data, err) {
@@ -337,7 +326,6 @@ router.post("/SaveDepartmentList", (req, res, next) => {
         }
     });
 });
-
 router.get("/GetDepMultiImageById/:id", (req, res, next) => {
     console.log(req.params)
     db.executeSql("SELECT * FROM departmentimages WHERE depid=" + req.params.id + ";", function (data, err) {
@@ -348,7 +336,6 @@ router.get("/GetDepMultiImageById/:id", (req, res, next) => {
         }
     })
 });
-
 router.post("/UpdateDepartmentList", (req, res, next) => {
     db.executeSql("UPDATE `department_list` SET `department`='" + req.body.department + "',`depimage`='" + req.body.depImage + "',`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id + ";", function (data, err) {
         if (err) {
@@ -384,8 +371,6 @@ router.post("/UpdateDepartmentList", (req, res, next) => {
         }
     });
 });
-
-
 router.get("/GetDepartmentByIdDetails/:id", (req, res, next) => {
     db.executeSql("SELECT * FROM `department_list` WHERE institute_id=" + req.params.id + " ORDER BY createddate DESC;", function (data, err) {
         if (err) {
@@ -395,7 +380,6 @@ router.get("/GetDepartmentByIdDetails/:id", (req, res, next) => {
         }
     })
 });
-
 router.get("/GetYearbyGroupDetails/:id", (req, res, next) => {
     console.log(req.params);
     db.executeSql("SELECT * FROM `papers` WHERE institute_id='" + req.params.id + "' GROUP BY year ;", function (data, err) {
@@ -415,7 +399,6 @@ router.get("/RemoveDepartmentByIdDetails/:id", (req, res, next) => {
         }
     })
 });
-
 router.post("/SaveStaffProfileImages", (req, res, next) => {
     var imgname = generateUUID();
     const storage = multer.diskStorage({
@@ -446,7 +429,6 @@ router.post("/SaveStaffProfileImages", (req, res, next) => {
         return res.json('/images/staff/' + req.file.filename);
     });
 });
-
 router.post("/SaveStaffDetailsList", (req, res, next) => {
     console.log(req.body, 'Hii I ma Staff')
     db.executeSql("INSERT INTO `staff_list` (`institute_id`, `department`, `name`, `contact`, `email`, `designation`, `qualification`, `birthday_date`, `joining_date`, `profile_image`,`position`,`researchPaper`,`createddate`) values ('" + req.body.institute_id + "','" + req.body.department + "','" + req.body.name + "'," + req.body.contact + ",'" + req.body.email + "','" + req.body.designation + "','" + req.body.qualification + "','" + req.body.birthday_date + "','" + req.body.joining_date + "','" + req.body.profile + "'," + req.body.position + ",'" + req.body.researchPaper + "',CURRENT_TIMESTAMP)", function (data, err) {
@@ -459,7 +441,6 @@ router.post("/SaveStaffDetailsList", (req, res, next) => {
         }
     });
 });
-
 router.post("/UpdateStaffDetailsById", (req, res, next) => {
     console.log(req.body, 'Update Staff')
     db.executeSql("UPDATE `staff_list` SET `department`='" + req.body.department + "',`name`='" + req.body.name + "',`contact`='" + req.body.contact + "',`email`='" + req.body.email + "',`designation`='" + req.body.designation + "',`qualification`='" + req.body.qualification + "',`birthday_date`='" + req.body.birthday_date + "',`joining_date`='" + req.body.joining_date + "',`profile_image`='" + req.body.profile + "',`position`=" + req.body.position + ",`researchPaper`='" + req.body.researchPaper + "',`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.staffId, function (data, err) {
@@ -471,7 +452,6 @@ router.post("/UpdateStaffDetailsById", (req, res, next) => {
         }
     });
 });
-
 router.get("/RemoveStaffDocument/:id", (req, res, next) => {
     db.executeSql("UPDATE `staff_list` SET `researchPaper`='undefined',`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.params.id, function (data, err) {
         if (err) {
@@ -482,7 +462,6 @@ router.get("/RemoveStaffDocument/:id", (req, res, next) => {
         }
     });
 });
-
 router.get("/GetAllStaffDetails/:id", (req, res, next) => {
     db.executeSql("SELECT s.id as staffId,s.institute_id,s.department,s.name,s.contact,s.email,s.designation,s.qualification,s.joining_date,s.profile_image, s.position,s.researchPaper,s.birthday_date,s.createddate,d.id as departmentId,d.department as departmentName FROM staff_list s left join department_list d on s.department= d.id WHERE s.institute_id=" + req.params.id + " ORDER BY s.position,s.joining_date", function (data, err) {
         if (err) {
@@ -492,7 +471,6 @@ router.get("/GetAllStaffDetails/:id", (req, res, next) => {
         }
     })
 });
-
 router.get("/RemoveStaffDetailsById/:id", (req, res, next) => {
     db.executeSql("DELETE FROM `staff_list` WHERE id=" + req.params.id, function (data, err) {
         if (err) {
@@ -502,7 +480,6 @@ router.get("/RemoveStaffDetailsById/:id", (req, res, next) => {
         }
     })
 });
-
 router.post("/SaveDonnerListDetails", (req, res, next) => {
     db.executeSql("INSERT INTO `donners`(`donationDate`, `donnerName`, `donnerCity`, `amount`, `createddate`) VALUES ('" + req.body.donationDate + "','" + req.body.donnerName + "','" + req.body.donnerCity + "'," + req.body.amount + ",CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
@@ -513,7 +490,6 @@ router.post("/SaveDonnerListDetails", (req, res, next) => {
         }
     });
 });
-
 router.get("/GetAllDonnerList", (req, res, next) => {
     db.executeSql("SELECT * FROM donners ORDER BY donationDate DESC ;", function (data, err) {
         if (err) {
@@ -535,7 +511,6 @@ router.post("/SaveBulkDonnersDetails", (req, res, next) => {
         });
     }
 });
-
 router.post("/SaveBeneficiaryDetails", (req, res, next) => {
     db.executeSql("INSERT INTO `beneficiary`(`year`,`studentName`, `instituteName`, `course`, `refundAmount`, `createddate`) VALUES ('" + req.body.year + "','" + req.body.studentName + "','" + req.body.instituteName + "','" + req.body.course + "','" + req.body.refundAmount + "',CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
@@ -546,7 +521,6 @@ router.post("/SaveBeneficiaryDetails", (req, res, next) => {
         }
     });
 });
-
 router.get("/GetAllBeneficiaryList", (req, res, next) => {
     db.executeSql("SELECT * FROM beneficiary;", function (data, err) {
         if (err) {
@@ -577,8 +551,6 @@ router.post("/SaveBulkBeneficiaryDetails", (req, res, next) => {
     }
     return res.json('success');
 });
-
-
 router.get("/RemoveBeneficiaryDetailsById/:id", (req, res, next) => {
     db.executeSql("DELETE FROM `beneficiary` WHERE id=" + req.params.id, function (data, err) {
         if (err) {
@@ -588,7 +560,6 @@ router.get("/RemoveBeneficiaryDetailsById/:id", (req, res, next) => {
         }
     })
 });
-
 router.get("/RemoveDonnerDetailsById/:id", (req, res, next) => {
     db.executeSql("DELETE FROM `donners` WHERE id=" + req.params.id, function (data, err) {
         if (err) {
@@ -666,7 +637,6 @@ router.post("/UpdateBlogDetails", (req, res, next) => {
         }
     });
 });
-
 router.get("/GetBlogsDetailsById/:id", (req, res, next) => {
     db.executeSql("SELECT * FROM blogs WHERE institute_id=" + req.params.id + " ORDER BY createdate DESC ;", function (data, err) {
         if (err) {
@@ -697,8 +667,6 @@ router.get("/RemoveBlogDetails/:id", (req, res, next) => {
         }
     });
 });
-
-
 router.post("/SaveScholarshipDetails", (req, res, next) => {
     db.executeSql("INSERT INTO `scholarship`(`institute_id`, `purpose`, `title`, `image`,`createdate`) VALUES  ('" + req.body.institute_id + "','" + req.body.purpose + "','" + req.body.title + "','" + req.body.image + "',CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
@@ -875,7 +843,7 @@ router.post("/UploadInfraImage", (req, res, next) => {
         return res.json('/images/infra/' + req.file.filename);
     });
 });
-router.post("/UploadInfraMultiImage", midway.checkToken, (req, res, next) => {
+router.post("/UploadInfraMultiImage", (req, res, next) => {
     var imgname = generateUUID();
     const storage = multer.diskStorage({
         destination: function (req, file, cb) {
@@ -1124,8 +1092,6 @@ router.post("/SaveCommitteeDetails", (req, res, next) => {
         }
     });
 });
-
-
 router.get("/GetPlacementDetailsById/:id", (req, res, next) => {
     db.executeSql("SELECT * FROM placement WHERE institute_id=" + req.params.id + " ORDER BY createddate ASC;", function (data, err) {
         if (err) {
@@ -1306,8 +1272,6 @@ router.post("/SavePlacementDetails", (req, res, next) => {
         }
     });
 });
-
-
 router.get("/GetResearchDetailsById/:id", (req, res, next) => {
     db.executeSql("SELECT * FROM research WHERE institute_id=" + req.params.id + " ORDER BY createddate ASC;", function (data, err) {
         if (err) {
@@ -1564,8 +1528,6 @@ router.get("/GetRahatokarshDonationList", (req, res, next) => {
         }
     })
 });
-
-
 router.get("/GetCampusDetailsById/:id", (req, res, next) => {
     db.executeSql("SELECT * FROM campus WHERE institute_id=" + req.params.id + " ORDER BY createddate ASC;", function (data, err) {
         if (err) {
@@ -1746,9 +1708,6 @@ router.post("/SaveCampusDetails", (req, res, next) => {
         }
     });
 });
-
-
-
 router.post("/SaveNewNaacDetails", (req, res, next) => {
     console.log(req.body)
     db.executeSql("INSERT INTO `naacnew`(`instituteId`, `criteria`, `createddate`) VALUES ('" + req.body.institute_id + "','" + req.body.selectedCriteria + "',CURRENT_TIMESTAMP)", function (data, err) {
@@ -1770,7 +1729,6 @@ router.post("/SaveNewNaacDetails", (req, res, next) => {
         }
     });
 });
-
 router.get("/GetNewNaacDetailsById/:id", (req, res, next) => {
     db.executeSql("SELECT * FROM naacnew WHERE instituteid=" + req.params.id + " ORDER BY createddate ASC;", function (data, err) {
         if (err) {
@@ -1789,7 +1747,6 @@ router.get("/removeNewNaacDetails/:id", (req, res, next) => {
         }
     })
 });
-
 router.post("/UpdateNewNaacDetails", (req, res, next) => {
     console.log(req.body);
     db.executeSql("UPDATE `naacnew` SET `criteria`='" + req.body.selectedCriteria + "',`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id + ";", function (data, err) {
@@ -1810,8 +1767,6 @@ router.post("/UpdateNewNaacDetails", (req, res, next) => {
         }
     });
 });
-
-
 router.get("/GetAlumniDetails", (req, res, next) => {
     db.executeSql("SELECT * FROM alumni ORDER BY createddate DESC;", function (data, err) {
         if (err) {
@@ -1821,7 +1776,6 @@ router.get("/GetAlumniDetails", (req, res, next) => {
         }
     })
 });
-
 router.post("/SaveContactUsDetails", (req, res, next) => {
     db.executeSql("INSERT INTO `contact`(`institute_id`, `name`, `email`, `contact`, `subject`, `message`, `createddate`) VALUES  ('" + req.body.institute_id + "','" + req.body.name + "','" + req.body.email + "','" + req.body.contact + "','" + req.body.subject + "','" + req.body.message + "',CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
@@ -1836,7 +1790,6 @@ router.post("/SaveContactUsDetails", (req, res, next) => {
         }
     });
 });
-
 router.post("/SaveCounselingDetails", (req, res, next) => {
     db.executeSql("INSERT INTO `counseling`(`name`, `division`, `email`, `phone`, `instituteName`, `message`, `createddate`) VALUES ('" + req.body.name + "','" + req.body.division + "','" + req.body.email + "'," + req.body.phone + ",'" + req.body.instituteName + "','" + req.body.message + "',CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
@@ -1868,7 +1821,6 @@ router.get("/GetCounselingData", (req, res, next) => {
         }
     })
 });
-
 router.get("/GetContactUsDetailsById/:id", (req, res, next) => {
     db.executeSql("SELECT * FROM contact WHERE institute_id=" + req.params.id + " ORDER BY createddate DESC;", function (data, err) {
         if (err) {
@@ -1878,7 +1830,6 @@ router.get("/GetContactUsDetailsById/:id", (req, res, next) => {
         }
     })
 });
-
 router.post("/SaveResultDetails", (req, res, next) => {
     db.executeSql("INSERT INTO `result`(`institute_id`, `title`, `image`,`year`, `createddate`) VALUES ('" + req.body.institute_id + "','" + req.body.title + "','" + req.body.image + "','" + req.body.year + "',CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
@@ -1889,7 +1840,6 @@ router.post("/SaveResultDetails", (req, res, next) => {
         }
     });
 });
-
 router.post("/SaveQuestionPapersDetails", (req, res, next) => {
     db.executeSql("INSERT INTO `papers`(`institute_id`, `department`, `subject`, `year`, `semester`, `title`, `files`, `createdate`) VALUES('" + req.body.institute_id + "','" + req.body.department + "','" + req.body.subject + "','" + req.body.year + "','" + req.body.semester + "','" + req.body.title + "','" + req.body.files + "',CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
@@ -1900,7 +1850,6 @@ router.post("/SaveQuestionPapersDetails", (req, res, next) => {
         }
     });
 });
-
 router.get("/GetQuestionPapersDetails/:id", (req, res, next) => {
     db.executeSql("SELECT * FROM papers WHERE institute_id=" + req.params.id + " ORDER BY createdate DESC;", function (data, err) {
         if (err) {
@@ -1910,7 +1859,6 @@ router.get("/GetQuestionPapersDetails/:id", (req, res, next) => {
         }
     })
 });
-
 router.get("/RemoveQuestionPapersDetails/:id", (req, res, next) => {
     db.executeSql("DELETE FROM papers WHERE id=" + req.params.id + ";", function (data, err) {
         if (err) {
@@ -1920,7 +1868,6 @@ router.get("/RemoveQuestionPapersDetails/:id", (req, res, next) => {
         }
     })
 });
-
 router.post("/UpdateResultDetails", (req, res, next) => {
     console, log(req.body, 'result')
     db.executeSql("UPDATE `result` SET `title`='" + req.body.title + "',`image`='" + req.body.image + "',`year`='" + req.body.year + "',`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id, function (data, err) {
@@ -1932,7 +1879,6 @@ router.post("/UpdateResultDetails", (req, res, next) => {
         }
     });
 });
-
 router.post("/UpdateBeneficiaryDetails", (req, res, next) => {
     console, log('Benificiary')
     db.executeSql("UPDATE `beneficiary` SET `year`='" + req.body.year + "',`studentName`='" + req.body.studentName + "',`instituteName`='" + req.body.instituteName + "',`course`='" + req.body.course + "',`refundAmount`='" + req.body.refundAmount + "',`updateddate`=CURRENT_TIMESTAMP WHERE id" + req.body.id, function (data, err) {
@@ -1975,7 +1921,6 @@ router.get("/GetResultDetailsById/:id", (req, res, next) => {
         }
     })
 });
-
 router.post("/UploadPDF", (req, res, next) => {
 
     const storage = multer.diskStorage({
@@ -1993,7 +1938,6 @@ router.post("/UploadPDF", (req, res, next) => {
     });
 
 });
-
 router.post("/SaveNewsDataList", (req, res, next) => {
     console.log(req.body, 'jbdjbjfds');
     const startDate = req.body.startDate ? mysql.escape(req.body.startDate) : 'NULL';
@@ -2018,7 +1962,6 @@ router.post("/SaveNewsDataList", (req, res, next) => {
         }
     });
 });
-
 router.post("/SaveAnswerkeyDataList", (req, res, next) => {
     db.executeSql("INSERT INTO `answerkey`(`date`,`files`, `isactive`, `createddate`) VALUES ('" + req.body.date + "','" + req.body.files + "',true,CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
@@ -2038,7 +1981,6 @@ router.post("/SaveAnswerkeyDataList", (req, res, next) => {
         }
     });
 });
-
 router.post("/UpdateActiveDeactiveNews", (req, res, next) => {
     console.log(req.body, 'news')
     db.executeSql("UPDATE `news` SET isactive=" + req.body.isactive + " WHERE id=" + req.body.id + ";", function (data, err) {
@@ -2049,7 +1991,6 @@ router.post("/UpdateActiveDeactiveNews", (req, res, next) => {
         }
     });
 });
-
 router.post("/UpdateActiveDeactiveAnswerkey", (req, res, next) => {
     console.log(req.body, 'answerkey')
     db.executeSql("UPDATE `answerkey` SET isactive=" + req.body.isactive + " WHERE id=" + req.body.id + ";", function (data, err) {
@@ -2060,7 +2001,6 @@ router.post("/UpdateActiveDeactiveAnswerkey", (req, res, next) => {
         }
     });
 });
-
 router.post("/SaveStudentListData", (req, res, next) => {
     db.executeSql("INSERT INTO `student`(`institute_id`, `title`, `createddate`) VALUES ('" + req.body.institute_id + "','" + req.body.title + "',CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
@@ -2080,7 +2020,6 @@ router.post("/SaveStudentListData", (req, res, next) => {
         }
     });
 });
-
 router.post("/UpdateStudentListData", (req, res, next) => {
     db.executeSql("UPDATE `student` SET `title`='" + req.body.title + "',`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id, function (data, err) {
         if (err) {
@@ -2100,7 +2039,6 @@ router.post("/UpdateStudentListData", (req, res, next) => {
         }
     });
 });
-
 router.get("/GetStudentListData/:id", (req, res, next) => {
     db.executeSql("SELECT * FROM student WHERE institute_id=" + req.params.id + " ORDER BY createddate DESC;", function (data, err) {
         if (err) {
@@ -2110,7 +2048,6 @@ router.get("/GetStudentListData/:id", (req, res, next) => {
         }
     })
 });
-
 router.get("/RemoveStudentListData/:id", (req, res, next) => {
     db.executeSql("DELETE FROM student WHERE id=" + req.params.id + ";", function (data, err) {
         if (err) {
@@ -2120,7 +2057,6 @@ router.get("/RemoveStudentListData/:id", (req, res, next) => {
         }
     })
 });
-
 router.get("/GetNewsByIdDetails/:id", (req, res, next) => {
     db.executeSql("SELECT * FROM news WHERE institute_id=" + req.params.id + " ORDER BY date DESC ;", function (data1, err) {
         if (err) {
@@ -2130,7 +2066,6 @@ router.get("/GetNewsByIdDetails/:id", (req, res, next) => {
         }
     })
 });
-
 router.get("/GetAllAnswerkey", (req, res, next) => {
     db.executeSql("SELECT * FROM answerkey where isactive=true ORDER BY date DESC ;", function (data, err) {
         if (err) {
@@ -2140,7 +2075,6 @@ router.get("/GetAllAnswerkey", (req, res, next) => {
         }
     })
 });
-
 router.get("/GetNewsOnlyForCES/:id", (req, res, next) => {
     db.executeSql("SELECT * FROM news WHERE institute_id=" + req.params.id + " AND isactive=true ORDER BY date DESC; ", function (data, err) {
         if (err) {
@@ -2223,7 +2157,6 @@ router.get("/RemoveOtherDetailsById/:id", (req, res, next) => {
         }
     });
 });
-
 router.post("/SaveOthersDataList", (req, res, next) => {
     db.executeSql("INSERT INTO `others`(`institute_id`, `purpose`, `title`, `files`, `createddate`) VALUES  ('" + req.body.institute_id + "','" + req.body.purpose + "','" + req.body.title + "','" + req.body.files + "',CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
@@ -2243,7 +2176,6 @@ router.get("/GetNaacLinkData/:id", (req, res, next) => {
         }
     })
 });
-
 router.post("/SaveNaacLinkDetails", (req, res, next) => {
     console.log(req.body)
     db.executeSql("INSERT INTO `naaclink`(`institute_id`,`criteria`, `subMenu`, `subToSub`, `linkName`, `link`, `isactive`, `createddate`) VALUES ('" + req.body.institute_id + "','" + req.body.criteria + "','" + req.body.subMenu + "','" + req.body.subToSub + "','" + req.body.paraname + "','" + req.body.paralink + "',true,CURRENT_TIMESTAMP)", function (data, err) {
@@ -2342,7 +2274,6 @@ router.get("getCriteriaGroupBy", (req, res, next) => {
         }
     })
 })
-
 router.get("/GetNaacData", (req, res, next) => {
     db.executeSql("SELECT * FROM naac;", function (data, err) {
         if (err) {
@@ -2461,7 +2392,6 @@ function mail(filename, data, toemail, subj, mailname) {
         }
     });
 }
-
 router.get("/GetAllBirthdayDetails", (req, res, next) => {
     db.executeSql("SELECT s.id as staffId,s.institute_id,s.department,s.name,s.contact,s.email,s.designation,s.qualification,s.joining_date,s.profile_image, s.birthday_date, CURDATE(),d.id as departmentId,d.department as departmentName,i.id as instiId,i.name as instituteName FROM staff_list s left join department_list d on s.department= d.id left join institute i on s.institute_id=i.id WHERE DAYOFMONTH(s.birthday_date) = DAYOFMONTH(CURDATE()) AND MONTH(s.birthday_date) = MONTH(CURDATE());", function (data, err) {
         if (err) {
@@ -2471,7 +2401,6 @@ router.get("/GetAllBirthdayDetails", (req, res, next) => {
         }
     })
 });
-
 router.get("/GetAllNewsDetails/:id", (req, res, next) => {
     db.executeSql("SELECT * FROM institute WHERE url='www.cesociety.in';", function (data, err) {
         if (err) {
@@ -2515,7 +2444,6 @@ router.get("/GetGatePassUserList", (req, res, next) => {
         }
     })
 });
-
 router.post("/ForgotPassword", (req, res, next) => {
     let otp = Math.floor(100000 + Math.random() * 900000);
     console.log(req.body);
@@ -2541,7 +2469,6 @@ router.post("/ForgotPassword", (req, res, next) => {
         }
     });
 });
-
 router.post("/GetOneTimePassword", (req, res, next) => {
     console.log(req.body)
     db.executeSql("select * from otp where userid = '" + req.body.id + "' " + " and otp =' " + req.body.otp + "' ", function (data, err) {
@@ -2552,7 +2479,6 @@ router.post("/GetOneTimePassword", (req, res, next) => {
         }
     });
 });
-
 router.post("/UpdatePassword", (req, res, next) => {
     console.log(req.body);
     var salt = '7fa73b47df808d36c5fe328546ddef8b9011b2c6';
@@ -2724,7 +2650,6 @@ router.get("/RemovePhotoContestDetailsById/:id", (req, res, next) => {
         return res.json(data);
     })
 });
-
 router.post("/SaveAdmissionDetails", (req, res, next) => {
     db.executeSql("INSERT INTO `admission`(`institute_id`, `subject`, `studentname`, `city`, `email`, `contact`, `lastdegree`, `clgname`, `bachelorsubject`, `cgpa`, `createddate`) VALUES ('" + req.body.institute_id + "','" + req.body.subject + "','" + req.body.studentname + "','" + req.body.city + "','" + req.body.email + "'," + req.body.contact + ",'" + req.body.lastdegree + "','" + req.body.clgname + "','" + req.body.bachelorsubject + "','" + req.body.cgpa + "',CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
@@ -2735,7 +2660,6 @@ router.post("/SaveAdmissionDetails", (req, res, next) => {
         }
     });
 });
-
 router.get("/GetAdmissionListData/:id", (req, res, next) => {
     db.executeSql("SELECT * FROM `admission` WHERE institute_id=" + req.params.id + ";", function (data, err) {
         if (err) {
@@ -2747,7 +2671,29 @@ router.get("/GetAdmissionListData/:id", (req, res, next) => {
 });
 
 
-router.post("/SaveEmployeeProfileImages", (req, res, next) => {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+router.post("/SaveEmployeeProfileImages", midway.checkToken, (req, res, next) => {
     var imgname = generateUUID();
     const storage = multer.diskStorage({
         destination: function (req, file, cb) {
@@ -2787,7 +2733,7 @@ router.post("/UpdateEmployeeLogo", midway.checkToken, (req, res, next) => {
         }
     });
 });
-router.post("/SaveEmployeeDetailsList", (req, res, next) => {
+router.post("/SaveEmployeeDetailsList", midway.checkToken, (req, res, next) => {
     console.log(req.body, 'Hii I ma Staff')
     var salt = "7fa73b47df808d36c5fe328546ddef8b9011b2c6";
     var repass = salt + "" + req.body.password;
@@ -2803,8 +2749,7 @@ router.post("/SaveEmployeeDetailsList", (req, res, next) => {
         }
     });
 });
-
-router.post("/UpdateEmployeeDetailsById", (req, res, next) => {
+router.post("/UpdateEmployeeDetailsById", midway.checkToken, (req, res, next) => {
     console.log(req.body, 'Update Staff')
     db.executeSql("UPDATE `company` SET `role`='" + req.body.role + "',`name`='" + req.body.name + "',`email`='" + req.body.email + "',`contact`='" + req.body.contact + "',`profile_image`='" + req.body.profile_image + "',`birthday_date`='" + req.body.birthday_date + "',`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id, function (data, err) {
         if (err) {
@@ -2815,8 +2760,7 @@ router.post("/UpdateEmployeeDetailsById", (req, res, next) => {
         }
     });
 });
-
-router.get("/GetAllEmployeeDetails", (req, res, next) => {
+router.get("/GetAllEmployeeDetails", midway.checkToken, (req, res, next) => {
     db.executeSql("SELECT * FROM company where isactive=true;", function (data, err) {
         if (err) {
             console.log(err);
@@ -2825,7 +2769,7 @@ router.get("/GetAllEmployeeDetails", (req, res, next) => {
         }
     })
 });
-router.get("/GetEmployeeDetails", (req, res, next) => {
+router.get("/GetEmployeeDetails", midway.checkToken, (req, res, next) => {
     db.executeSql("SELECT * FROM company;", function (data, err) {
         if (err) {
             console.log(err);
@@ -2834,8 +2778,7 @@ router.get("/GetEmployeeDetails", (req, res, next) => {
         }
     })
 });
-
-router.post("/RemoveEmployeeDetailsById", (req, res, next) => {
+router.post("/RemoveEmployeeDetailsById", midway.checkToken, (req, res, next) => {
     db.executeSql("UPDATE `company` SET `isactive`=" + req.body.isactive + ",`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id + ";", function (data, err) {
         if (err) {
             console.log(err);
@@ -2844,9 +2787,7 @@ router.post("/RemoveEmployeeDetailsById", (req, res, next) => {
         }
     })
 });
-
-
-router.post("/SaveClientImage", (req, res, next) => {
+router.post("/SaveClientImage", midway.checkToken, (req, res, next) => {
     var imgname = generateUUID();
     const storage = multer.diskStorage({
         destination: function (req, file, cb) {
@@ -2876,8 +2817,7 @@ router.post("/SaveClientImage", (req, res, next) => {
         return res.json('/images/clientlogo/' + req.file.filename);
     });
 });
-
-router.post("/SaveClientDetails", (req, res, next) => {
+router.post("/SaveClientDetails", midway.checkToken, (req, res, next) => {
     console.log(req.body, 'client list');
     db.executeSql("INSERT INTO `clients`(`name`, `logo`, `businesstype`, `post`, `story`, `reels`, `extra`, `media`, `username`, `password`, `facebooklink`, `twitterlink`, `linkedinlink`, `youtubelink`, `isactive`, `createddate`) VALUES ('" + req.body.name + "','" + req.body.profile + "','" + req.body.businesstype + "','" + req.body.post + "','" + req.body.story + "','" + req.body.reels + "','" + req.body.extra + "','" + req.body.selectedmedia + "','" + req.body.username + "','" + req.body.password + "','" + req.body.facebooklink + "','" + req.body.twitterlink + "','" + req.body.linkedinlink + "','" + req.body.youtubelink + "',true,CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
@@ -2915,8 +2855,7 @@ router.post("/SaveClientDetails", (req, res, next) => {
         }
     });
 });
-
-router.post("/UpdateClientDetailsByID", (req, res, next) => {
+router.post("/UpdateClientDetailsByID", midway.checkToken, (req, res, next) => {
     db.executeSql("UPDATE `clients` SET `name`='" + req.body.name + "',`logo`='" + req.body.profile + "',`businesstype`='" + req.body.businesstype + "',`post`='" + req.body.post + "',`story`='" + req.body.story + "',`reels`='" + req.body.reels + "',`extra`='" + req.body.extra + "',`username`='" + req.body.username + "',`password`='" + req.body.password + "',`facebooklink`='" + req.body.facebooklink + "',`twitterlink`='" + req.body.twitterlink + "',`linkedinlink`='" + req.body.linkedinlink + "',`youtubelink`='" + req.body.youtubelink + "',`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id + "", function (data, err) {
         if (err) {
             console.log(err);
@@ -2958,8 +2897,7 @@ router.post("/UpdateClientDetailsByID", (req, res, next) => {
         }
     });
 });
-
-router.get("/GetAllClientDetails", (req, res, next) => {
+router.get("/GetAllClientDetails", midway.checkToken, (req, res, next) => {
     db.executeSql("SELECT * FROM clients where isactive=true;", function (data, err) {
         if (err) {
             console.log(err);
@@ -2968,8 +2906,7 @@ router.get("/GetAllClientDetails", (req, res, next) => {
         }
     })
 });
-
-router.get("/GetAssignedEmployeeDetails/:id", (req, res, next) => {
+router.get("/GetAssignedEmployeeDetails/:id", midway.checkToken, (req, res, next) => {
     db.executeSql("SELECT ae.id AS assigned_employee_id, ae.clientid AS id, ae.empid, c.id AS company_id,c.name,c.email,c.contact,c.password,c.role,c.profile_image,c.birthday_date,c.isactive,c.iscompany,c.createddate,c.updateddate FROM assignedemployee ae INNER JOIN company c ON ae.empid = c.id where ae.clientid = " + req.params.id + "; ", function (data, err) {
         if (err) {
             console.log(err);
@@ -2978,7 +2915,7 @@ router.get("/GetAssignedEmployeeDetails/:id", (req, res, next) => {
         }
     })
 });
-router.get("/GetAssignedEmployeeForChart/:id", (req, res, next) => {
+router.get("/GetAssignedEmployeeForChart/:id", midway.checkToken, (req, res, next) => {
     db.executeSql("SELECT ae.id, ae.clientid, ae.empid, c.name FROM assignedemployee ae JOIN clients c ON ae.clientid = c.id WHERE ae.empid= " + req.params.id + "; ", function (data, err) {
         if (err) {
             console.log(err);
@@ -2987,8 +2924,7 @@ router.get("/GetAssignedEmployeeForChart/:id", (req, res, next) => {
         }
     })
 });
-
-router.get("/RemoveClientDetailsById/:id", (req, res, next) => {
+router.get("/RemoveClientDetailsById/:id", midway.checkToken, (req, res, next) => {
     db.executeSql("UPDATE `clients` SET `isactive`=false,`updateddate`=CURRENT_TIMESTAMP WHERE id=" + req.params.id, function (data, err) {
         if (err) {
             console.log(err);
@@ -2997,8 +2933,7 @@ router.get("/RemoveClientDetailsById/:id", (req, res, next) => {
         }
     })
 });
-
-router.post("/UploadTokenImage", (req, res, next) => {
+router.post("/UploadTokenImage", midway.checkToken, (req, res, next) => {
     var imgname = generateUUID();
     const storage = multer.diskStorage({
         destination: function (req, file, cb) {
@@ -3028,8 +2963,7 @@ router.post("/UploadTokenImage", (req, res, next) => {
         return res.json('/images/token/' + req.file.filename);
     });
 });
-
-router.post("/UploadTokenMultiImage", (req, res, next) => {
+router.post("/UploadTokenMultiImage", midway.checkToken, (req, res, next) => {
     var imgname = generateUUID();
     const storage = multer.diskStorage({
         destination: function (req, file, cb) {
@@ -3059,8 +2993,7 @@ router.post("/UploadTokenMultiImage", (req, res, next) => {
         return res.json('/images/tokenmulti/' + req.file.filename);
     });
 });
-
-router.get("/GetALLTokenDetails", (req, res, next) => {
+router.get("/GetALLTokenDetails", midway.checkToken, (req, res, next) => {
     db.executeSql("SELECT * FROM tokens ORDER BY createddate DESC;", function (data, err) {
         if (err) {
             console.log(err);
@@ -3069,8 +3002,7 @@ router.get("/GetALLTokenDetails", (req, res, next) => {
         }
     })
 });
-
-router.get("/GetEmployeeTokenById/:id", (req, res, next) => {
+router.get("/GetEmployeeTokenById/:id", midway.checkToken, (req, res, next) => {
     db.executeSql("SELECT a.*, t.* FROM assignedtokenemployee AS a INNER JOIN tokens AS t ON a.tokenid = t.id WHERE a.empid = " + req.params.id + " ORDER BY t.createddate DESC; ", function (data, err) {
         if (err) {
             console.log(err);
@@ -3079,8 +3011,7 @@ router.get("/GetEmployeeTokenById/:id", (req, res, next) => {
         }
     })
 });
-
-router.get("/GetAssignedEmpTokenById/:id", (req, res, next) => {
+router.get("/GetAssignedEmpTokenById/:id", midway.checkToken, (req, res, next) => {
     db.executeSql("SELECT ate.id, ate.tokenid, ate.empid, ate.isnotify, c.* FROM assignedtokenemployee AS ate INNER JOIN company AS c ON ate.empid = c.id WHERE ate.tokenid = " + req.params.id + "; ", function (data, err) {
         if (err) {
             console.log(err);
@@ -3089,7 +3020,6 @@ router.get("/GetAssignedEmpTokenById/:id", (req, res, next) => {
         }
     })
 });
-
 function companymail(filename, data, toemail, subj, mailname) {
     const transporter = nodemailer.createTransport({
         service: "gmail",
@@ -3121,7 +3051,6 @@ function companymail(filename, data, toemail, subj, mailname) {
         }
     });
 }
-
 function formatDateTime(date) {
     const options = {
         day: '2-digit',
@@ -3136,7 +3065,7 @@ function formatDateTime(date) {
 function stripHtml(str) {
     return str ? str.replace(/<\/?[^>]+(>|$)/g, "") : "";
 }
-router.post("/SaveTokenDetailsList", (req, res, next) => {
+router.post("/SaveTokenDetailsList", midway.checkToken, (req, res, next) => {
     // console.log(req.body)
     const managerNames = req.body.managers.map(manager => manager.name).join(', ');
     const designerNames = req.body.designers.map(designer => designer.name).join(', ');
@@ -3227,8 +3156,7 @@ router.post("/SaveTokenDetailsList", (req, res, next) => {
         }
     });
 });
-
-router.get("/UpdateTokenUnreadStatus/:id", (req, res, next) => {
+router.get("/UpdateTokenUnreadStatus/:id", midway.checkToken, (req, res, next) => {
     db.executeSql("UPDATE `tokens` SET `unread`= false,`updateddate`= CURRENT_TIMESTAMP WHERE id=" + req.params.id, function (data, err) {
         if (err) {
             console.log(err);
@@ -3237,8 +3165,7 @@ router.get("/UpdateTokenUnreadStatus/:id", (req, res, next) => {
         }
     })
 });
-
-router.get("/GetALLTokenImage/:id", (req, res, next) => {
+router.get("/GetALLTokenImage/:id", midway.checkToken, (req, res, next) => {
     db.executeSql("SELECT * FROM tokensimage where tokenid=" + req.params.id + ";", function (data, err) {
         if (err) {
             console.log(err);
@@ -3247,8 +3174,7 @@ router.get("/GetALLTokenImage/:id", (req, res, next) => {
         }
     })
 });
-
-router.post("/UpdateTokenStatusDetails", (req, res, next) => {
+router.post("/UpdateTokenStatusDetails", midway.checkToken, (req, res, next) => {
     db.executeSql("UPDATE `tokens` SET `status`= '" + req.body.status + "',`updateddate`= CURRENT_TIMESTAMP WHERE id=" + req.body.id, function (data, err) {
         if (err) {
             console.log(err);
@@ -3268,8 +3194,7 @@ router.post("/UpdateTokenStatusDetails", (req, res, next) => {
         }
     })
 });
-
-router.post("/ChackForPassword", (req, res, next) => {
+router.post("/ChackForPassword", midway.checkToken, (req, res, next) => {
     var salt = "7fa73b47df808d36c5fe328546ddef8b9011b2c6";
     var repass = salt + "" + req.body.password;
     var encPassword = crypto.createHash("sha1").update(repass).digest("hex");
@@ -3285,8 +3210,7 @@ router.post("/ChackForPassword", (req, res, next) => {
         }
     });
 });
-
-router.post("/UpdateCompanyPassword", (req, res, next) => {
+router.post("/UpdateCompanyPassword", midway.checkToken, (req, res, next) => {
     console.log(req.body);
     var salt = "7fa73b47df808d36c5fe328546ddef8b9011b2c6";
     var repass = salt + "" + req.body.password;
@@ -3304,7 +3228,6 @@ router.post("/UpdateCompanyPassword", (req, res, next) => {
         }
     );
 });
-
 router.get("/getEmployeeDataById/:id", midway.checkToken, (req, res, next) => {
     db.executeSql("SELECT * FROM `company` where id=" + req.params.id + ";", function (data, err) {
         if (err) {
@@ -3314,7 +3237,6 @@ router.get("/getEmployeeDataById/:id", midway.checkToken, (req, res, next) => {
         }
     });
 });
-
 router.get("/getClientDetailsById/:id", midway.checkToken, (req, res, next) => {
     db.executeSql("SELECT * FROM `tokens` where id=" + req.params.id + ";", function (data, err) {
         if (err) {
@@ -3338,7 +3260,6 @@ router.post("/SaveAttendanceDetails", midway.checkToken, (req, res, next) => {
         });
     }
 });
-
 router.get("/GetAllAttendanceList", midway.checkToken, (req, res, next) => {
     db.executeSql("SELECT  A.`id`, A.`eid`, A.`date`, A.`status`, A.`isactive`, A.`createddate`, A.`updateddate`,C.`id` AS company_id, C.`name`, C.`email`, C.`contact`, C.`password`, C.`role`, C.`profile_image`, C.`birthday_date`, C.`isactive` AS company_isactive, C.`iscompany`, C.`createddate` AS company_createddate, C.`updateddate` AS company_updateddate FROM `attendance` AS A JOIN `company` AS C ON A.`eid` = C.`id`;", function (data, err) {
         if (err) {
@@ -3348,8 +3269,7 @@ router.get("/GetAllAttendanceList", midway.checkToken, (req, res, next) => {
         }
     });
 });
-
-router.post("/SaveTodoListDetails", (req, res, next) => {
+router.post("/SaveTodoListDetails", midway.checkToken, (req, res, next) => {
     db.executeSql("INSERT INTO `todolist`(`empid`, `date`, `title`, `description`, `category`, `createddate`) VALUES ('" + req.body.empid + "','" + req.body.date + "','" + req.body.title + "','" + req.body.description + "','" + req.body.category + "',CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
             res.json("error");
@@ -3359,8 +3279,7 @@ router.post("/SaveTodoListDetails", (req, res, next) => {
         }
     });
 });
-
-router.get("/GetALLTodoListById/:id", (req, res, next) => {
+router.get("/GetALLTodoListById/:id", midway.checkToken, (req, res, next) => {
     db.executeSql("SELECT * FROM todolist where empid=" + req.params.id + ";", function (data, err) {
         if (err) {
             console.log(err);
@@ -3369,8 +3288,7 @@ router.get("/GetALLTodoListById/:id", (req, res, next) => {
         }
     })
 });
-
-router.get("/RemoveTodoListById/:id", (req, res, next) => {
+router.get("/RemoveTodoListById/:id", midway.checkToken, (req, res, next) => {
     db.executeSql("DELETE FROM `todolist` WHERE id=" + req.params.id + ";", function (data, err) {
         if (err) {
             console.log(err);
@@ -3379,8 +3297,7 @@ router.get("/RemoveTodoListById/:id", (req, res, next) => {
         }
     })
 });
-
-router.post("/UpdateTodoListById", (req, res, next) => {
+router.post("/UpdateTodoListById", midway.checkToken, (req, res, next) => {
     db.executeSql("UPDATE `todolist` SET `title`='" + req.body.title + "',`description`='" + req.body.description + "',`category`='" + req.body.category + "' where id=" + req.body.id + ";", function (data, err) {
         if (err) {
             res.json("error");
@@ -3390,8 +3307,7 @@ router.post("/UpdateTodoListById", (req, res, next) => {
         }
     });
 });
-
-router.post("/SaveSchedulerDetails", (req, res, next) => {
+router.post("/SaveSchedulerDetails", midway.checkToken, (req, res, next) => {
     db.executeSql("INSERT INTO `scheduler`(`clientid`, `managerid`, `designerid`, `date`, `title`, `description`, `unread`, `createddate`) VALUES (" + req.body.clientid + "," + req.body.managerid + "," + req.body.designerid + ",'" + req.body.date + "','" + req.body.title + "','" + req.body.description + "',true,CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
             res.json("error");
@@ -3401,8 +3317,7 @@ router.post("/SaveSchedulerDetails", (req, res, next) => {
         }
     });
 });
-
-router.get("/GetALLSchedulerById/:id", (req, res, next) => {
+router.get("/GetALLSchedulerById/:id", midway.checkToken, (req, res, next) => {
     db.executeSql("SELECT * FROM scheduler where clientid=" + req.params.id + ";", function (data, err) {
         if (err) {
             console.log(err);
@@ -3411,8 +3326,7 @@ router.get("/GetALLSchedulerById/:id", (req, res, next) => {
         }
     })
 });
-
-router.get("/RemoveSchedulerById/:id", (req, res, next) => {
+router.get("/RemoveSchedulerById/:id", midway.checkToken, (req, res, next) => {
     db.executeSql("DELETE FROM `scheduler` WHERE id=" + req.params.id + ";", function (data, err) {
         if (err) {
             console.log(err);
@@ -3421,8 +3335,7 @@ router.get("/RemoveSchedulerById/:id", (req, res, next) => {
         }
     })
 });
-
-router.post("/UpdateSchedulerById", (req, res, next) => {
+router.post("/UpdateSchedulerById", midway.checkToken, (req, res, next) => {
     db.executeSql("UPDATE `scheduler` SET `designerid`=" + req.body.designerid + ",`title`='" + req.body.title + "',`description`='" + req.body.description + "' WHERE id=" + req.body.id + ";", function (data, err) {
         if (err) {
             res.json("error");
@@ -3432,8 +3345,7 @@ router.post("/UpdateSchedulerById", (req, res, next) => {
         }
     });
 });
-
-router.post("/UpdateDailyWorkById", (req, res, next) => {
+router.post("/UpdateDailyWorkById", midway.checkToken, (req, res, next) => {
     if (req.body.iscompleted == true) {
         db.executeSql("UPDATE `scheduler` SET `iscompleted`=" + req.body.iscompleted + ",`completeddate`=CURRENT_TIMESTAMP WHERE id=" + req.body.id + ";", function (data, err) {
             if (err) {
@@ -3456,8 +3368,7 @@ router.post("/UpdateDailyWorkById", (req, res, next) => {
     }
 
 });
-
-router.get("/GetALLDailyWork", (req, res, next) => {
+router.get("/GetALLDailyWork", midway.checkToken, (req, res, next) => {
     db.executeSql("SELECT sch.id, sch.clientid, sch.managerid, sch.designerid, sch.date, sch.title, sch.description, sch.unread, sch.iscompleted, sch.completeddate, sch.createddate, cl.logo, cl.name AS clientname,mgr.name AS managername,des.name AS designername FROM scheduler sch INNER JOIN clients cl ON sch.clientid = cl.id LEFT JOIN company mgr ON sch.managerid = mgr.id LEFT JOIN company des ON sch.designerid = des.id ORDER BY sch.date ASC;", function (data, err) {
         if (err) {
             console.log(err);
@@ -3466,8 +3377,7 @@ router.get("/GetALLDailyWork", (req, res, next) => {
         }
     })
 });
-
-router.get("/UpdateDailyWorkUnreadStatus/:id", (req, res, next) => {
+router.get("/UpdateDailyWorkUnreadStatus/:id", midway.checkToken, (req, res, next) => {
     db.executeSql("UPDATE `scheduler` SET `unread`= false WHERE id=" + req.params.id, function (data, err) {
         if (err) {
             console.log(err);
@@ -3476,7 +3386,7 @@ router.get("/UpdateDailyWorkUnreadStatus/:id", (req, res, next) => {
         }
     })
 });
-router.post("/SaveBulkSchedulerDetails", (req, res, next) => {
+router.post("/SaveBulkSchedulerDetails", midway.checkToken, (req, res, next) => {
     console.log(req.body)
     for (let i = 0; i < req.body.length; i++) {
         db.executeSql("INSERT INTO `scheduler`(`clientid`,`managerid`,`designerid`, `date`, `title`, `description`, `createddate`) VALUES (" + req.body[i].clientid + "," + req.body[i].managerid + "," + req.body[i].designerid + ",'" + req.body[i].date + "','" + req.body[i].title + "','" + req.body[i].description + "',CURRENT_TIMESTAMP)", function (data, err) {
@@ -3492,8 +3402,7 @@ router.post("/SaveBulkSchedulerDetails", (req, res, next) => {
     }
     // console.log(data);
 });
-
-router.post("/UpdateTokenNotification", (req, res, next) => {
+router.post("/UpdateTokenNotification", midway.checkToken, (req, res, next) => {
     for (let i = 0; i < req.body.length; i++) {
         db.executeSql("UPDATE `assignedtokenemployee` SET `isnotify`=false WHERE tokenid=" + req.body[i].tokenid + " && empid=" + req.body[i].empid + "", function (data, err) {
             if (err) {
@@ -3506,8 +3415,7 @@ router.post("/UpdateTokenNotification", (req, res, next) => {
         })
     }
 });
-
-router.post("/UpdateTicketNotification", (req, res, next) => {
+router.post("/UpdateTicketNotification", midway.checkToken, (req, res, next) => {
     for (let i = 0; i < req.body.length; i++) {
 
         db.executeSql("UPDATE `help` SET `isnotify`= false WHERE eid=" + req.body[i].eid + " && isemp=true", function (data, err) {
@@ -3521,8 +3429,7 @@ router.post("/UpdateTicketNotification", (req, res, next) => {
         })
     }
 });
-
-router.post("/UpdateTicketForAdminNotification", (req, res, next) => {
+router.post("/UpdateTicketForAdminNotification", midway.checkToken, (req, res, next) => {
     for (let i = 0; i < req.body.length; i++) {
         db.executeSql("UPDATE `help` SET `isnotify`= false WHERE isemp=false", function (data, err) {
             if (err) {
@@ -3535,8 +3442,7 @@ router.post("/UpdateTicketForAdminNotification", (req, res, next) => {
         })
     }
 });
-
-router.post("/SaveHelpTicket", (req, res, next) => {
+router.post("/SaveHelpTicket", midway.checkToken, (req, res, next) => {
     db.executeSql("INSERT INTO `help`(`eid`, `empname`, `title`, `description`, `status`, `isactive`, `isemp`, `createddate`)  VALUES (" + req.body.employeeid + ",'" + req.body.empname + "','" + req.body.title + "','" + req.body.description + "','" + req.body.status + "', true," + req.body.isemp + ", CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
             res.json("error");
@@ -3546,9 +3452,7 @@ router.post("/SaveHelpTicket", (req, res, next) => {
         }
     });
 });
-
-
-router.get("/GetAllHelpTicket", (req, res, next) => {
+router.get("/GetAllHelpTicket", midway.checkToken, (req, res, next) => {
     db.executeSql("SELECT * FROM help ORDER BY createddate DESC", function (data, err) {
         if (err) {
             console.log(err);
@@ -3557,8 +3461,7 @@ router.get("/GetAllHelpTicket", (req, res, next) => {
         }
     })
 });
-
-router.post("/UpdateHelpTokenStatusDetails", (req, res, next) => {
+router.post("/UpdateHelpTokenStatusDetails", midway.checkToken, (req, res, next) => {
     if (req.body.isStateUpdate) {
         console.log(req.body, 'eeffgf Status')
         db.executeSql("UPDATE `help` SET `status`= '" + req.body.status + "',`updateddate`= CURRENT_TIMESTAMP WHERE id=" + req.body.id, function (data, err) {
@@ -3571,9 +3474,7 @@ router.post("/UpdateHelpTokenStatusDetails", (req, res, next) => {
     }
 
 });
-
-
-router.post("/SaveCESTokenDetails", (req, res, next) => {
+router.post("/SaveCESTokenDetails",  (req, res, next) => {
     // console.log(req.body)
     db.executeSql("INSERT INTO `cestokens`(`instituteid`, `institutename`, `title`, `createdby`, `contact`, `image`, `status`, `expecteddate`, `file`, `createddate`) VALUES (" + req.body.instituteid + ",'" + req.body.institutename + "','" + req.body.title + "','" + req.body.createdby + "','" + req.body.contact + "','" + req.body.image + "','" + req.body.status + "','" + req.body.expecteddate + "','" + req.body.file + "',CURRENT_TIMESTAMP)", function (data, err) {
         if (err) {
@@ -3601,7 +3502,6 @@ router.post("/SaveCESTokenDetails", (req, res, next) => {
         }
     });
 });
-
 router.get("/GetCESTokenImage/:id", (req, res, next) => {
     db.executeSql("SELECT * FROM cestokensimage where cestokenid=" + req.params.id + ";", function (data, err) {
         if (err) {
@@ -3611,9 +3511,7 @@ router.get("/GetCESTokenImage/:id", (req, res, next) => {
         }
     })
 });
-
-
-router.get("/RemoveCESToken/:id", (req, res, next) => {
+router.get("/RemoveCESToken/:id",  (req, res, next) => {
     db.executeSql("DELETE FROM cestokens where id=" + req.params.id + ";", function (data, err) {
         if (err) {
             console.log(err);
@@ -3628,8 +3526,7 @@ router.get("/RemoveCESToken/:id", (req, res, next) => {
         }
     })
 });
-
-router.get("/GetALLCESTokenData", (req, res, next) => {
+router.get("/GetALLCESTokenData",  (req, res, next) => {
     db.executeSql("SELECT * FROM cestokens ORDER BY createddate DESC;", function (data, err) {
         if (err) {
             console.log(err);
@@ -3638,7 +3535,7 @@ router.get("/GetALLCESTokenData", (req, res, next) => {
         }
     })
 });
-router.get("/GetALLDesignerSheet", (req, res, next) => {
+router.get("/GetALLDesignerSheet", midway.checkToken, (req, res, next) => {
     db.executeSql("SELECT c.id AS empid, c.name AS empname, c.profile_image, GROUP_CONCAT(cl.id ORDER BY cl.id) AS clients_id, GROUP_CONCAT(cl.name ORDER BY cl.name) AS clientnames, COUNT(cl.id) AS numberofclients FROM company c JOIN assignedemployee ae ON c.id = ae.empid JOIN clients cl ON ae.clientid = cl.id WHERE c.isactive = true AND c.role = 'Designer' GROUP BY c.id, c.name, c.profile_image ORDER BY c.id;", function (data, err) {
         if (err) {
             console.log(err);
@@ -3647,7 +3544,7 @@ router.get("/GetALLDesignerSheet", (req, res, next) => {
         }
     })
 });
-router.get("/RemoveTokensById/:id", (req, res, next) => {
+router.get("/RemoveTokensById/:id", midway.checkToken, (req, res, next) => {
     db.executeSql("DELETE FROM tokens where id=" + req.params.id + ";", function (data, err) {
         if (err) {
             console.log(err);
@@ -3662,7 +3559,7 @@ router.get("/RemoveTokensById/:id", (req, res, next) => {
         }
     })
 });
-router.post("/SaveConvertCesToTokenDetails", (req, res, next) => {
+router.post("/SaveConvertCesToTokenDetails", midway.checkToken, (req, res, next) => {
     // console.log(req.body)
     const managerNames = req.body.managers.map(manager => manager.name).join(', ');
     const designerNames = req.body.designers.map(designer => designer.name).join(', ');
@@ -3761,8 +3658,7 @@ router.post("/SaveConvertCesToTokenDetails", (req, res, next) => {
         }
     });
 });
-
-router.post("/UploadTokensFiles", (req, res, next) => {
+router.post("/UploadTokensFiles", midway.checkToken, (req, res, next) => {
     const storage = multer.diskStorage({
         destination: (req, file, cb) => {
             cb(null, "tokensFiles/");
@@ -3786,8 +3682,7 @@ router.post("/UploadTokensFiles", (req, res, next) => {
         return res.json({ filePath: '/tokensFiles/' + req.file.filename });
     });
 });
-
-router.post("/DeleteTokenUploadedImage", (req, res, next) => {
+router.post("/DeleteTokenUploadedImage", midway.checkToken, (req, res, next) => {
     console.log(req.body)
     fs.unlink('/var/www/html/cesbackend' + req.body.id, function (err) {
         if (err) {
@@ -3797,7 +3692,6 @@ router.post("/DeleteTokenUploadedImage", (req, res, next) => {
         }
     });
 });
-
 function generateUUID() {
     var d = new Date().getTime();
     var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx'.replace(/[xy]/g, function (c) {

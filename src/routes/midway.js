@@ -1,65 +1,55 @@
-let jwt = require('jsonwebtoken');
-// const config = require('./config.js');
-let user = require('./authenticate');
-let user1 = require('./admin');
+const jwt = require('jsonwebtoken');
+const user = require('./authenticate');
 
 let checkToken = (req, res, next) => {
-  let token = req.headers['x-access-token'] || req.headers['authorization']; // Express headers are auto converted to lowercase
-//   if (token.startsWith('Bearer')) {
-    // Remove Bearer from string
-//     token = token.slice(7, token.length);
-//   }
-
+  let token = req.headers['x-access-token'] || req.headers['authorization'];
+  console.log('Token:', token);  // Debugging line
   if (token) {
     jwt.verify(token, 'prnv', (err, decoded) => {
       if (err) {
-         console.log("erroe here");
-        //  res.json({ status: 401, error: { message: 'Unauthorised' } });
-         let err = new Error('unautherize');
-          err.status = 401;
-          throw err;
-        
-        
-        // res.json({
-        //   success: false,
-        //   message: 'Token is not valid'
-        // });
-      } 
-      else {
-        if(user.user !=  undefined){
-          if((user.user.username == decoded.username)&&(user.user.password == decoded.password)){
-            req.decoded = decoded;
-            next();
+        console.error("Token verification error:", err);
+        return res.status(401).json({
+          error: {
+            status: 401,
+            message: 'Unauthorized: Invalid token'
           }
-        }
-        else{
-          // console.log("ornv")
-          // if((user1.user1.username == decoded.username)&&(user1.user1.password == decoded.password)){
-           
-          // req.decoded = decoded; "Changes from shubham Patel"
-            // next();"Changes from shubham Patel"
-
-          // }
-          let err = new Error('unautherize');
-            err.status = 401;
-            res.status(err.status || 500);
-            res.json({
+        });
+      } else {
+        console.log('Decoded:', decoded);  // Debugging line
+        if (user.user) {
+          if (user.user.username === decoded.username && user.user.password === decoded.password) {
+            req.decoded = decoded;
+            console.log("Token successfully checked");
+            next();
+          } else {
+            return res.status(401).json({
               error: {
                 status: 401,
-                massage: err.message
+                message: 'Unauthorized: User credentials do not match'
               }
             });
+          }
+        } else {
+          return res.status(401).json({
+            error: {
+              status: 401,
+              message: 'Unauthorized: User not found'
+            }
+          });
         }
       }
     });
   } else {
-    console.log("erroe here123");
-    let err = new Error('noToken');
-          err.status = 111;
-          throw err;
+    console.error("No token provided");
+    return res.status(401).json({
+      error: {
+        status: 401,
+        message: 'Unauthorized: No token provided'
+      }
+    });
   }
 };
 
 module.exports = {
   checkToken: checkToken
-}
+};
